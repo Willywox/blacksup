@@ -188,9 +188,9 @@
                 elimine: false
             }
         })
-        // Celui qui parle en premier : jamais Mister White (trop dur)
-        const possibles = inf.joueurs.map(function (j, i) { return i }).filter(function (i) { return inf.joueurs[i].role !== "white" })
-        inf.premier = possibles[Math.floor(Math.random() * possibles.length)]
+        // Celui qui parle en premier : n'importe qui, Mister White compris
+        // (sinon le premier joueur serait forcément innocenté)
+        inf.premier = Math.floor(Math.random() * inf.joueurs.length)
         inf.distribue = 0
         inf.tour = 1
         enJeuINF = true
@@ -267,8 +267,6 @@
             if (depart === -1) depart = 0
         }
         const ordre = v.slice(depart).concat(v.slice(0, depart))
-        // Mister White ne commence jamais
-        if (inf.joueurs[ordre[0]].role === "white" && ordre.length > 1) ordre.push(ordre.shift())
         const ol = $("inf-ordre")
         ol.textContent = ""
         ordre.forEach(function (i, k) {
