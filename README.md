@@ -19,3 +19,7 @@ Site statique (HTML, CSS, JavaScript), installable comme une application et joua
 ## Mettre à jour
 
 À chaque modification : augmenter `VERSION` dans `sw.js` et le numéro `?v=` dans `index.html`.
+
+## Mise en ligne
+
+Chaque envoi sur la branche `main` est déployé automatiquement sur blacksup.com par Hostinger.
