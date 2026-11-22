@@ -727,6 +727,107 @@ body::before {
 .btn-ajouter:active { transform: scale(.98); }
 @media (hover: hover) { .btn-ajouter:hover { border-color: var(--or); color: var(--texte); background: rgba(212, 175, 106, .05); } }
 
+/* ---------- Paramètres : joueurs ---------- */
+
+.bloc-equipe { display: flex; flex-direction: column; }
+.liste-equipes { gap: 12px; }
+
+.zone-joueurs {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows .45s var(--douce), opacity .35s ease;
+}
+.avec-joueurs .zone-joueurs { grid-template-rows: 1fr; opacity: 1; }
+.zone-joueurs-interieur { overflow: hidden; min-height: 0; padding-left: 64px; }
+.liste-equipes:not(.avec-joueurs) .zone-joueurs-interieur { visibility: hidden; transition: visibility 0s .45s; }
+
+.puces { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 10px; }
+.puces:empty { padding-top: 6px; }
+.puce {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    height: 34px;
+    padding: 0 4px 0 12px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--ligne-2);
+    font-size: 14px;
+    color: var(--texte);
+    max-width: 100%;
+}
+.puce-texte { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.puce-retirer {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; flex-shrink: 0;
+    border: 0; border-radius: 50%;
+    background: transparent; color: var(--discret);
+    cursor: pointer;
+}
+@media (hover: hover) { .puce-retirer:hover { color: var(--corail); } }
+
+.ajout-joueur { display: flex; align-items: center; gap: 8px; padding-top: 8px; }
+.champ-joueur {
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    padding: 0 14px;
+    border-radius: 12px;
+    border: 1px dashed var(--ligne-2);
+    background: transparent;
+    color: var(--texte);
+    font-family: var(--sans);
+    font-size: 16px;
+    transition: border-color .3s, background-color .3s;
+}
+.champ-joueur::placeholder { color: var(--discret-2); }
+.champ-joueur:focus { outline: none; border-style: solid; border-color: var(--or); background: var(--surface); }
+.ajout-joueur-btn { width: 44px; height: 44px; }
+
+.interrupteur {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--ligne);
+    cursor: pointer;
+    position: relative;
+}
+.interrupteur-texte { flex: 1; display: flex; flex-direction: column; gap: 2px; font-size: 15px; }
+.interrupteur-texte small { font-size: 12px; color: var(--discret); }
+.interrupteur input { position: absolute; opacity: 0; pointer-events: none; }
+.interrupteur-curseur {
+    position: relative;
+    width: 46px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: var(--ligne-2);
+    transition: background-color .3s;
+}
+.interrupteur-curseur::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--texte);
+    transition: transform .35s var(--ressort);
+}
+.interrupteur input:checked + .interrupteur-curseur { background: var(--or); }
+.interrupteur input:checked + .interrupteur-curseur::after { transform: translateX(18px); background: var(--fond); }
+.interrupteur input:focus-visible + .interrupteur-curseur { outline: 2px solid var(--or); outline-offset: 2px; }
+
+/* Annonce du tour */
+.sous-equipe { margin: -8px 0 0; font-size: 15px; color: var(--texte-2); }
+.ensuite { color: var(--discret); }
+
 /* ---------- Paramètres : réglages perso ---------- */
 
 .choix.c6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }

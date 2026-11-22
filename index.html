@@ -17,12 +17,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=6">
-    <script src="scripts/animations.js?v=6" defer></script>
-    <script src="scripts/app.js?v=6" defer></script>
-    <script src="scripts/sons.js?v=6" defer></script>
-    <script src="scripts/mots.js?v=6" defer></script>
-    <script src="scripts/jeu.js?v=6" defer></script>
+    <link rel="stylesheet" href="styles.css?v=7">
+    <script src="scripts/animations.js?v=7" defer></script>
+    <script src="scripts/app.js?v=7" defer></script>
+    <script src="scripts/sons.js?v=7" defer></script>
+    <script src="scripts/mots.js?v=7" defer></script>
+    <script src="scripts/jeu.js?v=7" defer></script>
 </head>
 <body class="page-accueil">
     <main class="app">
@@ -134,6 +134,14 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
                     Ajouter une équipe
                 </button>
+                <label class="interrupteur" for="interrupteur-joueurs">
+                    <span class="interrupteur-texte">
+                        <span>Noter les prénoms des joueurs</span>
+                        <small>Le jeu annonce qui doit jouer, chacun son tour</small>
+                    </span>
+                    <input type="checkbox" id="interrupteur-joueurs" role="switch">
+                    <span class="interrupteur-curseur" aria-hidden="true"></span>
+                </label>
             </fieldset>
 
             <fieldset class="champ groupe">
@@ -207,11 +215,13 @@
                 <div class="filet gris" style="margin: 16px 0"></div>
                 <p class="etiquette">Au tour de</p>
                 <p class="nom-equipe" id="intro-equipe"></p>
+                <p class="sous-equipe" id="intro-sous-equipe" hidden></p>
             </div>
 
             <div class="pile">
                 <button id="btn-go" class="btn btn-or btn-grand" type="button" data-son="lancer">C'est parti</button>
                 <p class="info-bas" id="intro-info"></p>
+                <p class="info-bas ensuite" id="intro-ensuite"></p>
             </div>
         </section>
 

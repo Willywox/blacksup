@@ -101,7 +101,8 @@ function afficherAide(contenu, actionInstaller) {
     document.body.classList.add("avec-aide")
 }
 
-const surAccueil = document.body.classList.contains("page-accueil")
+// Seulement si on arrive sur l'accueil (pas directement sur les règles ou le jeu)
+const surAccueil = !location.hash || location.hash === "#"
 const dejaVue = memoire(CLE_AIDE) === "1"
 
 if (surAccueil && !estInstallee && !dejaVue) {

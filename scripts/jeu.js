@@ -40,7 +40,9 @@ let partie = {
     trouves: [],        // les mots trouvés pendant le tour en cours
     manche: 0,          // 0, 1 ou 2
     equipe: 0,          // l'équipe qui joue (0 à 3)
-    scores: []          // scores[manche][équipe]
+    scores: [],         // scores[manche][équipe]
+    joueurs: [],        // joueurs[équipe] = liste des prénoms
+    prochainJoueur: []  // pour chaque équipe, le rang du prochain joueur (ne repart jamais à zéro)
 }
 
 let chrono = { fin: 0, image: null, derniereSeconde: null, enCours: false }
@@ -78,6 +80,13 @@ function remplirEquipe(el, i, avant, apres) {
     el.appendChild(sym)
     el.append("\u00A0" + partie.equipes[i])
     if (apres) el.append(apres)
+}
+
+// Le joueur qui joue pour l'équipe eq au prochain tour de cette équipe (ou null)
+function joueurDe(eq, decalage) {
+    const liste = partie.joueurs[eq] || []
+    if (!liste.length) return null
+    return liste[(partie.prochainJoueur[eq] + (decalage || 0)) % liste.length]
 }
 
 function formatDuree(sec) {
@@ -123,9 +132,12 @@ function afficher(id) {
 
 // ---------- 1. Paramètres → lancement ----------
 $("btn-lancer").addEventListener("click", function () {
-    partie.equipes = Array.from(document.querySelectorAll("#liste-equipes .saisie")).map(function (champ, i) {
-        return champ.value.trim() || "Équipe " + (i + 1)
+    partie.equipes = nomsEquipesSaisis().map(function (nom, i) {
+        return nom.trim() || "Équipe " + (i + 1)
     })
+    // Les joueurs de chaque équipe (liste vide = on affiche juste l'équipe)
+    partie.joueurs = prenomsActifs() ? joueursSaisis() : partie.equipes.map(function () { return [] })
+    partie.prochainJoueur = partie.equipes.map(function () { return 0 })
     partie.nbMots = nbMotsChoisi()
     partie.duree = dureeChoisie()
     sauverReglages()
@@ -150,7 +162,19 @@ function preparerIntro() {
     $("intro-numero").textContent = "Manche " + (partie.manche + 1)
     $("intro-nom").textContent = m.nom
     $("intro-consigne").textContent = m.consigne
-    remplirEquipe($("intro-equipe"), partie.equipe)
+    const joueur = joueurDe(partie.equipe)
+    if (joueur) {
+        $("intro-equipe").textContent = joueur
+        remplirEquipe($("intro-sous-equipe"), partie.equipe, "de ")
+        $("intro-sous-equipe").hidden = false
+    } else {
+        remplirEquipe($("intro-equipe"), partie.equipe)
+        $("intro-sous-equipe").hidden = true
+    }
+    // Qui joue ensuite ? (pour que le prochain se prépare)
+    const suivante = (partie.equipe + 1) % partie.equipes.length
+    const joueurSuivant = joueurDe(suivante)
+    remplirEquipe($("intro-ensuite"), suivante, "Ensuite : " + (joueurSuivant ? joueurSuivant + " · " : ""))
     const n = partie.chapeau.length
     $("intro-info").textContent = n + (n > 1 ? " mots restants" : " mot restant") + " · " + formatDuree(partie.duree) + " par tour"
     document.querySelectorAll("#ecran-intro .progression span").forEach(function (s, i) {
@@ -165,7 +189,8 @@ $("btn-go").addEventListener("click", commencerTour)
 function commencerTour() {
     musique(false)
     partie.trouves = []
-    remplirEquipe($("tour-equipe"), partie.equipe)
+    const joueurTour = joueurDe(partie.equipe)
+    remplirEquipe($("tour-equipe"), partie.equipe, joueurTour ? joueurTour + " · " : "")
     $("tour-manche").textContent = "Manche " + (partie.manche + 1) + " · " + MANCHES[partie.manche].nom
     majCompteur(false)
     ecrireMot(partie.chapeau[0])
@@ -352,7 +377,8 @@ function majVerification() {
     const valides = document.querySelectorAll("#liste-mots input:checked").length
     const retires = partie.trouves.length - valides
     const titre = $("verif-titre")
-    remplirEquipe(titre, partie.equipe, " pour ")
+    const joueurVerif = joueurDe(partie.equipe)
+    remplirEquipe(titre, partie.equipe, " pour " + (joueurVerif ? joueurVerif + " · " : ""))
     const em = document.createElement("em")
     em.textContent = valides === 0 ? "Aucun mot" : valides + (valides > 1 ? " mots" : " mot")
     titre.prepend(em)
@@ -369,6 +395,7 @@ $("btn-valider-tour").addEventListener("click", function () {
         else partie.chapeau.push(c.value)
     })
     melanger(partie.chapeau)
+    partie.prochainJoueur[partie.equipe]++
     partie.equipe = (partie.equipe + 1) % partie.equipes.length
 
     if (partie.chapeau.length === 0) afficherScores()
@@ -540,53 +567,109 @@ $("btn-rejouer").addEventListener("click", function () {
 // Écran des paramètres
 // =========================================================
 
-// ---------- Équipes ----------
-function nombreEquipes() { return document.querySelectorAll("#liste-equipes .ligne-equipe").length }
+// ---------- Équipes et joueurs ----------
+const JOUEURS_MAX = 15
 
-function ajouterEquipe(nom, anime) {
+function blocsEquipes() { return Array.from(document.querySelectorAll("#liste-equipes .bloc-equipe")) }
+function nombreEquipes() { return blocsEquipes().length }
+function prenomsActifs() { return $("interrupteur-joueurs").checked }
+
+function iconeCroix(taille) {
+    return '<svg width="' + taille + '" height="' + taille + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>'
+}
+
+function ajouterEquipe(nom, joueurs, anime) {
     const liste = $("liste-equipes")
     const i = nombreEquipes()
     if (i >= EQUIPES_MAX) return
+
+    const bloc = document.createElement("div")
+    bloc.className = "bloc-equipe"
+
+    // Ligne : symbole + nom + croix
     const ligne = document.createElement("div")
     ligne.className = "ligne-equipe"
-
     const sym = document.createElement("span")
     sym.className = "symbole-equipe symbole " + SYMBOLES[i].couleur
     sym.textContent = SYMBOLES[i].signe
     sym.setAttribute("aria-hidden", "true")
-
     const champ = document.createElement("input")
     champ.type = "text"
-    champ.className = "saisie"
+    champ.className = "saisie nom-equipe-champ"
     champ.maxLength = 20
     champ.autocomplete = "off"
     champ.value = nom || ("Équipe " + (i + 1))
     champ.placeholder = "Équipe " + (i + 1)
     champ.setAttribute("aria-label", "Nom de l'équipe " + (i + 1))
     champ.addEventListener("change", sauverReglages)
-
     ligne.appendChild(sym)
     ligne.appendChild(champ)
-
     if (i >= EQUIPES_MIN) {
         const retirer = document.createElement("button")
         retirer.type = "button"
         retirer.className = "retirer-equipe"
         retirer.setAttribute("aria-label", "Retirer l'équipe " + (i + 1))
-        retirer.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>'
-        retirer.addEventListener("click", function () { retirerEquipe(ligne) })
+        retirer.innerHTML = iconeCroix(16)
+        retirer.addEventListener("click", function () { retirerEquipe(bloc) })
         ligne.appendChild(retirer)
-    } else if (nombreEquipes() >= 0) {
+    } else {
         const espace = document.createElement("span")
         espace.className = "espace-retirer"
         ligne.appendChild(espace)
     }
+    bloc.appendChild(ligne)
 
-    liste.appendChild(ligne)
+    // Zone des joueurs (visible quand l'interrupteur est activé)
+    const zone = document.createElement("div")
+    zone.className = "zone-joueurs"
+    const interieur = document.createElement("div")
+    interieur.className = "zone-joueurs-interieur"
+    const puces = document.createElement("div")
+    puces.className = "puces"
+    const ajout = document.createElement("div")
+    ajout.className = "ajout-joueur"
+    const champJoueur = document.createElement("input")
+    champJoueur.type = "text"
+    champJoueur.className = "champ-joueur"
+    champJoueur.maxLength = 15
+    champJoueur.autocomplete = "off"
+    champJoueur.enterKeyHint = "done"
+    champJoueur.placeholder = "Prénom d'un joueur"
+    champJoueur.setAttribute("aria-label", "Ajouter un joueur à l'équipe " + (i + 1))
+    const boutonAjout = document.createElement("button")
+    boutonAjout.type = "button"
+    boutonAjout.className = "petit-btn ajout-joueur-btn"
+    boutonAjout.dataset.son = "aucun"
+    boutonAjout.setAttribute("aria-label", "Ajouter ce joueur")
+    boutonAjout.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>'
+    function valider() {
+        const prenom = champJoueur.value.trim()
+        if (!prenom) return
+        if (puces.children.length >= JOUEURS_MAX) return
+        ajouterPuce(puces, prenom, true)
+        son("clic")
+        champJoueur.value = ""
+        champJoueur.focus({ preventScroll: true })
+        sauverReglages()
+    }
+    boutonAjout.addEventListener("click", valider)
+    champJoueur.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); valider() }
+    })
+    ajout.appendChild(champJoueur)
+    ajout.appendChild(boutonAjout)
+    interieur.appendChild(puces)
+    interieur.appendChild(ajout)
+    zone.appendChild(interieur)
+    bloc.appendChild(zone)
+
+    ;(joueurs || []).slice(0, JOUEURS_MAX).forEach(function (j) { ajouterPuce(puces, String(j).slice(0, 15), false) })
+
+    liste.appendChild(bloc)
     if (anime) {
-        animer(ligne, [
-            { opacity: 0, transform: "translateY(-8px)", height: "0px", marginTop: "-10px" },
-            { opacity: 1, transform: "none", height: "54px", marginTop: "0px" }
+        animer(bloc, [
+            { opacity: 0, transform: "translateY(-8px)" },
+            { opacity: 1, transform: "none" }
         ], { duration: 380, easing: "cubic-bezier(.2,.7,.2,1)" })
         champ.focus({ preventScroll: true })
         champ.select()
@@ -594,12 +677,38 @@ function ajouterEquipe(nom, anime) {
     majBoutonAjouter()
 }
 
-function retirerEquipe(ligne) {
-    animer(ligne, [
-        { opacity: 1, transform: "none", height: "54px", marginTop: "0px" },
-        { opacity: 0, transform: "translateX(20px)", height: "0px", marginTop: "-10px" }
-    ], { duration: 300, easing: "ease-in" }).then(function () {
-        ligne.remove()
+function ajouterPuce(puces, prenom, anime) {
+    const puce = document.createElement("span")
+    puce.className = "puce"
+    const texte = document.createElement("span")
+    texte.className = "puce-texte"
+    texte.textContent = prenom
+    const retirer = document.createElement("button")
+    retirer.type = "button"
+    retirer.className = "puce-retirer"
+    retirer.setAttribute("aria-label", "Retirer " + prenom)
+    retirer.innerHTML = iconeCroix(12)
+    retirer.addEventListener("click", function () {
+        son("clic")
+        animer(puce, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(.8)" }],
+            { duration: 180, easing: "ease-in" }).then(function () {
+            puce.remove()
+            sauverReglages()
+        })
+    })
+    puce.appendChild(texte)
+    puce.appendChild(retirer)
+    puces.appendChild(puce)
+    if (anime) animer(puce, [{ opacity: 0, transform: "scale(.7)" }, { opacity: 1, transform: "none" }],
+        { duration: 320, easing: "cubic-bezier(.34,1.56,.64,1)" })
+}
+
+function retirerEquipe(bloc) {
+    animer(bloc, [
+        { opacity: 1, transform: "none" },
+        { opacity: 0, transform: "translateX(20px)" }
+    ], { duration: 260, easing: "ease-in" }).then(function () {
+        bloc.remove()
         renumeroterEquipes()
         majBoutonAjouter()
         sauverReglages()
@@ -608,16 +717,17 @@ function retirerEquipe(ligne) {
 
 // Après un retrait, les équipes restantes reprennent les symboles dans l'ordre
 function renumeroterEquipes() {
-    document.querySelectorAll("#liste-equipes .ligne-equipe").forEach(function (ligne, i) {
-        const sym = ligne.querySelector(".symbole-equipe")
+    blocsEquipes().forEach(function (bloc, i) {
+        const sym = bloc.querySelector(".symbole-equipe")
         sym.className = "symbole-equipe symbole " + SYMBOLES[i].couleur
         sym.textContent = SYMBOLES[i].signe
-        const champ = ligne.querySelector(".saisie")
+        const champ = bloc.querySelector(".nom-equipe-champ")
         champ.placeholder = "Équipe " + (i + 1)
         champ.setAttribute("aria-label", "Nom de l'équipe " + (i + 1))
         if (/^Équipe \d$/.test(champ.value)) champ.value = "Équipe " + (i + 1)
-        const retirer = ligne.querySelector(".retirer-equipe")
+        const retirer = bloc.querySelector(".retirer-equipe")
         if (retirer) retirer.setAttribute("aria-label", "Retirer l'équipe " + (i + 1))
+        bloc.querySelector(".champ-joueur").setAttribute("aria-label", "Ajouter un joueur à l'équipe " + (i + 1))
     })
 }
 
@@ -625,8 +735,22 @@ function majBoutonAjouter() {
     $("btn-ajouter-equipe").hidden = nombreEquipes() >= EQUIPES_MAX
 }
 
+function nomsEquipesSaisis() {
+    return blocsEquipes().map(function (b) { return b.querySelector(".nom-equipe-champ").value })
+}
+function joueursSaisis() {
+    return blocsEquipes().map(function (b) {
+        return Array.from(b.querySelectorAll(".puce-texte")).map(function (t) { return t.textContent })
+    })
+}
+
 $("btn-ajouter-equipe").addEventListener("click", function () {
-    ajouterEquipe("", true)
+    ajouterEquipe("", [], true)
+    sauverReglages()
+})
+
+$("interrupteur-joueurs").addEventListener("change", function () {
+    $("liste-equipes").classList.toggle("avec-joueurs", prenomsActifs())
     sauverReglages()
 })
 
@@ -741,7 +865,9 @@ function majEstimation() {
 // ---------- Mémoriser les réglages ----------
 function sauverReglages() {
     const r = {
-        equipes: Array.from(document.querySelectorAll("#liste-equipes .saisie")).map(function (c) { return c.value }),
+        equipes: nomsEquipesSaisis(),
+        joueurs: joueursSaisis(),
+        prenoms: prenomsActifs(),
         mots: persoActif("mots") ? "perso" : nbMotsChoisi(),
         motsPerso: valeurPerso("mots"),
         temps: persoActif("temps") ? "perso" : dureeChoisie(),
@@ -755,7 +881,12 @@ function chargerReglages() {
     try { r = JSON.parse(memoire(CLE_REGLAGES) || "null") } catch (e) { r = null }
     const noms = (r && Array.isArray(r.equipes) && r.equipes.length >= EQUIPES_MIN)
         ? r.equipes.slice(0, EQUIPES_MAX) : ["Équipe 1", "Équipe 2"]
-    noms.forEach(function (nom) { ajouterEquipe(String(nom || "").slice(0, 20), false) })
+    const joueurs = (r && Array.isArray(r.joueurs)) ? r.joueurs : []
+    noms.forEach(function (nom, i) {
+        ajouterEquipe(String(nom || "").slice(0, 20), Array.isArray(joueurs[i]) ? joueurs[i] : [], false)
+    })
+    $("interrupteur-joueurs").checked = !!(r && r.prenoms)
+    $("liste-equipes").classList.toggle("avec-joueurs", prenomsActifs())
 
     definirPerso("mots", r && r.motsPerso ? r.motsPerso : 100, false)
     definirPerso("temps", r && r.tempsPerso ? r.tempsPerso : 90, false)
