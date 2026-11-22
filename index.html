@@ -17,38 +17,91 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=7">
-    <script src="scripts/animations.js?v=7" defer></script>
-    <script src="scripts/app.js?v=7" defer></script>
-    <script src="scripts/sons.js?v=7" defer></script>
-    <script src="scripts/mots.js?v=7" defer></script>
-    <script src="scripts/jeu.js?v=7" defer></script>
+    <link rel="stylesheet" href="styles.css?v=8">
+    <script src="scripts/animations.js?v=8" defer></script>
+    <script src="scripts/app.js?v=8" defer></script>
+    <script src="scripts/sons.js?v=8" defer></script>
+    <script src="scripts/mots.js?v=8" defer></script>
+    <script src="scripts/jeu.js?v=8" defer></script>
+    <script src="scripts/passe-mot.js?v=8" defer></script>
 </head>
-<body class="page-accueil">
+<body>
     <main class="app">
 
         <!-- 0. Accueil -->
-        <section id="ecran-accueil" class="ecran centre actif">
-            <div class="pile-centre" style="gap: 10px">
+        <section id="ecran-accueil" class="ecran actif accueil">
+            <div class="pile-centre entete-accueil">
                 <p class="surtitre">Tiens tiens tiens...</p>
                 <div class="filet"></div>
-            </div>
-
-            <div class="pile-centre" style="gap: 20px">
-                <svg class="logo-serrure" width="72" height="72" viewBox="0 0 72 72" fill="none" aria-hidden="true">
-                    <circle class="trace" cx="36" cy="36" r="34" stroke="#D4AF6A" stroke-width="1.2"></circle>
-                    <circle class="trace t2" cx="36" cy="30" r="7" stroke="#D4AF6A" stroke-width="1.2"></circle>
-                    <path class="trace t3" d="M32 36 L29 50 H43 L40 36" stroke="#D4AF6A" stroke-width="1.2" stroke-linejoin="round"></path>
+                <svg class="logo-serrure" width="60" height="60" viewBox="0 0 72 72" fill="none" aria-hidden="true">
+                    <circle class="trace" cx="36" cy="36" r="34" stroke="#D4AF6A" stroke-width="1.4"></circle>
+                    <circle class="trace t2" cx="36" cy="30" r="7" stroke="#D4AF6A" stroke-width="1.4"></circle>
+                    <path class="trace t3" d="M32 36 L29 50 H43 L40 36" stroke="#D4AF6A" stroke-width="1.4" stroke-linejoin="round"></path>
                 </svg>
                 <h1 class="marque">Black's Up<span class="exclam">!</span></h1>
-                <p class="manches-mini">Décrivez · Un mot · Mimez</p>
             </div>
 
-            <div class="pile">
-                <a href="#jouer" class="btn btn-or">Jouer</a>
-                <a href="#regles" class="btn btn-contour">Les règles</a>
-                <p class="version">Version bêta</p>
+            <p class="etiquette titre-section">Choisis ton jeu</p>
+
+            <div class="liste-jeux">
+                <article class="carte-jeu">
+                    <a href="#jouer" class="carte-jeu-principal">
+                        <span class="icone-jeu" aria-hidden="true">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10M7 21h10M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9s8 4 8 9"></path></svg>
+                        </span>
+                        <span class="textes-jeu">
+                            <span class="nom-jeu">Black's Up!</span>
+                            <span class="desc-jeu">Décrivez, un seul mot, mimez : trois manches contre la montre.</span>
+                            <span class="meta-jeu">En équipes · dès 4 joueurs</span>
+                        </span>
+                        <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+                    </a>
+                    <a href="#regles" class="carte-jeu-regles">Les règles</a>
+                </article>
+
+                <article class="carte-jeu">
+                    <a href="#passe-mot" class="carte-jeu-principal">
+                        <span class="icone-jeu" aria-hidden="true">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 3v-3H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"></path><path d="M19 9h1a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-1v3l-3-3h-4"></path></svg>
+                        </span>
+                        <span class="textes-jeu">
+                            <span class="nom-jeu">Passe-Mot</span>
+                            <span class="desc-jeu">Un seul mot pour faire deviner le mot de passe à ton binôme.</span>
+                            <span class="meta-jeu">En duos · 4 à 8 joueurs</span>
+                        </span>
+                        <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+                    </a>
+                    <a href="#passe-mot-regles" class="carte-jeu-regles">Les règles</a>
+                </article>
+
+                <button type="button" class="carte-jeu bientot" data-jeu="L'Infiltré">
+                    <span class="carte-jeu-principal">
+                        <span class="icone-jeu" aria-hidden="true">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10c2-3 5-4 9-4s7 1 9 4c-1 3-3 5-6 5-1.5 0-2-1.5-3-1.5S10.5 15 9 15c-3 0-5-2-6-5z"></path><circle cx="8.5" cy="10.5" r="1"></circle><circle cx="15.5" cy="10.5" r="1"></circle></svg>
+                        </span>
+                        <span class="textes-jeu">
+                            <span class="nom-jeu">L'Infiltré <span class="badge-bientot">Bientôt</span></span>
+                            <span class="desc-jeu">Tout le monde a le même mot… sauf un. Démasquez l'infiltré.</span>
+                            <span class="meta-jeu">Chacun pour soi · dès 4 joueurs</span>
+                        </span>
+                    </span>
+                </button>
+
+                <button type="button" class="carte-jeu bientot" data-jeu="Vacarme">
+                    <span class="carte-jeu-principal">
+                        <span class="icone-jeu" aria-hidden="true">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4h3l5 4V6L6 10H3z"></path><path d="M15 9.5a3.5 3.5 0 0 1 0 5M17.5 7a7 7 0 0 1 0 10M20 4.5a10.5 10.5 0 0 1 0 15"></path></svg>
+                        </span>
+                        <span class="textes-jeu">
+                            <span class="nom-jeu">Vacarme <span class="badge-bientot">Bientôt</span></span>
+                            <span class="desc-jeu">Questions, votes et duels qui mettent le feu entre potes.</span>
+                            <span class="meta-jeu">Tout le groupe · dès 3 joueurs</span>
+                        </span>
+                    </span>
+                </button>
             </div>
+
+            <p class="version">Version bêta</p>
         </section>
 
         <!-- Règles -->
@@ -306,7 +359,181 @@
             </div>
         </section>
 
+
+        <!-- ===================== PASSE-MOT ===================== -->
+
+        <!-- Passe-Mot : règles -->
+        <section id="ecran-pm-regles" class="ecran" style="gap: 22px">
+            <div class="barre-haut">
+                <a href="#" class="btn-rond" aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre">Passe-Mot</p>
+                <div class="vide"></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px">
+                <h1 class="titre">Un mot,<br><em>et un seul.</em></h1>
+                <p class="texte-doux">On joue en duos. Dans chaque duo, l'un fait deviner, l'autre devine. Les rôles s'inversent à chaque nouveau mot.</p>
+            </div>
+            <div class="liste-regles">
+                <article class="regle">
+                    <p class="chiffre">I</p>
+                    <div>
+                        <h2>Le mot de passe</h2>
+                        <p>Ceux qui font deviner (un par duo) maintiennent le doigt sur l'écran pour découvrir le mot en secret. Les autres ferment les yeux.</p>
+                    </div>
+                </article>
+                <article class="regle">
+                    <p class="chiffre">II</p>
+                    <div>
+                        <h2>Un indice, une réponse</h2>
+                        <p>Chacun son tour, un duo donne <b>un seul mot</b> comme indice, et son partenaire a <b>une seule proposition</b>. Pas de geste, pas de mot de la même famille. 10 secondes pour se décider.</p>
+                    </div>
+                </article>
+                <article class="regle">
+                    <p class="chiffre">III</p>
+                    <div>
+                        <h2>Les points</h2>
+                        <p>Trouvé au 1<sup>er</sup> indice : 5 points. Puis 4, 3, 2, 1. Après 5 indices sans succès, le mot est révélé et personne ne marque. Le duo qui a le plus de points à la fin gagne.</p>
+                    </div>
+                </article>
+            </div>
+            <a href="#passe-mot" class="btn btn-or">Compris, on joue</a>
+        </section>
+
+        <!-- Passe-Mot : préparation -->
+        <section id="ecran-pm-config" class="ecran">
+            <div class="barre-haut">
+                <a href="#" class="btn-rond" aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre">Passe-Mot</p>
+                <div class="vide"></div>
+            </div>
+
+            <h1 class="titre">Formez vos duos</h1>
+
+            <fieldset class="champ groupe">
+                <legend class="etiquette">Les duos</legend>
+                <div id="pm-liste-duos" class="liste-equipes"></div>
+                <button id="pm-ajouter-duo" class="btn-ajouter" type="button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                    Ajouter un duo
+                </button>
+            </fieldset>
+
+            <fieldset class="champ groupe">
+                <legend class="etiquette">Nombre de mots</legend>
+                <div class="choix c4">
+                    <input type="radio" name="pm-mots" value="5" id="pm5"><label for="pm5">5</label>
+                    <input type="radio" name="pm-mots" value="10" id="pm10" checked><label for="pm10">10</label>
+                    <input type="radio" name="pm-mots" value="15" id="pm15"><label for="pm15">15</label>
+                    <input type="radio" name="pm-mots" value="20" id="pm20"><label for="pm20">20</label>
+                </div>
+            </fieldset>
+
+            <a href="#passe-mot-regles" class="lien-discret">Revoir les règles</a>
+            <div class="pousse"></div>
+            <button id="pm-lancer" class="btn btn-or" type="button" data-son="lancer">Lancer la partie</button>
+        </section>
+
+        <!-- Passe-Mot : révélation du mot -->
+        <section id="ecran-pm-revelation" class="ecran centre">
+            <p class="surtitre" id="pm-rev-numero">Mot 1 sur 10</p>
+            <div class="pile-centre" style="gap: 14px">
+                <p class="etiquette">Font deviner</p>
+                <div class="pm-donneurs" id="pm-rev-donneurs"></div>
+                <p class="consigne">Les autres, <b>fermez les yeux</b>&#160;!</p>
+            </div>
+            <button type="button" class="carte-secrete" id="pm-carte-secrete" data-son="aucun" aria-label="Maintenir appuyé pour voir le mot">
+                <span class="carte-secrete-cache">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <span>Maintenir pour voir le mot</span>
+                </span>
+                <span class="carte-secrete-mot" id="pm-mot"></span>
+            </button>
+            <button id="pm-prets" class="btn btn-or btn-grand" type="button" data-son="lancer">On a vu, c'est parti</button>
+        </section>
+
+        <!-- Passe-Mot : le duel -->
+        <section id="ecran-pm-duel" class="ecran centre" style="gap: 22px">
+            <div class="entete-tour">
+                <p class="etiquette" id="pm-duel-numero">Mot 1 / 10</p>
+                <p class="surtitre" id="pm-duel-points">5 points</p>
+            </div>
+
+            <div class="pm-indices" id="pm-indices" aria-label="Indices utilisés"></div>
+
+            <div class="pile-centre" style="gap: 10px">
+                <p class="etiquette">Indice <span id="pm-num-indice">1</span> · au tour de</p>
+                <p class="nom-equipe" id="pm-duel-duo"></p>
+                <p class="sous-equipe" id="pm-duel-roles"></p>
+            </div>
+
+            <div class="jauge" aria-hidden="true"><div class="jauge-remplie" id="pm-jauge"></div></div>
+
+            <button type="button" class="revoir-mot" id="pm-revoir" data-son="aucun">
+                <span class="revoir-cache">Maintenir pour revoir le mot</span>
+                <span class="revoir-mot-texte" id="pm-revoir-mot"></span>
+            </button>
+
+            <div class="pousse"></div>
+            <div class="actions-tour">
+                <button id="pm-rate" class="btn btn-erreur btn-grand" type="button" data-son="aucun">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+                    Raté
+                </button>
+                <button id="pm-trouve" class="btn btn-or btn-grand" type="button" data-son="aucun">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+                    Trouvé
+                </button>
+            </div>
+        </section>
+
+        <!-- Passe-Mot : résultat d'un mot -->
+        <section id="ecran-pm-resultat" class="ecran centre">
+            <p class="surtitre" id="pm-res-surtitre">Trouvé</p>
+            <div class="pile-centre" style="gap: 14px">
+                <p class="etiquette">Le mot de passe était</p>
+                <p class="mot pm-mot-revele" id="pm-res-mot"></p>
+                <p class="pm-res-gain" id="pm-res-gain"></p>
+            </div>
+            <ol class="classement" id="pm-res-classement" aria-label="Scores"></ol>
+            <div class="pousse"></div>
+            <button id="pm-suivant" class="btn btn-or" type="button">Mot suivant</button>
+        </section>
+
+        <!-- Passe-Mot : fin de partie -->
+        <section id="ecran-pm-fin" class="ecran centre">
+            <p class="surtitre">Fin de partie</p>
+            <div class="pile-centre" style="gap: 10px">
+                <svg class="trophee" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
+                    <path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"></path>
+                </svg>
+                <h1 class="nom-equipe" id="pm-fin-titre" style="font-size: clamp(30px, 10vw, 42px)"></h1>
+                <p class="texte-doux" id="pm-fin-sous-titre" style="font-size: 15px; color: var(--texte-2)"></p>
+            </div>
+            <ol class="classement" id="pm-fin-classement" aria-label="Classement des duos"></ol>
+            <div class="pousse"></div>
+            <div class="pile">
+                <button id="pm-rejouer" class="btn btn-or" type="button">Rejouer</button>
+                <a href="#" class="btn btn-contour">Retour à l'accueil</a>
+            </div>
+        </section>
+
     </main>
+
+    <!-- Jeu en construction -->
+    <div id="bientot" class="pause bientot-fenetre" role="dialog" aria-modal="true" aria-labelledby="bientot-titre" hidden>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4 2.5-2.5z"></path></svg>
+        <p class="surtitre">Jeu en construction</p>
+        <h2 class="nom-manche" id="bientot-titre" style="font-size: clamp(36px, 12vw, 48px)"></h2>
+        <p class="pause-reste">Ce jeu arrive très bientôt. Encore un peu de patience&#160;!</p>
+        <div class="pile">
+            <button id="bientot-fermer" class="btn btn-contour" type="button">J'ai hâte</button>
+        </div>
+    </div>
 
     <!-- Pause -->
     <div id="pause" class="pause" role="dialog" aria-modal="true" aria-labelledby="pause-titre" hidden>

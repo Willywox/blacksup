@@ -115,7 +115,7 @@ function afficher(id) {
     if (suivant === ecranCourant) return
     const precedent = ecranCourant
     ecranCourant = suivant
-    document.body.classList.toggle("sans-btn-son", id === "ecran-tour" || id === "ecran-verif")
+    document.body.classList.toggle("sans-btn-son", ["ecran-tour", "ecran-verif", "ecran-pm-revelation", "ecran-pm-duel"].indexOf(id) !== -1)
     if (reduit) {
         precedent.classList.remove("actif")
         suivant.classList.add("actif")
@@ -908,7 +908,13 @@ chargerReglages()
 // (tout est dans une seule page : le son n'a besoin d'être
 // débloqué qu'une fois, et la musique ne se coupe pas)
 // =========================================================
-const ROUTES = { "": "ecran-accueil", "#regles": "ecran-regles", "#jouer": "ecran-parametres" }
+const ROUTES = {
+    "": "ecran-accueil",
+    "#regles": "ecran-regles",
+    "#jouer": "ecran-parametres",
+    "#passe-mot": "ecran-pm-config",
+    "#passe-mot-regles": "ecran-pm-regles"
+}
 
 function abandonnerPartie() {
     if (!enJeu) return
@@ -921,6 +927,7 @@ function suivreAdresse() {
     const id = ROUTES[location.hash] || "ecran-accueil"
     // Quitter la partie en cours (bouton retour du téléphone, lien vers l'accueil...)
     if (enJeu) abandonnerPartie()
+    if (window.abandonnerPasseMot) window.abandonnerPasseMot()
     musique(true)
     afficher(id)
 }
@@ -1011,3 +1018,25 @@ document.addEventListener("visibilitychange", function () {
 
 // Quitter le jeu par le bouton retour pendant une pause
 window.addEventListener("hashchange", function () { if (enPause) fermerPauseSansReprendre() })
+
+// =========================================================
+// Jeux à venir : petite fenêtre « en construction »
+// =========================================================
+document.querySelectorAll(".carte-jeu.bientot").forEach(function (carte) {
+    carte.addEventListener("click", function () {
+        $("bientot-titre").textContent = carte.dataset.jeu
+        const f = $("bientot")
+        f.classList.remove("part")
+        f.hidden = false
+        $("bientot-fermer").focus({ preventScroll: true })
+    })
+})
+function fermerBientot() {
+    const f = $("bientot")
+    if (f.hidden) return
+    f.classList.add("part")
+    setTimeout(function () { f.hidden = true; f.classList.remove("part") }, reduit ? 0 : 230)
+}
+$("bientot-fermer").addEventListener("click", fermerBientot)
+$("bientot").addEventListener("click", function (e) { if (e.target === $("bientot")) fermerBientot() })
+document.addEventListener("keydown", function (e) { if (e.key === "Escape") fermerBientot() })
