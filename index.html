@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Black's Up!, le jeu d'ambiance en trois manches : décrivez, un seul mot, mimez.">
+    <meta name="theme-color" content="#0E0D0C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Black's Up!">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icones/icone.svg" type="image/svg+xml">
+    <link rel="icon" href="icones/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="apple-touch-icon" href="icones/apple-touch-icon.png">
+    <title>Black's Up!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=6">
+    <script src="scripts/animations.js?v=6" defer></script>
+    <script src="scripts/app.js?v=6" defer></script>
+    <script src="scripts/sons.js?v=6" defer></script>
+    <script src="scripts/mots.js?v=6" defer></script>
+    <script src="scripts/jeu.js?v=6" defer></script>
+</head>
+<body class="page-accueil">
+    <main class="app">
+
+        <!-- 0. Accueil -->
+        <section id="ecran-accueil" class="ecran centre actif">
+            <div class="pile-centre" style="gap: 10px">
+                <p class="surtitre">Tiens tiens tiens...</p>
+                <div class="filet"></div>
+            </div>
+
+            <div class="pile-centre" style="gap: 20px">
+                <svg class="logo-serrure" width="72" height="72" viewBox="0 0 72 72" fill="none" aria-hidden="true">
+                    <circle class="trace" cx="36" cy="36" r="34" stroke="#D4AF6A" stroke-width="1.2"></circle>
+                    <circle class="trace t2" cx="36" cy="30" r="7" stroke="#D4AF6A" stroke-width="1.2"></circle>
+                    <path class="trace t3" d="M32 36 L29 50 H43 L40 36" stroke="#D4AF6A" stroke-width="1.2" stroke-linejoin="round"></path>
+                </svg>
+                <h1 class="marque">Black's Up<span class="exclam">!</span></h1>
+                <p class="manches-mini">Décrivez · Un mot · Mimez</p>
+            </div>
+
+            <div class="pile">
+                <a href="#jouer" class="btn btn-or">Jouer</a>
+                <a href="#regles" class="btn btn-contour">Les règles</a>
+                <p class="version">Version bêta</p>
+            </div>
+        </section>
+
+        <!-- Règles -->
+        <section id="ecran-regles" class="ecran" style="gap: 22px">
+            <div class="barre-haut">
+                <a href="#" class="btn-rond" aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre">Le règlement</p>
+                <div class="vide"></div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px">
+                <h1 class="titre">Trois manches,<br><em>les mêmes mots.</em></h1>
+                <p class="texte-doux">Les équipes jouent chacune leur tour. Le joueur qui fait deviner a un temps limité pour faire trouver un maximum de mots à son équipe. Chaque mot trouvé rapporte un point.</p>
+            </div>
+
+            <div class="liste-regles">
+                <article class="regle">
+                    <p class="chiffre">I</p>
+                    <div>
+                        <h2>Décrivez</h2>
+                        <p>Le joueur peut dire tout ce qu'il veut, mais il ne peut pas&#160;:</p>
+                        <ul>
+                            <li>passer un mot qui ne lui plaît pas&#160;;</li>
+                            <li>dire un mot de la même famille&#160;;</li>
+                            <li>dire un mot qui sonne pareil&#160;;</li>
+                            <li>traduire le mot dans une autre langue&#160;;</li>
+                            <li>épeler des lettres.</li>
+                        </ul>
+                        <p style="margin-top: 8px">Son équipe peut faire autant de propositions qu'elle veut.</p>
+                    </div>
+                </article>
+
+                <article class="regle">
+                    <p class="chiffre">II</p>
+                    <div>
+                        <h2>Un seul mot</h2>
+                        <p>Mêmes règles, mais le joueur ne dit qu'un seul mot pour faire deviner, et son équipe n'a droit qu'à une seule proposition.</p>
+                    </div>
+                </article>
+
+                <article class="regle">
+                    <p class="chiffre">III</p>
+                    <div>
+                        <h2>Mimez</h2>
+                        <p>Plus le droit de parler&#160;: on mime, on fredonne, on fait des bruitages.</p>
+                    </div>
+                </article>
+
+                <article class="regle">
+                    <p class="chiffre">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+                    </p>
+                    <div>
+                        <h2>Pendant un tour</h2>
+                        <p>Mot trouvé&#160;: appuyez sur «&#160;Trouvé&#160;». Règle enfreinte&#160;: appuyez sur «&#160;Erreur&#160;», le tour s'arrête aussitôt. À la fin du tour, vérifiez la liste des mots trouvés et décochez ceux qui ne comptent pas&#160;: ils retournent dans le chapeau.</p>
+                        <p style="margin-top: 8px">Quand tous les mots sont trouvés, on passe à la manche suivante. Après la troisième, l'équipe qui a le plus de points gagne.</p>
+                    </div>
+                </article>
+            </div>
+
+            <a href="#jouer" class="btn btn-or">Compris, on joue</a>
+        </section>
+
+
+        <!-- 1. Paramètres -->
+        <section id="ecran-parametres" class="ecran">
+            <div class="barre-haut">
+                <a href="#" class="btn-rond" aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre">Préparatifs</p>
+                <div class="vide"></div>
+            </div>
+
+            <h1 class="titre">Déclinez votre identité</h1>
+
+            <fieldset class="champ groupe">
+                <legend class="etiquette">Les équipes</legend>
+                <div id="liste-equipes" class="liste-equipes"></div>
+                <button id="btn-ajouter-equipe" class="btn-ajouter" type="button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                    Ajouter une équipe
+                </button>
+            </fieldset>
+
+            <fieldset class="champ groupe">
+                <legend class="etiquette">Nombre de mots</legend>
+                <div class="choix c6">
+                    <input type="radio" name="nbmots" value="40" id="m40" checked><label for="m40">40</label>
+                    <input type="radio" name="nbmots" value="50" id="m50"><label for="m50">50</label>
+                    <input type="radio" name="nbmots" value="60" id="m60"><label for="m60">60</label>
+                    <input type="radio" name="nbmots" value="70" id="m70"><label for="m70">70</label>
+                    <input type="radio" name="nbmots" value="80" id="m80"><label for="m80">80</label>
+                    <input type="radio" name="nbmots" value="perso" id="m-perso"><label for="m-perso" class="perso">Perso</label>
+                </div>
+                <div class="zone-perso" id="zone-mots">
+                    <div class="zone-perso-interieur">
+                        <div class="reglage">
+                            <button type="button" class="petit-btn" data-pas="-5" data-cible="mots" aria-label="5 mots de moins">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg>
+                            </button>
+                            <p class="valeur" aria-live="polite"><b id="valeur-mots">100</b><span>mots</span></p>
+                            <button type="button" class="petit-btn" data-pas="5" data-cible="mots" aria-label="5 mots de plus">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                            </button>
+                        </div>
+                        <input type="range" id="reglette-mots" class="reglette" min="10" max="500" step="5" value="100" aria-label="Nombre de mots">
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="champ groupe">
+                <legend class="etiquette">Durée d'un tour</legend>
+                <div class="choix c5">
+                    <input type="radio" name="temps" value="30" id="t30" checked><label for="t30">30 s</label>
+                    <input type="radio" name="temps" value="40" id="t40"><label for="t40">40 s</label>
+                    <input type="radio" name="temps" value="50" id="t50"><label for="t50">50 s</label>
+                    <input type="radio" name="temps" value="60" id="t60"><label for="t60">60 s</label>
+                    <input type="radio" name="temps" value="perso" id="t-perso"><label for="t-perso" class="perso">Perso</label>
+                </div>
+                <div class="zone-perso" id="zone-temps">
+                    <div class="zone-perso-interieur">
+                        <div class="reglage">
+                            <button type="button" class="petit-btn" data-pas="-5" data-cible="temps" aria-label="5 secondes de moins">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg>
+                            </button>
+                            <p class="valeur" aria-live="polite"><b id="valeur-temps">1 min 30</b></p>
+                            <button type="button" class="petit-btn" data-pas="5" data-cible="temps" aria-label="5 secondes de plus">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                            </button>
+                        </div>
+                        <input type="range" id="reglette-temps" class="reglette" min="10" max="120" step="5" value="90" aria-label="Durée d'un tour en secondes">
+                    </div>
+                </div>
+            </fieldset>
+
+            <p class="estimation" id="estimation">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+                <span id="estimation-texte"></span>
+            </p>
+
+            <div class="pousse"></div>
+            <button id="btn-lancer" class="btn btn-or" type="button" data-son="lancer">Lancer la partie</button>
+        </section>
+
+        <!-- 2. À vous de jouer -->
+        <section id="ecran-intro" class="ecran centre">
+            <div class="progression" aria-hidden="true"><span></span><span></span><span></span></div>
+
+            <div class="pile-centre" style="gap: 18px">
+                <p class="surtitre" id="intro-numero">Manche 1</p>
+                <h1 class="nom-manche" id="intro-nom">Décrivez</h1>
+                <p class="consigne" id="intro-consigne"></p>
+                <div class="filet gris" style="margin: 16px 0"></div>
+                <p class="etiquette">Au tour de</p>
+                <p class="nom-equipe" id="intro-equipe"></p>
+            </div>
+
+            <div class="pile">
+                <button id="btn-go" class="btn btn-or btn-grand" type="button" data-son="lancer">C'est parti</button>
+                <p class="info-bas" id="intro-info"></p>
+            </div>
+        </section>
+
+        <!-- 3. Le tour -->
+        <section id="ecran-tour" class="ecran centre" style="gap: 22px">
+            <div class="entete-tour">
+                <button id="btn-pause" class="btn-rond" type="button" aria-label="Mettre en pause">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg>
+                </button>
+                <div class="entete-textes">
+                    <p class="etiquette" id="tour-equipe"></p>
+                    <p class="surtitre" id="tour-manche"></p>
+                </div>
+            </div>
+
+            <div class="chrono" id="chrono" role="timer" aria-live="off">
+                <div class="lueur"></div>
+                <svg width="168" height="168" viewBox="0 0 168 168" aria-hidden="true">
+                    <circle class="piste" cx="84" cy="84" r="78"></circle>
+                    <circle class="anneau" id="anneau" cx="84" cy="84" r="78"></circle>
+                </svg>
+                <div class="centre-chrono">
+                    <p class="secondes" id="secondes">30</p>
+                    <p class="unite">secondes</p>
+                </div>
+            </div>
+
+            <div class="carte-mot" id="carte-mot">
+                <p class="etiquette">Faites deviner</p>
+                <p class="mot" id="mot" aria-live="polite"></p>
+            </div>
+
+            <p class="compteur"><b id="nb-trouves">0</b> <span id="nb-trouves-texte">mot trouvé</span> ce tour</p>
+
+            <div class="actions-tour">
+                <button id="btn-erreur" class="btn btn-erreur btn-grand" type="button" data-son="aucun">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+                    Erreur
+                </button>
+                <button id="btn-trouve" class="btn btn-or btn-grand" type="button" data-son="aucun">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+                    Trouvé
+                </button>
+            </div>
+        </section>
+
+        <!-- 4. Vérification -->
+        <section id="ecran-verif" class="ecran" style="gap: 24px">
+            <div style="display: flex; flex-direction: column; gap: 10px">
+                <p class="surtitre" id="verif-raison">Temps écoulé</p>
+                <h1 class="titre" id="verif-titre"></h1>
+                <p class="texte-doux">Décochez un mot s'il ne compte pas&#160;: il retournera dans le chapeau.</p>
+            </div>
+
+            <div class="liste-mots" id="liste-mots"></div>
+
+            <div class="pousse"></div>
+            <div class="resume"><span>Mots restants dans le chapeau</span><b id="restants">0</b></div>
+            <button id="btn-valider-tour" class="btn btn-or" type="button">Équipe suivante</button>
+        </section>
+
+        <!-- 5. Scores (fin de manche et fin de partie) -->
+        <section id="ecran-score" class="ecran centre">
+            <p class="surtitre" id="score-surtitre">Fin de manche</p>
+
+            <div class="pile-centre" style="gap: 10px">
+                <svg class="trophee" id="trophee" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
+                    <path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"></path>
+                </svg>
+                <h1 class="nom-equipe" id="score-titre" style="font-size: clamp(32px, 11vw, 44px)"></h1>
+                <p class="texte-doux" id="score-sous-titre" style="font-size: 15px; color: var(--texte-2)"></p>
+            </div>
+
+            <ol class="classement" id="classement" aria-label="Classement des équipes"></ol>
+
+            <div class="pousse"></div>
+            <div class="pile">
+                <button id="btn-manche-suivante" class="btn btn-or" type="button">Manche suivante</button>
+                <button id="btn-rejouer" class="btn btn-or" type="button" hidden>Rejouer</button>
+                <a id="lien-accueil" href="#" class="btn btn-contour" hidden>Retour à l'accueil</a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Pause -->
+    <div id="pause" class="pause" role="dialog" aria-modal="true" aria-labelledby="pause-titre" hidden>
+        <p class="surtitre">Le chrono est arrêté</p>
+        <h2 class="nom-manche" id="pause-titre">Pause</h2>
+        <p class="pause-reste"><b id="pause-secondes">0</b> secondes restantes</p>
+        <div class="pile">
+            <button id="btn-reprendre" class="btn btn-or btn-grand" type="button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.87l11-6.5a1 1 0 0 0 0-1.74l-11-6.5A1 1 0 0 0 8 5.5z"></path></svg>
+                Reprendre
+            </button>
+            <button id="btn-quitter" class="btn btn-contour" type="button">Quitter la partie</button>
+        </div>
+    </div>
+
+</body>
+</html>
