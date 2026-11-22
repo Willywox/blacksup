@@ -17,13 +17,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=8">
-    <script src="scripts/animations.js?v=8" defer></script>
-    <script src="scripts/app.js?v=8" defer></script>
-    <script src="scripts/sons.js?v=8" defer></script>
-    <script src="scripts/mots.js?v=8" defer></script>
-    <script src="scripts/jeu.js?v=8" defer></script>
-    <script src="scripts/passe-mot.js?v=8" defer></script>
+    <link rel="stylesheet" href="styles.css?v=9">
+    <script src="scripts/animations.js?v=9" defer></script>
+    <script src="scripts/app.js?v=9" defer></script>
+    <script src="scripts/sons.js?v=9" defer></script>
+    <script src="scripts/mots.js?v=9" defer></script>
+    <script src="scripts/jeu.js?v=9" defer></script>
+    <script src="scripts/passe-mot.js?v=9" defer></script>
+    <script src="scripts/infiltre-paires.js?v=9" defer></script>
+    <script src="scripts/infiltre.js?v=9" defer></script>
 </head>
 <body>
     <main class="app">
@@ -74,18 +76,20 @@
                     <a href="#passe-mot-regles" class="carte-jeu-regles">Les règles</a>
                 </article>
 
-                <button type="button" class="carte-jeu bientot" data-jeu="L'Infiltré">
-                    <span class="carte-jeu-principal">
+                <article class="carte-jeu">
+                    <a href="#infiltre" class="carte-jeu-principal">
                         <span class="icone-jeu" aria-hidden="true">
                             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10c2-3 5-4 9-4s7 1 9 4c-1 3-3 5-6 5-1.5 0-2-1.5-3-1.5S10.5 15 9 15c-3 0-5-2-6-5z"></path><circle cx="8.5" cy="10.5" r="1"></circle><circle cx="15.5" cy="10.5" r="1"></circle></svg>
                         </span>
                         <span class="textes-jeu">
-                            <span class="nom-jeu">L'Infiltré <span class="badge-bientot">Bientôt</span></span>
+                            <span class="nom-jeu">L'Infiltré</span>
                             <span class="desc-jeu">Tout le monde a le même mot… sauf un. Démasquez l'infiltré.</span>
-                            <span class="meta-jeu">Chacun pour soi · dès 4 joueurs</span>
+                            <span class="meta-jeu">Chacun pour soi · 4 à 12 joueurs</span>
                         </span>
-                    </span>
-                </button>
+                        <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+                    </a>
+                    <a href="#infiltre-regles" class="carte-jeu-regles">Les règles</a>
+                </article>
 
                 <button type="button" class="carte-jeu bientot" data-jeu="Vacarme">
                     <span class="carte-jeu-principal">
@@ -518,6 +522,174 @@
             <div class="pousse"></div>
             <div class="pile">
                 <button id="pm-rejouer" class="btn btn-or" type="button">Rejouer</button>
+                <a href="#" class="btn btn-contour">Retour à l'accueil</a>
+            </div>
+        </section>
+
+
+        <!-- ===================== L'INFILTRÉ ===================== -->
+
+        <!-- L'Infiltré : règles -->
+        <section id="ecran-inf-regles" class="ecran" style="gap: 22px">
+            <div class="barre-haut">
+                <a href="#" class="btn-rond" aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre">L'Infiltré</p>
+                <div class="vide"></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px">
+                <h1 class="titre">Tout le monde a le même mot…<br><em>sauf un.</em></h1>
+                <p class="texte-doux">Chacun reçoit un mot en secret. Les civils ont tous le même. Les infiltrés ont un mot proche, mais différent. Et personne ne sait qui est qui.</p>
+            </div>
+            <div class="liste-regles">
+                <article class="regle">
+                    <p class="chiffre">I</p>
+                    <div>
+                        <h2>Les rôles</h2>
+                        <ul>
+                            <li><b>Civils</b> : la majorité, tous le même mot.</li>
+                            <li><b>Infiltrés</b> : un mot proche. Ils ne savent pas qu'ils sont infiltrés&#160;!</li>
+                            <li><b>Mister White</b> (en option) : aucun mot. Il doit bluffer.</li>
+                        </ul>
+                    </div>
+                </article>
+                <article class="regle">
+                    <p class="chiffre">II</p>
+                    <div>
+                        <h2>Un tour</h2>
+                        <p>Chacun son tour, chaque joueur dit <b>un mot</b> pour décrire le sien, sans être trop précis. Puis on débat, et le groupe vote pour éliminer un suspect. Son rôle est révélé.</p>
+                    </div>
+                </article>
+                <article class="regle">
+                    <p class="chiffre">III</p>
+                    <div>
+                        <h2>La victoire</h2>
+                        <p>Les civils gagnent s'ils éliminent tous les imposteurs. Les imposteurs gagnent s'il ne reste plus qu'un civil. Mister White éliminé peut tenter de deviner le mot des civils&#160;: s'il trouve, il gagne seul.</p>
+                    </div>
+                </article>
+            </div>
+            <a href="#infiltre" class="btn btn-or">Compris, on joue</a>
+        </section>
+
+        <!-- L'Infiltré : préparation -->
+        <section id="ecran-inf-config" class="ecran">
+            <div class="barre-haut">
+                <a href="#" class="btn-rond" aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre">L'Infiltré</p>
+                <div class="vide"></div>
+            </div>
+            <h1 class="titre">Qui est dans la pièce&#160;?</h1>
+
+            <fieldset class="champ groupe">
+                <legend class="etiquette">Les joueurs <span id="inf-compte" class="compte"></span></legend>
+                <div class="puces inf-puces" id="inf-joueurs"></div>
+                <div class="ajout-joueur">
+                    <input type="text" class="champ-joueur" id="inf-champ" maxlength="15" autocomplete="off" enterkeyhint="done" placeholder="Prénom d'un joueur" aria-label="Ajouter un joueur">
+                    <button type="button" class="petit-btn" id="inf-ajouter" data-son="aucun" aria-label="Ajouter ce joueur">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                    </button>
+                </div>
+                <p class="aide-champ" id="inf-aide">Il faut au moins 4 joueurs.</p>
+            </fieldset>
+
+            <fieldset class="champ groupe">
+                <legend class="etiquette">Infiltrés</legend>
+                <div class="reglage" style="margin-top: 0">
+                    <button type="button" class="petit-btn" id="inf-moins" data-son="aucun" aria-label="Un infiltré de moins">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg>
+                    </button>
+                    <p class="valeur" aria-live="polite"><b id="inf-nb">1</b><span id="inf-nb-texte">infiltré</span></p>
+                    <button type="button" class="petit-btn" id="inf-plus" data-son="aucun" aria-label="Un infiltré de plus">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                    </button>
+                </div>
+                <label class="interrupteur" for="inf-white">
+                    <span class="interrupteur-texte">
+                        <span>Ajouter un Mister White</span>
+                        <small id="inf-white-aide">Un joueur sans mot qui doit bluffer · dès 5 joueurs</small>
+                    </span>
+                    <input type="checkbox" id="inf-white" role="switch">
+                    <span class="interrupteur-curseur" aria-hidden="true"></span>
+                </label>
+            </fieldset>
+
+            <a href="#infiltre-regles" class="lien-discret">Revoir les règles</a>
+            <div class="pousse"></div>
+            <button id="inf-lancer" class="btn btn-or" type="button" data-son="lancer">Distribuer les mots</button>
+        </section>
+
+        <!-- L'Infiltré : distribution des mots -->
+        <section id="ecran-inf-distribution" class="ecran centre">
+            <p class="surtitre" id="inf-dist-progres">Joueur 1 sur 6</p>
+            <div class="pile-centre" style="gap: 10px">
+                <p class="etiquette">Passe le téléphone à</p>
+                <p class="nom-equipe" id="inf-dist-nom"></p>
+                <p class="consigne">Personne d'autre ne regarde&#160;!</p>
+            </div>
+            <button type="button" class="carte-secrete" id="inf-carte" data-son="aucun" aria-label="Maintenir appuyé pour voir ton mot">
+                <span class="carte-secrete-cache"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg><span>Maintenir pour voir ton mot</span></span>
+                <span class="carte-secrete-mot" id="inf-mot"></span>
+            </button>
+            <button id="inf-vu" class="btn btn-or btn-grand" type="button" disabled>C'est vu, je passe</button>
+        </section>
+
+        <!-- L'Infiltré : un tour de parole -->
+        <section id="ecran-inf-tour" class="ecran centre">
+            <p class="surtitre" id="inf-tour-numero">Tour 1</p>
+            <div class="pile-centre" style="gap: 10px">
+                <h1 class="titre" style="text-align: center">Un mot chacun</h1>
+                <p class="consigne">Dans cet ordre, chacun dit un mot pour décrire le sien. Puis on débat&#160;!</p>
+            </div>
+            <ol class="ordre-parole" id="inf-ordre"></ol>
+            <div class="pousse"></div>
+            <button id="inf-vers-vote" class="btn btn-or" type="button">Passer au vote</button>
+        </section>
+
+        <!-- L'Infiltré : le vote -->
+        <section id="ecran-inf-vote" class="ecran centre">
+            <p class="surtitre">Le vote</p>
+            <h1 class="titre" style="text-align: center">Qui est éliminé&#160;?</h1>
+            <div class="grille-vote" id="inf-vote"></div>
+            <div class="pousse"></div>
+            <button id="inf-eliminer" class="btn btn-erreur btn-grand" type="button" disabled>Choisissez un joueur</button>
+        </section>
+
+        <!-- L'Infiltré : révélation du rôle -->
+        <section id="ecran-inf-revelation" class="ecran centre">
+            <p class="surtitre" id="inf-rev-tour">Tour 1</p>
+            <div class="pile-centre" style="gap: 14px">
+                <p class="nom-equipe" id="inf-rev-nom"></p>
+                <p class="etiquette">était</p>
+                <p class="role-revele" id="inf-rev-role"></p>
+                <p class="consigne" id="inf-rev-detail"></p>
+            </div>
+            <div class="pile" id="inf-white-devine" hidden>
+                <p class="consigne" style="margin: 0 auto 6px">Mister White, à toi&#160;: quel est le mot des civils&#160;?</p>
+                <button id="inf-white-oui" class="btn btn-or" type="button" data-son="aucun">Il a trouvé</button>
+                <button id="inf-white-non" class="btn btn-contour" type="button" data-son="aucun">Raté</button>
+            </div>
+            <div class="pousse"></div>
+            <button id="inf-continuer" class="btn btn-or" type="button">Tour suivant</button>
+        </section>
+
+        <!-- L'Infiltré : fin de partie -->
+        <section id="ecran-inf-fin" class="ecran centre">
+            <p class="surtitre">Fin de partie</p>
+            <div class="pile-centre" style="gap: 10px">
+                <svg class="trophee" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
+                    <path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"></path>
+                </svg>
+                <h1 class="nom-equipe" id="inf-fin-titre" style="font-size: clamp(30px, 10vw, 42px)"></h1>
+                <p class="texte-doux" id="inf-fin-mots" style="font-size: 15px; color: var(--texte-2)"></p>
+            </div>
+            <ul class="bilan-roles" id="inf-fin-bilan"></ul>
+            <div class="pousse"></div>
+            <div class="pile">
+                <button id="inf-rejouer" class="btn btn-or" type="button">Rejouer avec un nouveau mot</button>
                 <a href="#" class="btn btn-contour">Retour à l'accueil</a>
             </div>
         </section>

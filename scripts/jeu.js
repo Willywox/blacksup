@@ -115,7 +115,7 @@ function afficher(id) {
     if (suivant === ecranCourant) return
     const precedent = ecranCourant
     ecranCourant = suivant
-    document.body.classList.toggle("sans-btn-son", ["ecran-tour", "ecran-verif", "ecran-pm-revelation", "ecran-pm-duel"].indexOf(id) !== -1)
+    document.body.classList.toggle("sans-btn-son", ["ecran-tour", "ecran-verif", "ecran-pm-revelation", "ecran-pm-duel", "ecran-inf-distribution"].indexOf(id) !== -1)
     if (reduit) {
         precedent.classList.remove("actif")
         suivant.classList.add("actif")
@@ -913,7 +913,9 @@ const ROUTES = {
     "#regles": "ecran-regles",
     "#jouer": "ecran-parametres",
     "#passe-mot": "ecran-pm-config",
-    "#passe-mot-regles": "ecran-pm-regles"
+    "#passe-mot-regles": "ecran-pm-regles",
+    "#infiltre": "ecran-inf-config",
+    "#infiltre-regles": "ecran-inf-regles"
 }
 
 function abandonnerPartie() {
@@ -928,6 +930,7 @@ function suivreAdresse() {
     // Quitter la partie en cours (bouton retour du téléphone, lien vers l'accueil...)
     if (enJeu) abandonnerPartie()
     if (window.abandonnerPasseMot) window.abandonnerPasseMot()
+    if (window.abandonnerInfiltre) window.abandonnerInfiltre()
     musique(true)
     afficher(id)
 }
