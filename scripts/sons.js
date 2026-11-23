@@ -233,7 +233,7 @@ const Sons = (function () {
     // (data-son="aucun" : c'est le jeu qui s'en charge).
     document.addEventListener("click", function (e) {
         if (e.target.matches('input[type="radio"], input[type="checkbox"]')) return
-        const el = e.target.closest(".btn, .btn-rond, .choix label, .ligne-mot, .aide-installer, .aide-fermer, .btn-son, .btn-ajouter, .retirer-equipe, .petit-btn, .interrupteur, .carte-jeu-principal, .carte-jeu-regles, .carte-jeu.bientot, .lien-discret, .choix-vote, .btn-apparence, .apercu-theme")
+        const el = e.target.closest(".btn, .btn-rond, .choix label, .ligne-mot, .aide-installer, .aide-fermer, .btn-son, .btn-ajouter, .retirer-equipe, .petit-btn, .interrupteur, .carte-jeu-principal, .carte-jeu-regles, .carte-jeu.bientot, .lien-discret, .choix-vote, .btn-apparence, .apercu-theme, .btn-menu-partie")
         if (!el) return
         const nom = el.dataset.son || "clic"
         if (nom !== "aucun") jouer(nom)

@@ -522,7 +522,35 @@ body::before {
 .entete-tour { display: flex; align-items: center; justify-content: space-between; gap: 14px; width: 100%; }
 .entete-textes { min-width: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; text-align: right; }
 .entete-tour .etiquette, .entete-tour .surtitre { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#btn-pause { flex-shrink: 0; background: transparent; cursor: pointer; }
+.place-pause { width: 44px; height: 44px; flex-shrink: 0; }
+
+/* Bouton pause commun : en haut à gauche, sur tous les écrans de partie */
+.btn-menu-partie {
+    position: fixed;
+    z-index: 10;
+    top: max(40px, env(safe-area-inset-top));
+    left: max(26px, calc((100vw - 460px) / 2 + 26px));
+    width: 44px;
+    height: 44px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--ligne-2);
+    background: rgba(var(--fond-rvb), .6);
+    color: var(--texte-2);
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    transition: border-color .3s, color .3s, transform .25s var(--ressort);
+}
+body.en-partie .btn-menu-partie { display: flex; animation: monte .6s var(--douce) .2s backwards; }
+.btn-menu-partie:active { transform: scale(.92); }
+@media (hover: hover) { .btn-menu-partie:hover { border-color: var(--or); color: var(--texte); } }
+.btn-menu-partie:focus-visible { outline: 2px solid var(--or); outline-offset: 3px; }
+
+/* Laisser la place au bouton pause sur les écrans dont le haut est aligné à gauche */
+#ecran-verif > :first-child, #ecran-pm-duel .entete-tour { padding-left: 58px; }
 
 /* ---------- Pause ---------- */
 
@@ -1680,6 +1708,7 @@ body.avec-aide .ecran { padding-bottom: 112px; transition: padding-bottom .5s va
     .ecran { padding-top: 64px; padding-bottom: 56px; }
     .app { max-width: 480px; }
     .btn-son { top: max(64px, env(safe-area-inset-top)); right: max(26px, calc((100vw - 480px) / 2 + 26px)); }
+    .btn-menu-partie { top: max(64px, env(safe-area-inset-top)); left: max(26px, calc((100vw - 480px) / 2 + 26px)); }
 }
 
 @media (max-height: 680px) {

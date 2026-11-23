@@ -120,6 +120,7 @@ function afficher(id) {
     if (suivant === ecranCourant) return
     const precedent = ecranCourant
     ecranCourant = suivant
+    document.body.classList.toggle("en-partie", ECRANS_DE_PARTIE.indexOf(id) !== -1)
     document.body.classList.toggle("sans-btn-son", ["ecran-tour", "ecran-verif", "ecran-pm-revelation", "ecran-pm-duel", "ecran-inf-distribution"].indexOf(id) !== -1)
     if (reduit) {
         precedent.classList.remove("actif")
@@ -952,18 +953,58 @@ window.addEventListener("hashchange", suivreAdresse)
 })()
 
 // =========================================================
-// Pause
+// Pause — commune à tous les jeux
+//
+// Chaque jeu qui a un chrono s'enregistre avec enregistrerPause({ geler, relancer }) :
+//  - geler() arrête son chrono et renvoie le temps restant (ms), ou null s'il n'y en a pas
+//  - relancer(reste) le fait repartir exactement là où il s'était arrêté
 // =========================================================
+const ECRANS_DE_PARTIE = [
+    "ecran-intro", "ecran-tour", "ecran-verif", "ecran-score",
+    "ecran-pm-revelation", "ecran-pm-duel", "ecran-pm-resultat",
+    "ecran-inf-distribution", "ecran-inf-tour", "ecran-inf-vote", "ecran-inf-revelation"
+]
+const PAUSES = []
 let enPause = false
-let resteAvantPause = 0
+let restesGeles = []
 let quitterArme = null
 
+function enregistrerPause(jeu) { PAUSES.push(jeu) }
+
+// Black's Up : son chrono
+enregistrerPause({
+    geler: function () {
+        if (!chrono.enCours) return null
+        const reste = Math.max(0, chrono.fin - performance.now())
+        arreterChrono()
+        return reste
+    },
+    relancer: function (reste) {
+        chrono.fin = performance.now() + reste
+        chrono.enCours = true
+        chrono.image = requestAnimationFrame(boucleChrono)
+    }
+})
+
+function ecranDePartie() { return ECRANS_DE_PARTIE.indexOf(ecranCourant.id) !== -1 }
+
 function mettreEnPause() {
-    if (!chrono.enCours || enPause) return
+    if (enPause || !ecranDePartie()) return
     enPause = true
-    resteAvantPause = Math.max(0, chrono.fin - performance.now())
-    arreterChrono()
-    $("pause-secondes").textContent = Math.ceil(resteAvantPause / 1000)
+    restesGeles = PAUSES.map(function (jeu) { return jeu.geler() })
+    const reste = restesGeles.filter(function (r) { return r !== null })[0]
+    const ligne = $("pause-reste")
+    ligne.textContent = ""
+    if (reste !== undefined) {
+        $("pause-surtitre").textContent = "Le chrono est arrêté"
+        const b = document.createElement("b")
+        b.textContent = Math.ceil(reste / 1000)
+        ligne.appendChild(b)
+        ligne.append(" secondes restantes")
+    } else {
+        $("pause-surtitre").textContent = "On souffle un peu"
+        ligne.textContent = "La partie vous attend."
+    }
     desarmerQuitter()
     document.body.classList.add("en-pause")
     const p = $("pause")
@@ -981,10 +1022,9 @@ function reprendre() {
         p.classList.remove("part")
         document.body.classList.remove("en-pause")
         enPause = false
-        // Le chrono repart exactement là où il s'était arrêté
-        chrono.fin = performance.now() + resteAvantPause
-        chrono.enCours = true
-        chrono.image = requestAnimationFrame(boucleChrono)
+        // Chaque chrono repart exactement là où il s'était arrêté
+        restesGeles.forEach(function (reste, i) { if (reste !== null) PAUSES[i].relancer(reste) })
+        restesGeles = []
     }, reduit ? 0 : 230)
 }
 
@@ -997,12 +1037,13 @@ function desarmerQuitter() {
 
 function fermerPauseSansReprendre() {
     enPause = false
+    restesGeles = []
     $("pause").hidden = true
     document.body.classList.remove("en-pause")
     desarmerQuitter()
 }
 
-$("btn-pause").addEventListener("click", mettreEnPause)
+$("btn-menu-partie").addEventListener("click", mettreEnPause)
 $("btn-reprendre").addEventListener("click", reprendre)
 
 // Quitter demande une confirmation : un 2e appui dans les 3 secondes
@@ -1016,12 +1057,14 @@ $("btn-quitter").addEventListener("click", function () {
     }
     fermerPauseSansReprendre()
     abandonnerPartie()
+    if (window.abandonnerPasseMot) window.abandonnerPasseMot()
+    if (window.abandonnerInfiltre) window.abandonnerInfiltre()
     location.hash = ""   // retour à l'accueil (la musique revient)
 })
 
-// Pause automatique si le téléphone passe à autre chose en plein tour
+// Pause automatique si le téléphone passe à autre chose en pleine partie
 document.addEventListener("visibilitychange", function () {
-    if (document.hidden && chrono.enCours) mettreEnPause()
+    if (document.hidden && ecranDePartie()) mettreEnPause()
 })
 
 // Quitter le jeu par le bouton retour pendant une pause

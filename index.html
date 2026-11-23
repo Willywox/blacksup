@@ -24,16 +24,16 @@
             if (apparence) document.documentElement.setAttribute("data-theme", apparence)
         } catch (e) {}
     </script>
-    <link rel="stylesheet" href="styles.css?v=11">
-    <script src="scripts/animations.js?v=11" defer></script>
-    <script src="scripts/app.js?v=11" defer></script>
-    <script src="scripts/sons.js?v=11" defer></script>
-    <script src="scripts/mots.js?v=11" defer></script>
-    <script src="scripts/jeu.js?v=11" defer></script>
-    <script src="scripts/passe-mot.js?v=11" defer></script>
-    <script src="scripts/infiltre-paires.js?v=11" defer></script>
-    <script src="scripts/infiltre.js?v=11" defer></script>
-    <script src="scripts/apparence.js?v=11" defer></script>
+    <link rel="stylesheet" href="styles.css?v=12">
+    <script src="scripts/animations.js?v=12" defer></script>
+    <script src="scripts/app.js?v=12" defer></script>
+    <script src="scripts/sons.js?v=12" defer></script>
+    <script src="scripts/mots.js?v=12" defer></script>
+    <script src="scripts/jeu.js?v=12" defer></script>
+    <script src="scripts/passe-mot.js?v=12" defer></script>
+    <script src="scripts/infiltre-paires.js?v=12" defer></script>
+    <script src="scripts/infiltre.js?v=12" defer></script>
+    <script src="scripts/apparence.js?v=12" defer></script>
 </head>
 <body>
     <main class="app">
@@ -298,9 +298,7 @@
         <!-- 3. Le tour -->
         <section id="ecran-tour" class="ecran centre" style="gap: 22px">
             <div class="entete-tour">
-                <button id="btn-pause" class="btn-rond" type="button" aria-label="Mettre en pause">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg>
-                </button>
+                <span class="place-pause" aria-hidden="true"></span>
                 <div class="entete-textes">
                     <p class="etiquette" id="tour-equipe"></p>
                     <p class="surtitre" id="tour-manche"></p>
@@ -739,11 +737,16 @@
         </div>
     </div>
 
+    <!-- Bouton pause, présent sur tous les écrans de partie -->
+    <button id="btn-menu-partie" class="btn-menu-partie" type="button" aria-label="Mettre en pause ou quitter la partie">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg>
+    </button>
+
     <!-- Pause -->
     <div id="pause" class="pause" role="dialog" aria-modal="true" aria-labelledby="pause-titre" hidden>
-        <p class="surtitre">Le chrono est arrêté</p>
+        <p class="surtitre" id="pause-surtitre">Le chrono est arrêté</p>
         <h2 class="nom-manche" id="pause-titre">Pause</h2>
-        <p class="pause-reste"><b id="pause-secondes">0</b> secondes restantes</p>
+        <p class="pause-reste" id="pause-reste"></p>
         <div class="pile">
             <button id="btn-reprendre" class="btn btn-or btn-grand" type="button">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.87l11-6.5a1 1 0 0 0 0-1.74l-11-6.5A1 1 0 0 0 8 5.5z"></path></svg>

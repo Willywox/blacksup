@@ -522,12 +522,18 @@
         if (window.garderEcranAllume) window.garderEcranAllume(false)
     }
 
-    // Le téléphone passe à autre chose en plein indice : on relance l'indice au retour
-    document.addEventListener("visibilitychange", function () {
-        if (!document.hidden && enJeuPM && document.getElementById("ecran-pm-duel").classList.contains("actif") && !jauge.active) {
-            lancerJauge()
-        } else if (document.hidden && jauge.active) {
+    // La pause commune (bouton pause, appel, notification) gèle aussi la jauge
+    enregistrerPause({
+        geler: function () {
+            if (!jauge.active) return null
+            const reste = Math.max(0, jauge.fin - performance.now())
             arreterJauge()
+            return reste
+        },
+        relancer: function (reste) {
+            jauge.fin = performance.now() + reste
+            jauge.active = true
+            jauge.image = requestAnimationFrame(boucleJauge)
         }
     })
 
