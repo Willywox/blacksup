@@ -24,7 +24,7 @@
     }
     let enJeuINF = false
     let derniereElimination = null
-    let pairesRecentes = []
+    let pairesRecentes = { normal: [], adulte: [] }
 
     // ---------- Préparation : les joueurs ----------
     function noms() {
@@ -157,11 +157,13 @@
     // ---------- Lancement : tirage des rôles ----------
     function tirerPaire() {
         // Évite de retomber sur une paire jouée récemment
-        let candidates = PAIRES_INFILTRE.filter(function (p, i) { return pairesRecentes.indexOf(i) === -1 })
-        if (!candidates.length) { pairesRecentes = []; candidates = PAIRES_INFILTRE.slice() }
+        const paires = modeAdulte ? PAIRES_ADULTES : PAIRES_INFILTRE
+        const recentes = pairesRecentes[modeAdulte ? "adulte" : "normal"]
+        let candidates = paires.filter(function (p, i) { return recentes.indexOf(i) === -1 })
+        if (!candidates.length) { recentes.length = 0; candidates = paires.slice() }
         const paire = candidates[Math.floor(Math.random() * candidates.length)]
-        pairesRecentes.push(PAIRES_INFILTRE.indexOf(paire))
-        if (pairesRecentes.length > 40) pairesRecentes.shift()
+        recentes.push(paires.indexOf(paire))
+        if (recentes.length > Math.min(40, Math.floor(paires.length * .6))) recentes.shift()
         return Math.random() < .5 ? [paire[0], paire[1]] : [paire[1], paire[0]]
     }
 

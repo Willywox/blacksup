@@ -1614,6 +1614,69 @@ html.change-apparence, html.change-apparence body, html.change-apparence *:not(.
 .apercu-theme[data-theme="manga"] { border: 2px solid #141414; border-radius: 6px; box-shadow: 4px 4px 0 #141414; }
 .apercu-theme[data-theme="manga"][aria-pressed="true"] { border-color: var(--or); box-shadow: 4px 4px 0 var(--or); }
 
+/* ---------- Mode adulte (18+) ---------- */
+
+.badge-adulte, .bouton-adulte { display: none !important; }
+html.mode-adulte .badge-adulte {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    margin: 2px 0 0;
+    padding: 5px 12px 5px 5px;
+    border-radius: 999px;
+    border: 1px solid rgba(225, 29, 72, .6);
+    color: #FF6B88;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    animation: monte .6s var(--douce) both;
+}
+.badge-adulte b {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: #E11D48;
+    color: #FFFFFF;
+    letter-spacing: .04em;
+}
+html.mode-adulte .bouton-adulte { display: flex !important; border-color: rgba(225, 29, 72, .55); color: #FF6B88; }
+
+/* Un halo rouge sur tous les écrans, pour ne jamais oublier qu'on est en mode adulte */
+html.mode-adulte body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(120% 60% at 50% 0%, rgba(225, 29, 72, .22), transparent 60%),
+                radial-gradient(90% 50% at 50% 100%, rgba(225, 29, 72, .12), transparent 70%);
+    animation: pouls-adulte 5s ease-in-out infinite;
+}
+@keyframes pouls-adulte { 50% { opacity: .65; } }
+
+.fenetre-adulte { gap: 14px; }
+.fenetre-adulte .nom-manche { animation: none; }
+.pastille-18 {
+    margin: 0 0 6px;
+    width: 84px;
+    height: 84px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid #E11D48;
+    color: #FF6B88;
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: 700;
+    box-shadow: 0 0 40px rgba(225, 29, 72, .45);
+    animation: revele 1s var(--douce) both;
+}
+
 /* ---------- Bouton son (haut-parleur) ---------- */
 
 .btn-son {

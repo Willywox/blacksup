@@ -24,16 +24,18 @@
             if (apparence) document.documentElement.setAttribute("data-theme", apparence)
         } catch (e) {}
     </script>
-    <link rel="stylesheet" href="styles.css?v=13">
-    <script src="scripts/animations.js?v=13" defer></script>
-    <script src="scripts/app.js?v=13" defer></script>
-    <script src="scripts/sons.js?v=13" defer></script>
-    <script src="scripts/mots.js?v=13" defer></script>
-    <script src="scripts/jeu.js?v=13" defer></script>
-    <script src="scripts/passe-mot.js?v=13" defer></script>
-    <script src="scripts/infiltre-paires.js?v=13" defer></script>
-    <script src="scripts/infiltre.js?v=13" defer></script>
-    <script src="scripts/apparence.js?v=13" defer></script>
+    <link rel="stylesheet" href="styles.css?v=14">
+    <script src="scripts/animations.js?v=14" defer></script>
+    <script src="scripts/app.js?v=14" defer></script>
+    <script src="scripts/sons.js?v=14" defer></script>
+    <script src="scripts/mots.js?v=14" defer></script>
+    <script src="scripts/mots-adultes.js?v=14" defer></script>
+    <script src="scripts/jeu.js?v=14" defer></script>
+    <script src="scripts/passe-mot.js?v=14" defer></script>
+    <script src="scripts/infiltre-paires.js?v=14" defer></script>
+    <script src="scripts/infiltre.js?v=14" defer></script>
+    <script src="scripts/apparence.js?v=14" defer></script>
+    <script src="scripts/adulte.js?v=14" defer></script>
 </head>
 <body>
     <main class="app">
@@ -44,7 +46,7 @@
                 <button type="button" class="btn-apparence" id="btn-apparence" aria-label="Changer l'apparence" aria-haspopup="dialog">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.9 1.8-1.9 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.3 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.3-4-7.7-9-7.7z"></path><circle cx="7.5" cy="11" r="1.2"></circle><circle cx="10.5" cy="7" r="1.2"></circle><circle cx="15" cy="7.5" r="1.2"></circle></svg>
                 </button>
-                <p class="surtitre">Tiens tiens tiens...</p>
+                <p class="surtitre" id="accueil-surtitre">Tiens tiens tiens...</p>
                 <div class="vide"></div>
             </div>
             <div class="pile-centre entete-accueil">
@@ -54,6 +56,7 @@
                     <path class="trace t3" d="M32 36 L29 50 H43 L40 36" stroke="#D4AF6A" stroke-width="1.4" stroke-linejoin="round"></path>
                 </svg>
                 <h1 class="marque">Black's Up<span class="exclam">!</span></h1>
+                <p class="badge-adulte"><b>18+</b> Mode adulte</p>
             </div>
 
             <p class="etiquette titre-section">Choisis ton jeu</p>
@@ -118,6 +121,7 @@
                 </button>
             </div>
 
+            <button id="quitter-adulte" class="btn btn-contour bouton-adulte" type="button">Quitter le mode adulte</button>
             <p class="version">Version bêta</p>
         </section>
 
@@ -723,6 +727,18 @@
         <div class="grille-apparences" id="grille-apparences"></div>
         <div class="pile">
             <button id="apparence-fermer" class="btn btn-or" type="button">C'est parfait</button>
+        </div>
+    </div>
+
+    <!-- Mode adulte : confirmation de l'âge -->
+    <div id="adulte" class="pause fenetre-adulte" role="dialog" aria-modal="true" aria-labelledby="adulte-titre" hidden>
+        <p class="pastille-18" aria-hidden="true">18+</p>
+        <p class="surtitre">Vous avez débloqué</p>
+        <h2 class="nom-manche" id="adulte-titre" style="font-size: clamp(36px, 11vw, 46px)">Le mode adulte</h2>
+        <p class="pause-reste">Contenu sexuel explicite, réservé aux adultes.<br><b>Avez-vous 18 ans ou plus&#160;?</b></p>
+        <div class="pile">
+            <button id="adulte-oui" class="btn btn-or" type="button" data-son="lancer">Oui, j'entre</button>
+            <button id="adulte-non" class="btn btn-contour" type="button">Non</button>
         </div>
     </div>
 

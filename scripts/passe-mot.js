@@ -26,15 +26,15 @@
         "Mot de passe oublié", "Batterie à 1 %", "Feat surprise", "Suite décevante", "Stade de France complet",
         "Sneakers en édition limitée", "Oignon qui fait pleurer", "Le sang de la veine"]
 
-    const MOTS_PM = (function () {
+    function construireListe(categories, exclues, moments) {
         const vus = new Set(), liste = []
-        Object.keys(CATEGORIES).forEach(function (cle) {
-            if (CATEGORIES_EXCLUES.indexOf(cle) !== -1) return
-            CATEGORIES[cle].mots.forEach(function (m) {
+        Object.keys(categories).forEach(function (cle) {
+            if (exclues.indexOf(cle) !== -1) return
+            categories[cle].mots.forEach(function (m) {
                 m = (m || "").trim()
                 const nbMots = m.split(/\s+/).length
                 if (!m || m.length > 24 || nbMots > 3) return
-                if (cle === "moments" && nbMots > 2) return          // « La gifle de Will Smith aux Oscars »…
+                if (cle === moments && nbMots > 2) return          // « La gifle de Will Smith aux Oscars »…
                 if (/[«»:?]/.test(m)) return
                 if (COMMENCE_PAR_UN_VERBE.test(m)) return
                 if (PHRASES.indexOf(m) !== -1) return
@@ -45,7 +45,10 @@
             })
         })
         return liste
-    })()
+    }
+    const MOTS_PM = construireListe(CATEGORIES, CATEGORIES_EXCLUES, "moments")
+    // Mode adulte : les noms seulement (la catégorie « expressions » est écartée)
+    const MOTS_PM_ADULTES = construireListe(CATEGORIES_ADULTES, ["expressions"], null)
 
     let pm = {
         duos: [],          // [{ joueurs: ["Moussa", "Awa"] }, ...]
@@ -225,7 +228,7 @@
         pm.duos = pm.coop ? lireDuos().slice(0, 1) : lireDuos()
         document.body.classList.toggle("pm-coop", pm.coop)
         pm.nbMots = parseInt(document.querySelector('input[name="pm-mots"]:checked').value, 10)
-        pm.mots = melanger(MOTS_PM.slice()).slice(0, pm.nbMots)
+        pm.mots = melanger((modeAdulte ? MOTS_PM_ADULTES : MOTS_PM).slice()).slice(0, pm.nbMots)
         pm.index = 0
         pm.scores = pm.duos.map(function () { return 0 })
         pm.trouves = pm.duos.map(function () { return 0 })

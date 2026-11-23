@@ -60,8 +60,12 @@ function melanger(liste) {
     return liste
 }
 
+// Mode adulte (18+) : jamais mémorisé, il repart à zéro à chaque ouverture de l'appli
+let modeAdulte = false
+
 function tirerMots(n) {
-    const uniques = Array.from(new Set(TOUSLESMOTS.filter(Boolean)))
+    const source = modeAdulte ? TOUSLESMOTS_ADULTES : TOUSLESMOTS
+    const uniques = Array.from(new Set(source.filter(Boolean)))
     return melanger(uniques).slice(0, n)
 }
 
@@ -149,6 +153,7 @@ $("btn-lancer").addEventListener("click", function () {
     sauverReglages()
     enJeu = true
     partie.selection = tirerMots(partie.nbMots)
+    partie.nbMots = partie.selection.length   // la liste adulte est plus courte : on s'adapte
     partie.scores = [0, 1, 2].map(function () { return partie.equipes.map(function () { return 0 }) })
     partie.manche = 0
     partie.equipe = 0

@@ -225,6 +225,7 @@ const Sons = (function () {
         general.gain.setValueAtTime(general.gain.value, ctx.currentTime)
         general.gain.linearRampToValueAtTime(muet ? 0 : 1, ctx.currentTime + 0.25)
         if (muet) couperEffet()
+        ecouteurs.forEach(function (f) { f() })
         return muet
     }
 
