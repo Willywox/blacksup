@@ -12,6 +12,7 @@
     const INDICES_MAX = 5          // 5 indices : 5, 4, 3, 2 puis 1 point
     const SECONDES_INDICE = 10
     const CLE_PM = "blacksup-passe-mot"
+    const CLE_RECORDS = "blacksup-passe-mot-records"
 
     // Les mots du jeu : ceux de Black's Up, sans les expressions trop longues
     const MOTS_PM = TOUSLESMOTS.filter(function (m) {
@@ -25,7 +26,8 @@
         index: 0,          // mot en cours (0, 1, 2...)
         indice: 1,         // indice en cours (1 à 5)
         scores: [],
-        trouves: []        // nombre de mots trouvés par duo
+        trouves: [],       // nombre de mots trouvés par duo
+        coop: false        // true = à deux, ensemble contre le score
     }
     let enJeuPM = false
     let jauge = { fin: 0, image: null, active: false, derniere: null }
@@ -130,7 +132,26 @@
         })
     }
 
-    function majAjout() { $("pm-ajouter-duo").hidden = blocsDuos().length >= DUOS_MAX }
+    function majAjout() { $("pm-ajouter-duo").hidden = modeCoop() || blocsDuos().length >= DUOS_MAX }
+
+    // ---------- Mode : à deux (coopération) ou duos contre duos ----------
+    function modeCoop() {
+        const r = document.querySelector('input[name="pm-mode"]:checked')
+        return !!r && r.value === "coop"
+    }
+    function majMode() {
+        const coop = modeCoop()
+        blocsDuos().forEach(function (b, i) { b.hidden = coop && i > 0 })
+        $("pm-duos-legende").textContent = coop ? "Votre duo" : "Les duos"
+        $("pm-config-titre").textContent = coop ? "Jouez à deux" : "Formez vos duos"
+        $("pm-mode-aide").textContent = coop
+            ? "Vous jouez ensemble : visez le meilleur score et battez votre record."
+            : "Chaque duo joue pour lui : le duo qui marque le plus de points gagne."
+        majAjout()
+    }
+    document.querySelectorAll('input[name="pm-mode"]').forEach(function (r) {
+        r.addEventListener("change", function () { majMode(); sauver() })
+    })
 
     function lireDuos() {
         return blocsDuos().map(function (bloc) {
@@ -147,7 +168,8 @@
             duos: blocsDuos().map(function (b) {
                 return Array.from(b.querySelectorAll(".joueur-duo")).map(function (c) { return c.value })
             }),
-            mots: parseInt(document.querySelector('input[name="pm-mots"]:checked').value, 10)
+            mots: parseInt(document.querySelector('input[name="pm-mots"]:checked').value, 10),
+            mode: modeCoop() ? "coop" : "versus"
         }
         memoire(CLE_PM, JSON.stringify(r))
     }
@@ -157,6 +179,8 @@
         try { r = JSON.parse(memoire(CLE_PM) || "null") } catch (e) { r = null }
         const duos = (r && Array.isArray(r.duos) && r.duos.length >= DUOS_MIN) ? r.duos.slice(0, DUOS_MAX) : [[], []]
         duos.forEach(function (j) { ajouterDuo(Array.isArray(j) ? j : [], false) })
+        if (r && r.mode === "coop") $("pm-mode-coop").checked = true
+        majMode()
         if (r && r.mots) {
             const radio = document.querySelector('input[name="pm-mots"][value="' + r.mots + '"]')
             if (radio) radio.checked = true
@@ -169,7 +193,9 @@
     // ---------- Lancement ----------
     $("pm-lancer").addEventListener("click", function () {
         sauver()
-        pm.duos = lireDuos()
+        pm.coop = modeCoop()
+        pm.duos = pm.coop ? lireDuos().slice(0, 1) : lireDuos()
+        document.body.classList.toggle("pm-coop", pm.coop)
         pm.nbMots = parseInt(document.querySelector('input[name="pm-mots"]:checked').value, 10)
         pm.mots = melanger(MOTS_PM.slice()).slice(0, pm.nbMots)
         pm.index = 0
@@ -197,6 +223,14 @@
             p.append(" " + donneur(d))
             liste.appendChild(p)
         })
+        $("pm-rev-etiquette").textContent = pm.coop ? "Fait deviner" : "Font deviner"
+        const consigne = $("pm-rev-consigne")
+        consigne.textContent = ""
+        const b = document.createElement("b")
+        b.textContent = pm.coop ? "ferme les yeux" : "fermez les yeux"
+        consigne.append(pm.coop ? devineur(0) + ", " : "Les autres, ")
+        consigne.appendChild(b)
+        consigne.append("\u00A0!")
         $("pm-mot").textContent = pm.mots[pm.index]
         $("pm-revoir-mot").textContent = pm.mots[pm.index]
         const carte = $("pm-carte-secrete")
@@ -375,6 +409,16 @@
             g.appendChild(b)
             g.append(gain > 1 ? " points" : " point")
         }
+        if (pm.coop) {
+            g.textContent = ""
+            if (d !== null) {
+                const b2 = document.createElement("b")
+                b2.textContent = "+" + gain
+                g.appendChild(b2)
+                g.append(gain > 1 ? " points · " : " point · ")
+            }
+            g.append("Total : " + pm.scores[0] + " / " + (pm.nbMots * INDICES_MAX))
+        }
         rendreClassement($("pm-res-classement"), false)
         const dernier = pm.index >= pm.nbMots - 1
         $("pm-suivant").textContent = dernier ? "Voir le classement final" : "Mot suivant"
@@ -391,9 +435,56 @@
     })
 
     // ---------- 4. Fin de partie ----------
+    function verdict(ratio) {
+        if (ratio >= .8) return "Télépathes !"
+        if (ratio >= .6) return "Bien connectés"
+        if (ratio >= .4) return "Pas mal du tout"
+        if (ratio >= .2) return "On s'entraîne encore"
+        return "Vous vous connaissez vraiment ?"
+    }
+
+    function afficherFinCoop() {
+        const score = pm.scores[0], max = pm.nbMots * INDICES_MAX
+        $("pm-fin-titre").textContent = verdict(score / max)
+        const sous = $("pm-fin-sous-titre")
+        sous.textContent = ""
+
+        const grand = document.createElement("p")
+        grand.className = "pm-score-coop"
+        grand.textContent = "0"
+        const surMax = document.createElement("small")
+        surMax.textContent = " / " + max
+        const ligne = document.createElement("span")
+        remplirDuo(ligne, 0, "", " · " + pm.trouves[0] + (pm.trouves[0] > 1 ? " mots trouvés" : " mot trouvé"))
+
+        // Record pour ce nombre de mots
+        let records = {}
+        try { records = JSON.parse(memoire(CLE_RECORDS) || "{}") || {} } catch (e) { records = {} }
+        const ancien = records[pm.nbMots]
+        const nouveau = score > 0 && (ancien === undefined || score > ancien)
+        if (nouveau) { records[pm.nbMots] = score; memoire(CLE_RECORDS, JSON.stringify(records)) }
+        const rec = document.createElement("p")
+        rec.className = "pm-record" + (nouveau ? " nouveau" : "")
+        rec.textContent = nouveau
+            ? (ancien === undefined ? "Premier record établi !" : "Nouveau record ! (avant : " + ancien + ")")
+            : (ancien !== undefined ? "Votre record sur " + pm.nbMots + " mots : " + ancien : "")
+
+        sous.appendChild(grand)
+        sous.appendChild(ligne)
+        afficher("ecran-pm-fin")
+        setTimeout(function () {
+            compterJusqua(grand, score)
+            setTimeout(function () { grand.appendChild(surMax) }, reduit ? 0 : 950)
+            sous.appendChild(rec)
+            if (score / max >= .4 || nouveau) confettis()
+            son("victoire", { ensuite: function () { musique(true) } })
+        }, reduit ? 0 : 600)
+    }
+
     function afficherFin() {
         enJeuPM = false
         if (window.garderEcranAllume) window.garderEcranAllume(false)
+        if (pm.coop) { afficherFinCoop(); return }
         const res = rendreClassement($("pm-fin-classement"), true)
         const enTete = res.ordre.filter(function (d) { return res.rangs[d] === 1 })
         const titre = $("pm-fin-titre"), sous = $("pm-fin-sous-titre")

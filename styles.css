@@ -459,6 +459,7 @@ body::before {
 .choix { display: grid; gap: 8px; }
 .choix.c5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .choix.c4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.choix.c2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
 .choix input { position: absolute; opacity: 0; pointer-events: none; }
 
@@ -1346,6 +1347,14 @@ body::before {
 .pm-mot-revele { font-size: clamp(32px, 11vw, 44px); }
 .pm-res-gain { margin: 0; font-size: 15px; color: var(--texte-2); }
 .pm-res-gain b { color: var(--or); font-family: var(--serif); font-size: 20px; }
+
+/* Passe-Mot à deux : score et record */
+.pm-score-coop { margin: 0; font-family: var(--serif); font-weight: 700; font-size: clamp(56px, 18vw, 76px); line-height: 1; color: var(--or); font-variant-numeric: tabular-nums; }
+.pm-score-coop small { font-size: .38em; color: var(--discret); font-weight: 500; }
+.pm-record { margin: 0; font-size: 14px; color: var(--texte-2); }
+.pm-record.nouveau { color: var(--or); font-weight: 600; animation: saute .6s var(--ressort); }
+.pm-coop #pm-res-classement, .pm-coop #pm-fin-classement { display: none; }
+#pm-fin-sous-titre { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 
 /* ---------- L'Infiltré ---------- */
 
