@@ -14,10 +14,38 @@
     const CLE_PM = "blacksup-passe-mot"
     const CLE_RECORDS = "blacksup-passe-mot-records"
 
-    // Les mots du jeu : ceux de Black's Up, sans les expressions trop longues
-    const MOTS_PM = TOUSLESMOTS.filter(function (m) {
-        return m.length <= 24 && m.split(/\s+/).length <= 3 && !/[«»:]/.test(m)
-    })
+    // Les mots du jeu : ceux de Black's Up, mais seulement des « choses » à faire deviner
+    // (noms, personnages, lieux, objets, titres…), jamais des expressions ou des phrases.
+    // Un mot de passe peut faire plusieurs mots (« Tour Eiffel »), mais reste un nom.
+    const CATEGORIES_EXCLUES = ["actions-droles"]           // que des actions et expressions
+    const COMMENCE_PAR_UN_VERBE = /^(avoir|être|faire|mettre|prendre|se |s'|donner|tirer|couper|poser|tomber|marcher|casser|coûter|jeter|rouler|péter|raconter|tourner|chanter|danser|liker|envoyer|écrire|laisser|stalker|rater|glisser|chercher|courir|dire|croquer|manger|monter|fuir|repasser|passer|promener|changer|bercer|soulever|taper|ouvrir|souffler|pleurer|rire|draguer|attrapez)\b/i
+    // Tournures qui passent les filtres mais restent des phrases
+    const PHRASES = ["Naruto qui court", "Tiens tiens tiens", "C'est carré", "En PLS", "Winter is coming",
+        "Clash en commentaire", "Réaction en live", "Popcorn au cinéma", "Concert à Bercy", "Visio sur Zoom",
+        "Casquette à l'envers", "Barbe bien taillée", "Netflix and chill", "Le premier iPhone", "Un métro bondé",
+        "Mot de passe oublié", "Batterie à 1 %", "Feat surprise", "Suite décevante", "Stade de France complet",
+        "Sneakers en édition limitée", "Oignon qui fait pleurer", "Le sang de la veine"]
+
+    const MOTS_PM = (function () {
+        const vus = new Set(), liste = []
+        Object.keys(CATEGORIES).forEach(function (cle) {
+            if (CATEGORIES_EXCLUES.indexOf(cle) !== -1) return
+            CATEGORIES[cle].mots.forEach(function (m) {
+                m = (m || "").trim()
+                const nbMots = m.split(/\s+/).length
+                if (!m || m.length > 24 || nbMots > 3) return
+                if (cle === "moments" && nbMots > 2) return          // « La gifle de Will Smith aux Oscars »…
+                if (/[«»:?]/.test(m)) return
+                if (COMMENCE_PAR_UN_VERBE.test(m)) return
+                if (PHRASES.indexOf(m) !== -1) return
+                const cleUnique = m.toLowerCase()
+                if (vus.has(cleUnique)) return
+                vus.add(cleUnique)
+                liste.push(m)
+            })
+        })
+        return liste
+    })()
 
     let pm = {
         duos: [],          // [{ joueurs: ["Moussa", "Awa"] }, ...]
