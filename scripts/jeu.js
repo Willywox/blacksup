@@ -102,6 +102,11 @@ function memoire(cle, valeur) {
     } catch (e) { return null }
 }
 
+// Lit une couleur de l'apparence en cours (ex. couleur("or"))
+function couleur(nom) {
+    return getComputedStyle(document.documentElement).getPropertyValue("--" + nom).trim()
+}
+
 function animer(el, images, options) {
     if (reduit || !el.animate) return Promise.resolve()
     return el.animate(images, options).finished.catch(function () {})
@@ -282,8 +287,8 @@ $("btn-trouve").addEventListener("click", function (e) {
         ], { duration: 320, easing: "cubic-bezier(.2,.7,.2,1)", fill: "forwards" })
     }).then(function () { verrou = false })
     animer($("carte-mot"), [
-        { borderColor: "rgba(212,175,106,.7)" },
-        { borderColor: "#2C2925" }
+        { borderColor: couleur("or") },
+        { borderColor: couleur("ligne") }
     ], { duration: 600, easing: "ease-out" })
 })
 
@@ -295,7 +300,7 @@ $("btn-erreur").addEventListener("click", function () {
         { transform: "translateX(-5px)" }, { transform: "translateX(3px)" }, { transform: "translateX(0)" }
     ], { duration: 420, easing: "ease-out" })
     animer($("carte-mot"), [
-        { borderColor: "#E8917F" }, { borderColor: "#2C2925" }
+        { borderColor: couleur("corail") }, { borderColor: couleur("ligne") }
     ], { duration: 700, easing: "ease-out" })
     finDuTour("erreur")
 })
@@ -312,7 +317,7 @@ function etincelles(bouton) {
         p.style.top = "50%"
         p.style.setProperty("--dx", (Math.cos(angle) * dist) + "px")
         p.style.setProperty("--dy", (Math.sin(angle) * dist) + "px")
-        if (i % 3 === 0) p.style.background = "#F2EDE4"
+        if (i % 3 === 0) p.style.background = couleur("texte")
         carte.appendChild(p)
         p.addEventListener("animationend", function () { p.remove() })
     }
@@ -353,7 +358,7 @@ function preparerVerification() {
         const coche = document.createElement("span")
         coche.className = "coche"
         coche.setAttribute("aria-hidden", "true")
-        coche.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0E0D0C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>'
+        coche.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>'
 
         const libelle = document.createElement("span")
         libelle.className = "libelle"
@@ -535,7 +540,7 @@ function confettis() {
     const zone = document.createElement("div")
     zone.className = "confettis"
     zone.setAttribute("aria-hidden", "true")
-    const couleurs = ["#D4AF6A", "#E6C98E", "#F2EDE4", "#B8925065"]
+    const couleurs = [couleur("or"), couleur("or-clair"), couleur("texte"), couleur("corail")]
     for (let i = 0; i < 46; i++) {
         const c = document.createElement("i")
         const large = Math.random() < .5

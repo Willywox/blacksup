@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="Black's Up!, le jeu d'ambiance en trois manches : décrivez, un seul mot, mimez.">
-    <meta name="theme-color" content="#0E0D0C">
+    <meta name="theme-color" content="#0E0D0C" id="couleur-barre">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,25 +16,38 @@
     <title>Black's Up!</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=9">
-    <script src="scripts/animations.js?v=9" defer></script>
-    <script src="scripts/app.js?v=9" defer></script>
-    <script src="scripts/sons.js?v=9" defer></script>
-    <script src="scripts/mots.js?v=9" defer></script>
-    <script src="scripts/jeu.js?v=9" defer></script>
-    <script src="scripts/passe-mot.js?v=9" defer></script>
-    <script src="scripts/infiltre-paires.js?v=9" defer></script>
-    <script src="scripts/infiltre.js?v=9" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600&family=Bangers&family=Fredoka:wght@600;700&family=Anton&family=Archivo+Black&family=Bungee&display=swap" rel="stylesheet">
+    <script>
+        // Applique l'apparence choisie avant l'affichage (évite un flash de l'apparence par défaut)
+        try {
+            var apparence = localStorage.getItem("blacksup-apparence")
+            if (apparence) document.documentElement.setAttribute("data-theme", apparence)
+        } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="styles.css?v=10">
+    <script src="scripts/animations.js?v=10" defer></script>
+    <script src="scripts/app.js?v=10" defer></script>
+    <script src="scripts/sons.js?v=10" defer></script>
+    <script src="scripts/mots.js?v=10" defer></script>
+    <script src="scripts/jeu.js?v=10" defer></script>
+    <script src="scripts/passe-mot.js?v=10" defer></script>
+    <script src="scripts/infiltre-paires.js?v=10" defer></script>
+    <script src="scripts/infiltre.js?v=10" defer></script>
+    <script src="scripts/apparence.js?v=10" defer></script>
 </head>
 <body>
     <main class="app">
 
         <!-- 0. Accueil -->
         <section id="ecran-accueil" class="ecran actif accueil">
-            <div class="pile-centre entete-accueil">
+            <div class="barre-haut">
+                <button type="button" class="btn-apparence" id="btn-apparence" aria-label="Changer l'apparence" aria-haspopup="dialog">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.9 1.8-1.9 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.3 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.3-4-7.7-9-7.7z"></path><circle cx="7.5" cy="11" r="1.2"></circle><circle cx="10.5" cy="7" r="1.2"></circle><circle cx="15" cy="7.5" r="1.2"></circle></svg>
+                </button>
                 <p class="surtitre">Tiens tiens tiens...</p>
-                <div class="filet"></div>
+                <div class="vide"></div>
+            </div>
+            <div class="pile-centre entete-accueil">
                 <svg class="logo-serrure" width="60" height="60" viewBox="0 0 72 72" fill="none" aria-hidden="true">
                     <circle class="trace" cx="36" cy="36" r="34" stroke="#D4AF6A" stroke-width="1.4"></circle>
                     <circle class="trace t2" cx="36" cy="30" r="7" stroke="#D4AF6A" stroke-width="1.4"></circle>
@@ -695,6 +708,16 @@
         </section>
 
     </main>
+
+    <!-- Apparence -->
+    <div id="apparence" class="pause panneau-apparence" role="dialog" aria-modal="true" aria-labelledby="apparence-titre" hidden>
+        <p class="surtitre">Personnalise ton jeu</p>
+        <h2 class="nom-manche" id="apparence-titre" style="font-size: clamp(36px, 11vw, 46px)">Apparence</h2>
+        <div class="grille-apparences" id="grille-apparences"></div>
+        <div class="pile">
+            <button id="apparence-fermer" class="btn btn-or" type="button">C'est parfait</button>
+        </div>
+    </div>
 
     <!-- Jeu en construction -->
     <div id="bientot" class="pause bientot-fenetre" role="dialog" aria-modal="true" aria-labelledby="bientot-titre" hidden>

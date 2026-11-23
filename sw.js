@@ -4,7 +4,7 @@
 // pour que tous les téléphones récupèrent la nouvelle version.
 // =========================================================
 
-const VERSION = "blacksup-v9"
+const VERSION = "blacksup-v10"
 
 const FICHIERS = [
     "./",
@@ -19,6 +19,7 @@ const FICHIERS = [
     "./scripts/passe-mot.js",
     "./scripts/infiltre-paires.js",
     "./scripts/infiltre.js",
+    "./scripts/apparence.js",
     "./scripts/mots.js",
     "./scripts/sons.js",
     "./sons/clic.mp3",
