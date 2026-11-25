@@ -1777,6 +1777,67 @@ body.nuit-dieux::after {
 .bilan-roles li.dieu .bilan-role { color: var(--or); }
 .dx-fin-icone svg { color: var(--or); }
 
+/* ---------- Songs Up, Qui de nous ?, Le Mytho ---------- */
+
+.choix.c3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.carte-riche { flex-direction: column; gap: 10px; }
+.carte-riche small { font-family: var(--sans); font-size: 14px; line-height: 1.45; color: var(--texte-2); max-width: 260px; }
+.carte-riche .fort { color: var(--or); }
+.su-note { animation: respire 2.4s ease-in-out infinite; }
+
+.qdn-carte {
+    width: 100%;
+    min-height: 300px;
+    padding: 34px 26px;
+    border-radius: 26px;
+    background: linear-gradient(160deg, rgba(var(--or-rvb), .10), rgba(var(--or-rvb), 0) 55%), var(--surface);
+    border: 1px solid rgba(var(--or-rvb), .35);
+    display: grid;
+    place-items: center;
+    position: relative;
+    overflow: hidden;
+}
+.qdn-question {
+    margin: 0;
+    font-family: var(--serif);
+    font-style: var(--italique);
+    text-transform: var(--casse-titre);
+    font-size: clamp(25px, 7.6vw, 33px);
+    line-height: 1.22;
+    text-align: center;
+    transition: opacity .3s, filter .3s;
+}
+.qdn-question.entre { animation: monte .55s var(--douce) both; }
+.qdn-decompte {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--serif);
+    font-size: 120px;
+    line-height: 1;
+    color: var(--or);
+    pointer-events: none;
+    opacity: 0;
+}
+.qdn-carte.decompte .qdn-question { opacity: .08 !important; filter: blur(6px); }
+.qdn-decompte.bat { animation: qdn-bat .9s var(--douce) both; }
+.qdn-decompte.pointez { inset: auto 0 18px; font-size: clamp(30px, 9vw, 38px); animation: qdn-pointez .5s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes qdn-bat { 0% { opacity: 0; transform: scale(1.6); } 25% { opacity: 1; transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: scale(.85); } }
+@keyframes qdn-pointez { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+
+.my-theme {
+    margin: 0;
+    max-width: 330px;
+    font-family: var(--serif);
+    font-size: clamp(24px, 7vw, 30px);
+    line-height: 1.25;
+    text-align: center;
+}
+.role-revele.vrai { color: var(--texte); }
+.role-revele.mytho { color: var(--or); text-shadow: 0 0 30px rgba(var(--or-rvb), .5); }
+
 /* ---------- Mode adulte (18+) ---------- */
 
 .badge-adulte, .bouton-adulte { display: none !important; }

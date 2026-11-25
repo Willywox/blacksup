@@ -125,7 +125,7 @@ function afficher(id) {
     const precedent = ecranCourant
     ecranCourant = suivant
     document.body.classList.toggle("en-partie", ECRANS_DE_PARTIE.indexOf(id) !== -1)
-    document.body.classList.toggle("sans-btn-son", ["ecran-tour", "ecran-verif", "ecran-pm-revelation", "ecran-pm-duel", "ecran-inf-distribution", "ecran-cm-ecriture", "ecran-cm-tour", "ecran-cm-mime", "ecran-dx-distribution", "ecran-dx-nuit"].indexOf(id) !== -1)
+    document.body.classList.toggle("sans-btn-son", ["ecran-tour", "ecran-verif", "ecran-pm-revelation", "ecran-pm-duel", "ecran-inf-distribution", "ecran-cm-ecriture", "ecran-cm-tour", "ecran-cm-mime", "ecran-dx-distribution", "ecran-dx-nuit", "ecran-su-revelation", "ecran-su-tour", "ecran-my-secret"].indexOf(id) !== -1)
     if (reduit) {
         precedent.classList.remove("actif")
         suivant.classList.add("actif")
@@ -962,7 +962,13 @@ const ROUTES = {
     "#crea-mime": "ecran-cm-config",
     "#crea-mime-regles": "ecran-cm-regles",
     "#dieux": "ecran-dx-config",
-    "#dieux-regles": "ecran-dx-regles"
+    "#dieux-regles": "ecran-dx-regles",
+    "#songs-up": "ecran-su-config",
+    "#songs-up-regles": "ecran-su-regles",
+    "#qui-de-nous": "ecran-qdn-jeu",
+    "#qui-de-nous-regles": "ecran-qdn-regles",
+    "#mytho": "ecran-my-config",
+    "#mytho-regles": "ecran-my-regles"
 }
 
 function abandonnerPartie() {
@@ -980,6 +986,8 @@ function suivreAdresse() {
     if (window.abandonnerInfiltre) window.abandonnerInfiltre()
     if (window.abandonnerCreaMime) window.abandonnerCreaMime()
     if (window.abandonnerDieux) window.abandonnerDieux()
+    if (window.abandonnerSongsUp) window.abandonnerSongsUp()
+    if (window.abandonnerMytho) window.abandonnerMytho()
     musique(true)
     afficher(id)
 }
@@ -1007,7 +1015,9 @@ const ECRANS_DE_PARTIE = [
     "ecran-pm-revelation", "ecran-pm-duel", "ecran-pm-resultat",
     "ecran-inf-distribution", "ecran-inf-tour", "ecran-inf-vote", "ecran-inf-revelation",
     "ecran-cm-ecriture", "ecran-cm-passage", "ecran-cm-tour", "ecran-cm-mime", "ecran-cm-resultat",
-    "ecran-dx-distribution", "ecran-dx-nuit", "ecran-dx-jour", "ecran-dx-vote", "ecran-dx-revelation"
+    "ecran-dx-distribution", "ecran-dx-nuit", "ecran-dx-jour", "ecran-dx-vote", "ecran-dx-revelation",
+    "ecran-su-revelation", "ecran-su-tour", "ecran-su-qui", "ecran-su-resultat",
+    "ecran-my-secret", "ecran-my-recit", "ecran-my-vote", "ecran-my-resultat"
 ]
 const PAUSES = []
 let enPause = false
@@ -1117,6 +1127,8 @@ $("btn-quitter").addEventListener("click", function () {
     if (window.abandonnerInfiltre) window.abandonnerInfiltre()
     if (window.abandonnerCreaMime) window.abandonnerCreaMime()
     if (window.abandonnerDieux) window.abandonnerDieux()
+    if (window.abandonnerSongsUp) window.abandonnerSongsUp()
+    if (window.abandonnerMytho) window.abandonnerMytho()
     location.hash = ""   // retour à l'accueil (la musique revient)
 })
 

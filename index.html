@@ -24,20 +24,26 @@
             if (apparence) document.documentElement.setAttribute("data-theme", apparence)
         } catch (e) {}
     </script>
-    <link rel="stylesheet" href="styles.css?v=17">
-    <script src="scripts/animations.js?v=17" defer></script>
-    <script src="scripts/app.js?v=17" defer></script>
-    <script src="scripts/sons.js?v=17" defer></script>
-    <script src="scripts/mots.js?v=17" defer></script>
-    <script src="scripts/mots-adultes.js?v=17" defer></script>
-    <script src="scripts/jeu.js?v=17" defer></script>
-    <script src="scripts/passe-mot.js?v=17" defer></script>
-    <script src="scripts/infiltre-paires.js?v=17" defer></script>
-    <script src="scripts/infiltre.js?v=17" defer></script>
-    <script src="scripts/crea-mime.js?v=17" defer></script>
-    <script src="scripts/dieux.js?v=17" defer></script>
-    <script src="scripts/apparence.js?v=17" defer></script>
-    <script src="scripts/adulte.js?v=17" defer></script>
+    <link rel="stylesheet" href="styles.css?v=18">
+    <script src="scripts/animations.js?v=18" defer></script>
+    <script src="scripts/app.js?v=18" defer></script>
+    <script src="scripts/sons.js?v=18" defer></script>
+    <script src="scripts/mots.js?v=18" defer></script>
+    <script src="scripts/mots-adultes.js?v=18" defer></script>
+    <script src="scripts/jeu.js?v=18" defer></script>
+    <script src="scripts/passe-mot.js?v=18" defer></script>
+    <script src="scripts/infiltre-paires.js?v=18" defer></script>
+    <script src="scripts/infiltre.js?v=18" defer></script>
+    <script src="scripts/crea-mime.js?v=18" defer></script>
+    <script src="scripts/dieux.js?v=18" defer></script>
+    <script src="scripts/outils-joueurs.js?v=18" defer></script>
+    <script src="scripts/songs.js?v=18" defer></script>
+    <script src="scripts/songs-up.js?v=18" defer></script>
+    <script src="scripts/qui-mytho-contenus.js?v=18" defer></script>
+    <script src="scripts/qui-de-nous.js?v=18" defer></script>
+    <script src="scripts/mytho.js?v=18" defer></script>
+    <script src="scripts/apparence.js?v=18" defer></script>
+    <script src="scripts/adulte.js?v=18" defer></script>
 </head>
 <body>
     <main class="app">
@@ -137,18 +143,44 @@
                     <a href="#dieux-regles" class="carte-jeu-regles">Les règles</a>
                 </article>
 
-                <button type="button" class="carte-jeu bientot" data-jeu="Vacarme">
-                    <span class="carte-jeu-principal">
-                        <span class="icone-jeu" aria-hidden="true">
-                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4h3l5 4V6L6 10H3z"></path><path d="M15 9.5a3.5 3.5 0 0 1 0 5M17.5 7a7 7 0 0 1 0 10M20 4.5a10.5 10.5 0 0 1 0 15"></path></svg>
-                        </span>
+                <article class="carte-jeu">
+                    <a href="#songs-up" class="carte-jeu-principal">
+                        <span class="icone-jeu" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></span>
                         <span class="textes-jeu">
-                            <span class="nom-jeu">Vacarme <span class="badge-bientot">Bientôt</span></span>
-                            <span class="desc-jeu">Questions, votes et duels qui mettent le feu entre potes.</span>
+                            <span class="nom-jeu">Songs Up</span>
+                            <span class="desc-jeu">Fredonne un son culte, les autres devinent. Le premier qui trouve marque.</span>
+                            <span class="meta-jeu">Chacun pour soi · 3 à 12 joueurs</span>
+                        </span>
+                        <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+                    </a>
+                    <a href="#songs-up-regles" class="carte-jeu-regles">Les règles</a>
+                </article>
+
+                <article class="carte-jeu">
+                    <a href="#qui-de-nous" class="carte-jeu-principal">
+                        <span class="icone-jeu" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11"></path><path d="M11 10.5V9a1.5 1.5 0 0 1 3 0v2"></path><path d="M14 10.5a1.5 1.5 0 0 1 3 0V12"></path><path d="M17 11.5a1.5 1.5 0 0 1 3 0V16a6 6 0 0 1-6 6h-1.5a6 6 0 0 1-4.6-2.1L4.6 16.5a1.6 1.6 0 0 1 2.3-2.2L8 15.5"></path></svg></span>
+                        <span class="textes-jeu">
+                            <span class="nom-jeu">Qui de nous ?</span>
+                            <span class="desc-jeu">Une question, trois secondes, tout le monde pointe quelqu'un. Bonne chance pour se justifier.</span>
                             <span class="meta-jeu">Tout le groupe · dès 3 joueurs</span>
                         </span>
-                    </span>
-                </button>
+                        <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+                    </a>
+                    <a href="#qui-de-nous-regles" class="carte-jeu-regles">Les règles</a>
+                </article>
+
+                <article class="carte-jeu">
+                    <a href="#mytho" class="carte-jeu-principal">
+                        <span class="icone-jeu" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-3 0-5 2.2-5 5 0 1.6.6 2.6.6 4.2 0 1.3-.6 2.3-.6 3.3 0 2.2 2.1 3.5 5 3.5s5-1.3 5-3.5c0-1-.6-2-.6-3.3 0-1.6.6-2.6.6-4.2 0-2.8-2-5-5-5z"></path><path d="M12 19v2.5M9.5 9.5h.01M14.5 9.5h.01M10 13.5c1.2.8 2.8.8 4 0"></path></svg></span>
+                        <span class="textes-jeu">
+                            <span class="nom-jeu">Le Mytho</span>
+                            <span class="desc-jeu">Une histoire, une consigne secrète : vérité ou mytho ? Démasquez les menteurs.</span>
+                            <span class="meta-jeu">Chacun pour soi · 3 à 12 joueurs</span>
+                        </span>
+                        <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+                    </a>
+                    <a href="#mytho-regles" class="carte-jeu-regles">Les règles</a>
+                </article>
             </div>
 
             <button id="quitter-adulte" class="btn btn-contour bouton-adulte" type="button">Quitter le mode adulte</button>
@@ -1095,6 +1127,364 @@
             </div>
         </section>
 
+
+        <!-- ===================== SONGS UP ===================== -->
+
+        <section id="ecran-su-regles" class="ecran" style="gap: 22px">
+            <div class="barre-haut">
+                <a href="#" class="btn-rond" aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre">Songs Up</p>
+                <div class="vide"></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px">
+                <h1 class="titre">Fredonne,<br><em>ils devinent.</em></h1>
+                <p class="texte-doux">Le téléphone te montre en secret un son connu&#160;: rap, R&amp;B, pop, afro, variété, génériques… À toi de le faire deviner, sans un seul mot.</p>
+            </div>
+            <div class="liste-regles">
+                <article class="regle">
+                    <p class="chiffre">I</p>
+                    <div>
+                        <h2>Fredonne</h2>
+                        <p>Chacun son tour, un joueur découvre un titre en secret et le fredonne. Interdit de chanter les paroles, de dire le nom de l'artiste ou de mimer.</p>
+                    </div>
+                </article>
+                <article class="regle">
+                    <p class="chiffre">II</p>
+                    <div>
+                        <h2>Trouve</h2>
+                        <p>Le premier qui trouve le titre gagne <b>1 point</b>, et celui qui fredonne aussi. Mieux tu fredonnes, plus tu marques.</p>
+                    </div>
+                </article>
+                <article class="regle">
+                    <p class="chiffre">III</p>
+                    <div>
+                        <h2>Gagne</h2>
+                        <p>Le premier à atteindre le nombre de points fixé remporte la partie.</p>
+                    </div>
+                </article>
+            </div>
+            <a href="#songs-up" class="btn btn-or">Compris, on joue</a>
+        </section>
+
+        <section id="ecran-su-config" class="ecran">
+            <div class="barre-haut">
+                <a href="#" class="btn-rond" aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre">Songs Up</p>
+                <div class="vide"></div>
+            </div>
+            <h1 class="titre">Qui fredonne&#160;?</h1>
+            <fieldset class="champ groupe">
+                <legend class="etiquette">Les joueurs <span id="su-compte" class="compte"></span></legend>
+                <div class="puces inf-puces" id="su-joueurs"></div>
+                <div class="ajout-joueur">
+                    <input type="text" class="champ-joueur" id="su-champ" maxlength="15" autocomplete="off" enterkeyhint="done" placeholder="Prénom d'un joueur" aria-label="Ajouter un joueur">
+                    <button type="button" class="petit-btn" id="su-ajouter" data-son="aucun" aria-label="Ajouter ce joueur"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+                </div>
+                <p class="aide-champ" id="su-aide"></p>
+            </fieldset>
+            <fieldset class="champ groupe">
+                <legend class="etiquette">Points pour gagner</legend>
+                <div class="choix c4">
+                    <input type="radio" name="su-objectif" value="5" id="su-objectif5"><label for="su-objectif5">5</label>
+                    <input type="radio" name="su-objectif" value="10" id="su-objectif10" checked><label for="su-objectif10">10</label>
+                    <input type="radio" name="su-objectif" value="15" id="su-objectif15"><label for="su-objectif15">15</label>
+                    <input type="radio" name="su-objectif" value="20" id="su-objectif20"><label for="su-objectif20">20</label>
+                </div>
+            </fieldset>
+            <fieldset class="champ groupe">
+                <legend class="etiquette">Temps pour fredonner</legend>
+                <div class="choix c4">
+                    <input type="radio" name="su-temps" value="30" id="su-temps30"><label for="su-temps30">30 s</label>
+                    <input type="radio" name="su-temps" value="45" id="su-temps45" checked><label for="su-temps45">45 s</label>
+                    <input type="radio" name="su-temps" value="60" id="su-temps60"><label for="su-temps60">60 s</label>
+                    <input type="radio" name="su-temps" value="90" id="su-temps90"><label for="su-temps90">90 s</label>
+                </div>
+            </fieldset>
+            <a href="#songs-up-regles" class="lien-discret">Revoir les règles</a>
+            <div class="pousse"></div>
+            <button id="su-lancer" class="btn btn-or" type="button" data-son="lancer">Lancer la partie</button>
+        </section>
+
+        <section id="ecran-su-revelation" class="ecran centre">
+            <p class="surtitre" id="su-rev-numero">Son 1</p>
+            <div class="pile-centre" style="gap: 10px">
+                <p class="etiquette">Passe le téléphone à</p>
+                <p class="nom-equipe" id="su-rev-nom"></p>
+                <p class="consigne">Les autres, <b>ne regardez pas</b>&#160;!</p>
+            </div>
+            <button type="button" class="carte-secrete" id="su-carte" data-son="aucun" aria-label="Maintenir appuyé pour voir le son">
+                <span class="carte-secrete-cache"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg><span>Maintenir pour voir le son</span></span>
+                <span class="carte-secrete-mot carte-riche" id="su-son"></span>
+            </button>
+            <div class="pile" style="width: 100%">
+                <button id="su-go" class="btn btn-or btn-grand" type="button" data-son="lancer" disabled>Je fredonne&#160;!</button>
+                <button id="su-autre" class="lien-discret" type="button" style="background: none; border: 0; cursor: pointer">Je ne connais pas, un autre son</button>
+            </div>
+        </section>
+
+        <section id="ecran-su-tour" class="ecran centre" style="gap: 22px">
+            <div class="entete-tour">
+                <p class="etiquette" id="su-tour-numero">Son 1</p>
+                <p class="surtitre" id="su-tour-chrono">45</p>
+            </div>
+            <div class="pile-centre" style="gap: 12px">
+                <svg class="su-note" width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                <p class="nom-equipe" id="su-tour-nom"></p>
+                <p class="etiquette">fredonne…</p>
+                <p class="consigne">Criez le titre dès que vous l'avez&#160;!</p>
+            </div>
+            <div class="jauge" aria-hidden="true"><div class="jauge-remplie" id="su-jauge"></div></div>
+            <button type="button" class="revoir-mot" id="su-revoir" data-son="aucun">
+                <span class="revoir-cache">Maintenir pour revoir le son</span>
+                <span class="revoir-mot-texte" id="su-revoir-son"></span>
+            </button>
+            <div class="pousse"></div>
+            <div class="actions-tour">
+                <button id="su-personne" class="btn btn-erreur btn-grand" type="button" data-son="aucun">Personne</button>
+                <button id="su-trouve" class="btn btn-or btn-grand" type="button" data-son="aucun">Trouvé&#160;!</button>
+            </div>
+        </section>
+
+        <section id="ecran-su-qui" class="ecran centre">
+            <p class="surtitre">Trouvé&#160;!</p>
+            <h1 class="titre" style="text-align: center">Qui a trouvé&#160;?</h1>
+            <div class="grille-vote" id="su-grille"></div>
+            <div class="pousse"></div>
+            <button id="su-qui-annuler" class="lien-discret" type="button" style="background: none; border: 0; cursor: pointer">Finalement, personne</button>
+        </section>
+
+        <section id="ecran-su-resultat" class="ecran centre">
+            <p class="surtitre" id="su-res-surtitre">Trouvé</p>
+            <div class="pile-centre" style="gap: 10px">
+                <p class="etiquette">C'était</p>
+                <p class="mot pm-mot-revele" id="su-res-titre"></p>
+                <p class="texte-doux" id="su-res-artiste" style="margin: 0; color: var(--texte-2)"></p>
+                <p class="pm-res-gain" id="su-res-gain"></p>
+            </div>
+            <ol class="classement" id="su-res-classement" aria-label="Scores"></ol>
+            <div class="pousse"></div>
+            <button id="su-suivant" class="btn btn-or" type="button">Son suivant</button>
+        </section>
+
+        <section id="ecran-su-fin" class="ecran centre">
+            <p class="surtitre">Fin de partie</p>
+            <div class="pile-centre" style="gap: 10px">
+                <svg class="trophee" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
+                    <path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"></path>
+                </svg>
+                <h1 class="nom-equipe" id="su-fin-titre" style="font-size: clamp(30px, 10vw, 42px)"></h1>
+                <p class="texte-doux" id="su-fin-sous-titre" style="font-size: 15px; color: var(--texte-2)"></p>
+            </div>
+            <ol class="classement" id="su-fin-classement" aria-label="Classement"></ol>
+            <div class="pousse"></div>
+            <div class="pile">
+                <button id="su-rejouer" class="btn btn-or" type="button">Rejouer</button>
+                <a href="#" class="btn btn-contour">Retour à l'accueil</a>
+            </div>
+        </section>
+
+        <!-- ===================== QUI DE NOUS ? ===================== -->
+
+        <section id="ecran-qdn-regles" class="ecran" style="gap: 22px">
+            <div class="barre-haut">
+                <a href="#" class="btn-rond" aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre">Qui de nous ?</p>
+                <div class="vide"></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px">
+                <h1 class="titre">Qui de nous…<br><em>pointez&#160;!</em></h1>
+                <p class="texte-doux">Aucun point, aucun perdant&#160;: juste des questions qui font parler et des amitiés mises à l'épreuve.</p>
+            </div>
+            <div class="liste-regles">
+                <article class="regle">
+                    <p class="chiffre">I</p>
+                    <div>
+                        <h2>La question</h2>
+                        <p>Le téléphone pose une question du genre «&#160;Qui de nous finira en garde à vue pour une bêtise&#160;?&#160;». Lisez-la à voix haute.</p>
+                    </div>
+                </article>
+                <article class="regle">
+                    <p class="chiffre">II</p>
+                    <div>
+                        <h2>Pointez</h2>
+                        <p>Le téléphone compte jusqu'à trois. Au signal, tout le monde pointe du doigt la personne qui correspond le mieux. En même temps, pas de regards en coin&#160;!</p>
+                    </div>
+                </article>
+                <article class="regle">
+                    <p class="chiffre">III</p>
+                    <div>
+                        <h2>Justifiez</h2>
+                        <p>Celui qui a été le plus pointé doit se défendre… ou assumer. Puis question suivante.</p>
+                    </div>
+                </article>
+            </div>
+            <a href="#qui-de-nous" class="btn btn-or">Compris, on joue</a>
+        </section>
+
+        <section id="ecran-qdn-jeu" class="ecran centre" style="gap: 22px">
+            <div class="barre-haut" style="width: 100%">
+                <a href="#" class="btn-rond" aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre" id="qdn-numero">Question 1</p>
+                <div class="vide"></div>
+            </div>
+            <div class="qdn-carte" id="qdn-carte">
+                <p class="qdn-question" id="qdn-question"></p>
+                <p class="qdn-decompte" id="qdn-decompte" aria-live="assertive"></p>
+            </div>
+            <div class="pousse"></div>
+            <button id="qdn-pointez" class="btn btn-or btn-grand" type="button" data-son="aucun">3, 2, 1… pointez&#160;!</button>
+            <button id="qdn-passer" class="lien-discret" type="button" style="background: none; border: 0; cursor: pointer">Passer cette question</button>
+        </section>
+
+        <!-- ===================== LE MYTHO ===================== -->
+
+        <section id="ecran-my-regles" class="ecran" style="gap: 22px">
+            <div class="barre-haut">
+                <a href="#" class="btn-rond" aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre">Le Mytho</p>
+                <div class="vide"></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px">
+                <h1 class="titre">Vrai…<br><em>ou mytho&#160;?</em></h1>
+                <p class="texte-doux">Chacun son tour, un joueur raconte une histoire. Vraie ou inventée&#160;? Lui seul le sait.</p>
+            </div>
+            <div class="liste-regles">
+                <article class="regle">
+                    <p class="chiffre">I</p>
+                    <div>
+                        <h2>La consigne secrète</h2>
+                        <p>Le conteur découvre un thème («&#160;Raconte ton pire date&#160;») et une consigne secrète&#160;: dire <b>la vérité</b> ou raconter <b>un mytho</b>.</p>
+                    </div>
+                </article>
+                <article class="regle">
+                    <p class="chiffre">II</p>
+                    <div>
+                        <h2>L'histoire</h2>
+                        <p>Il raconte, les autres posent toutes les questions qu'ils veulent pour le piéger.</p>
+                    </div>
+                </article>
+                <article class="regle">
+                    <p class="chiffre">III</p>
+                    <div>
+                        <h2>Le verdict</h2>
+                        <p>À trois, chacun lève le pouce (vrai) ou le baisse (mytho). Bonne réponse&#160;: <b>+1</b>. Le conteur gagne <b>+1 par personne piégée</b>.</p>
+                    </div>
+                </article>
+            </div>
+            <a href="#mytho" class="btn btn-or">Compris, on joue</a>
+        </section>
+
+        <section id="ecran-my-config" class="ecran">
+            <div class="barre-haut">
+                <a href="#" class="btn-rond" aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre">Le Mytho</p>
+                <div class="vide"></div>
+            </div>
+            <h1 class="titre">Qui sait mentir&#160;?</h1>
+            <fieldset class="champ groupe">
+                <legend class="etiquette">Les joueurs <span id="my-compte" class="compte"></span></legend>
+                <div class="puces inf-puces" id="my-joueurs"></div>
+                <div class="ajout-joueur">
+                    <input type="text" class="champ-joueur" id="my-champ" maxlength="15" autocomplete="off" enterkeyhint="done" placeholder="Prénom d'un joueur" aria-label="Ajouter un joueur">
+                    <button type="button" class="petit-btn" id="my-ajouter" data-son="aucun" aria-label="Ajouter ce joueur"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+                </div>
+                <p class="aide-champ" id="my-aide"></p>
+            </fieldset>
+            <fieldset class="champ groupe">
+                <legend class="etiquette">Histoires par joueur</legend>
+                <div class="choix c3">
+                    <input type="radio" name="my-tours" value="1" id="my-tours1"><label for="my-tours1">1</label>
+                    <input type="radio" name="my-tours" value="2" id="my-tours2" checked><label for="my-tours2">2</label>
+                    <input type="radio" name="my-tours" value="3" id="my-tours3"><label for="my-tours3">3</label>
+                </div>
+            </fieldset>
+            <a href="#mytho-regles" class="lien-discret">Revoir les règles</a>
+            <div class="pousse"></div>
+            <button id="my-lancer" class="btn btn-or" type="button" data-son="lancer">Lancer la partie</button>
+        </section>
+
+        <section id="ecran-my-secret" class="ecran centre">
+            <p class="surtitre" id="my-sec-numero">Histoire 1 sur 10</p>
+            <div class="pile-centre" style="gap: 10px">
+                <p class="etiquette">Passe le téléphone à</p>
+                <p class="nom-equipe" id="my-sec-nom"></p>
+                <p class="consigne" id="my-sec-theme"></p>
+            </div>
+            <button type="button" class="carte-secrete" id="my-carte" data-son="aucun" aria-label="Maintenir appuyé pour voir ta consigne">
+                <span class="carte-secrete-cache"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg><span>Maintenir pour voir ta consigne</span></span>
+                <span class="carte-secrete-mot carte-riche" id="my-consigne"></span>
+            </button>
+            <div class="pile" style="width: 100%">
+                <button id="my-vu" class="btn btn-or btn-grand" type="button" disabled>C'est vu, je raconte</button>
+                <button id="my-autre" class="lien-discret" type="button" style="background: none; border: 0; cursor: pointer">Changer de thème</button>
+            </div>
+        </section>
+
+        <section id="ecran-my-recit" class="ecran centre">
+            <p class="surtitre" id="my-recit-numero">Histoire 1</p>
+            <div class="pile-centre" style="gap: 14px">
+                <p class="etiquette">À toi de jouer</p>
+                <p class="nom-equipe" id="my-recit-nom"></p>
+                <p class="my-theme" id="my-recit-theme"></p>
+                <p class="consigne">Les autres, posez toutes les questions que vous voulez pour le piéger.</p>
+            </div>
+            <div class="pousse"></div>
+            <button id="my-vers-vote" class="btn btn-or" type="button">Fin de l'histoire, on vote</button>
+        </section>
+
+        <section id="ecran-my-vote" class="ecran centre">
+            <p class="surtitre">Le verdict</p>
+            <div class="pile-centre" style="gap: 8px">
+                <h1 class="titre" style="text-align: center">Vrai ou mytho&#160;?</h1>
+                <p class="consigne">À trois, chacun lève le pouce (vrai) ou le baisse (mytho). Puis touchez ceux qui ont dit <b>mytho</b>.</p>
+            </div>
+            <div class="grille-vote" id="my-grille"></div>
+            <div class="pousse"></div>
+            <button id="my-reveler" class="btn btn-or btn-grand" type="button">Révéler la vérité</button>
+        </section>
+
+        <section id="ecran-my-resultat" class="ecran centre">
+            <p class="surtitre" id="my-res-surtitre">Histoire 1</p>
+            <div class="pile-centre" style="gap: 12px">
+                <p class="etiquette">C'était</p>
+                <p class="role-revele" id="my-res-verdict"></p>
+                <p class="pm-res-gain" id="my-res-gain"></p>
+            </div>
+            <ol class="classement" id="my-res-classement" aria-label="Scores"></ol>
+            <div class="pousse"></div>
+            <button id="my-suivant" class="btn btn-or" type="button">Histoire suivante</button>
+        </section>
+
+        <section id="ecran-my-fin" class="ecran centre">
+            <p class="surtitre">Fin de partie</p>
+            <div class="pile-centre" style="gap: 10px">
+                <svg class="trophee" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
+                    <path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"></path>
+                </svg>
+                <h1 class="nom-equipe" id="my-fin-titre" style="font-size: clamp(30px, 10vw, 42px)"></h1>
+                <p class="texte-doux" id="my-fin-sous-titre" style="font-size: 15px; color: var(--texte-2)"></p>
+            </div>
+            <ol class="classement" id="my-fin-classement" aria-label="Classement"></ol>
+            <div class="pousse"></div>
+            <div class="pile">
+                <button id="my-rejouer" class="btn btn-or" type="button">Rejouer</button>
+                <a href="#" class="btn btn-contour">Retour à l'accueil</a>
+            </div>
+        </section>
     </main>
 
     <!-- Apparence -->
