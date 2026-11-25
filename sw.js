@@ -4,7 +4,7 @@
 // pour que tous les téléphones récupèrent la nouvelle version.
 // =========================================================
 
-const VERSION = "blacksup-v18"
+const VERSION = "blacksup-v19"
 
 const FICHIERS = [
     "./",
@@ -27,6 +27,7 @@ const FICHIERS = [
     "./scripts/qui-mytho-contenus.js",
     "./scripts/qui-de-nous.js",
     "./scripts/mytho.js",
+    "./scripts/soiree.js",
     "./scripts/apparence.js",
     "./scripts/adulte.js",
     "./scripts/mots.js",

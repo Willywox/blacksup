@@ -63,6 +63,14 @@ function melanger(liste) {
 // Mode adulte (18+) : jamais mémorisé, il repart à zéro à chaque ouverture de l'appli
 let modeAdulte = false
 
+// ---------- Mode soirée ----------
+// Chaque jeu déclare ici comment recevoir les joueurs de la soirée : JEUX_SOIREE[jeu] = { remplir(joueurs) }
+// et, à la fin d'une partie, envoie son résultat avec finSoiree(jeu, resultat, idEcranDeFin)
+const JEUX_SOIREE = {}
+function finSoiree(jeu, resultat, ecran) {
+    if (window.Soiree && window.Soiree.enCours()) window.Soiree.finDeJeu(jeu, resultat, ecran)
+}
+
 function tirerMots(n) {
     const source = modeAdulte ? TOUSLESMOTS_ADULTES : TOUSLESMOTS
     const uniques = Array.from(new Set(source.filter(Boolean)))
@@ -125,7 +133,7 @@ function afficher(id) {
     const precedent = ecranCourant
     ecranCourant = suivant
     document.body.classList.toggle("en-partie", ECRANS_DE_PARTIE.indexOf(id) !== -1)
-    document.body.classList.toggle("sans-btn-son", ["ecran-tour", "ecran-verif", "ecran-pm-revelation", "ecran-pm-duel", "ecran-inf-distribution", "ecran-cm-ecriture", "ecran-cm-tour", "ecran-cm-mime", "ecran-dx-distribution", "ecran-dx-nuit", "ecran-su-revelation", "ecran-su-tour", "ecran-my-secret"].indexOf(id) !== -1)
+    document.body.classList.toggle("sans-btn-son", ["ecran-tour", "ecran-verif", "ecran-pm-revelation", "ecran-pm-duel", "ecran-inf-distribution", "ecran-cm-ecriture", "ecran-cm-tour", "ecran-cm-mime", "ecran-dx-distribution", "ecran-dx-nuit", "ecran-su-revelation", "ecran-su-tour", "ecran-my-secret", "ecran-soiree-vote"].indexOf(id) !== -1)
     if (reduit) {
         precedent.classList.remove("actif")
         suivant.classList.add("actif")
@@ -155,6 +163,7 @@ $("btn-lancer").addEventListener("click", function () {
     partie.selection = tirerMots(partie.nbMots)
     partie.nbMots = partie.selection.length   // la liste adulte est plus courte : on s'adapte
     partie.scores = [0, 1, 2].map(function () { return partie.equipes.map(function () { return 0 }) })
+    partie.motsParJoueur = {}
     partie.manche = 0
     partie.equipe = 0
     // L'écran ne se met pas en veille pendant la partie
@@ -433,8 +442,12 @@ function majVerification() {
 }
 
 $("btn-valider-tour").addEventListener("click", function () {
+    const joueurTour = joueurDe(partie.equipe)
     document.querySelectorAll("#liste-mots input").forEach(function (c) {
-        if (c.checked) partie.scores[partie.manche][partie.equipe]++
+        if (c.checked) {
+            partie.scores[partie.manche][partie.equipe]++
+            if (joueurTour) partie.motsParJoueur[joueurTour] = (partie.motsParJoueur[joueurTour] || 0) + 1
+        }
         else partie.chapeau.push(c.value)
     })
     melanger(partie.chapeau)
@@ -510,6 +523,14 @@ function afficherScores() {
         $("btn-manche-suivante").hidden = true
         $("btn-rejouer").hidden = false
         $("lien-accueil").hidden = false
+        // Mode soirée : classement des équipes + le « Dictionnaire vivant »
+        let meilleur = 0
+        Object.keys(partie.motsParJoueur || {}).forEach(function (n) { meilleur = Math.max(meilleur, partie.motsParJoueur[n]) })
+        finSoiree("blacksup", {
+            type: "equipes",
+            equipes: partie.equipes.map(function (_, i) { return { noms: partie.joueurs[i] || [], rang: rangs[i] } }),
+            titres: meilleur ? [{ titre: "Le Dictionnaire vivant", noms: Object.keys(partie.motsParJoueur).filter(function (n) { return partie.motsParJoueur[n] === meilleur }), detail: meilleur + " mots trouvés" }] : []
+        }, "ecran-score")
     } else {
         $("score-surtitre").textContent = "Fin de la manche " + (partie.manche + 1)
         if (enTete.length === 1) {
@@ -612,6 +633,17 @@ $("btn-rejouer").addEventListener("click", function () {
 
 // ---------- Équipes et joueurs ----------
 const JOUEURS_MAX = 15
+
+// Mode soirée : équipes tirées au sort, prénoms activés
+JEUX_SOIREE.blacksup = {
+    remplir: function (equipes) {
+        $("liste-equipes").textContent = ""
+        equipes.forEach(function (j) { ajouterEquipe("", j, false) })
+        $("interrupteur-joueurs").checked = true
+        $("liste-equipes").classList.add("avec-joueurs")
+        sauverReglages()
+    }
+}
 
 function blocsEquipes() { return Array.from(document.querySelectorAll("#liste-equipes .bloc-equipe")) }
 function nombreEquipes() { return blocsEquipes().length }
@@ -968,7 +1000,11 @@ const ROUTES = {
     "#qui-de-nous": "ecran-qdn-jeu",
     "#qui-de-nous-regles": "ecran-qdn-regles",
     "#mytho": "ecran-my-config",
-    "#mytho-regles": "ecran-my-regles"
+    "#mytho-regles": "ecran-my-regles",
+    "#soiree": "ecran-soiree",
+    "#soiree-joueurs": "ecran-soiree-joueurs",
+    "#soiree-bilan": "ecran-soiree-bilan",
+    "#historique": "ecran-historique"
 }
 
 function abandonnerPartie() {
@@ -1129,7 +1165,8 @@ $("btn-quitter").addEventListener("click", function () {
     if (window.abandonnerDieux) window.abandonnerDieux()
     if (window.abandonnerSongsUp) window.abandonnerSongsUp()
     if (window.abandonnerMytho) window.abandonnerMytho()
-    location.hash = ""   // retour à l'accueil (la musique revient)
+    // Retour à l'accueil (la musique revient), ou à la soirée en cours
+    location.hash = (window.Soiree && window.Soiree.enCours()) ? "#soiree" : ""
 })
 
 // Pause automatique si le téléphone passe à autre chose en pleine partie

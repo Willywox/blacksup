@@ -82,7 +82,13 @@ function listeJoueurs(o) {
         if (ecran.classList.contains("actif") && !noms().length) remplir()
     }).observe(ecran, { attributes: true, attributeFilter: ["class"] })
 
-    return { noms: noms, sauver: sauver }
+    function remplacer(liste) {
+        o.puces.textContent = ""
+        liste.slice(0, o.max).forEach(function (n) { ajouter(n, false) })
+        maj(); sauver()
+    }
+
+    return { noms: noms, sauver: sauver, remplacer: remplacer }
 }
 
 // Carte à maintenir appuyée : visible tant qu'on appuie ; auVu() après la première fois

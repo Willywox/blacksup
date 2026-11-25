@@ -248,12 +248,19 @@
         $("su-fin-sous-titre").textContent = noms.length > 1
             ? "Égalité au sommet avec " + su.joueurs[gagnants[0]].points + " points."
             : su.joueurs[gagnants[0]].points + " points en " + su.tour + " sons. Une oreille en or."
+        finSoiree("songs-up", {
+            type: "individuel",
+            classement: su.joueurs.map(function (j) { return { nom: j.nom, points: j.points } }),
+            titres: [{ titre: "Le Shazam humain", noms: noms }]
+        }, "ecran-su-fin")
         afficher("ecran-su-fin")
         setTimeout(function () {
             confettis()
             son("victoire", { ensuite: function () { musique(true) } })
         }, reduit ? 0 : 500)
     }
+
+    JEUX_SOIREE["songs-up"] = { remplir: function (joueurs) { liste.remplacer(joueurs) } }
 
     window.abandonnerSongsUp = function () {
         if (!enJeuSU) return

@@ -474,6 +474,14 @@
             })
             bilan.appendChild(bloc)
         })
+        // Mode soirée : l'équipe la plus rapide, et le mime le plus rapide
+        let rapide = null
+        cm.tours.forEach(function (t) { if (t.temps !== null && !t.abandon && (!rapide || t.temps < rapide.temps)) rapide = t })
+        finSoiree("crea-mime", {
+            type: "equipes",
+            equipes: [0, 1].map(function (e) { return { noms: cm.equipes[e].joueurs.slice(), rang: gagnant === null ? 1 : (gagnant === e ? 1 : 2) } }),
+            titres: rapide ? [{ titre: "Charlie Chaplin", noms: [rapide.joueur], detail: "Mime en " + formatTemps(rapide.temps) }] : []
+        }, "ecran-cm-fin")
         afficher("ecran-cm-fin")
         setTimeout(function () {
             confettis()
@@ -482,6 +490,17 @@
     }
 
     $("cm-rejouer").addEventListener("click", function () { afficher("ecran-cm-config") })
+
+    JEUX_SOIREE["crea-mime"] = {
+        remplir: function (equipes) {
+            ;[0, 1].forEach(function (e) { $("cm-joueurs-" + e).textContent = "" })
+            ;[0, 1].forEach(function (e) {
+                ;(equipes[e] || []).forEach(function (n) { ajouterJoueur(e, n, false) })
+            })
+            majPrep()
+            sauver()
+        }
+    }
 
     // ---------- Abandon de la partie (retour accueil, quitter…) ----------
     window.abandonnerCreaMime = function () {

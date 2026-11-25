@@ -421,6 +421,12 @@
             li.appendChild(nom); li.appendChild(role)
             bilan.appendChild(li)
         })
+        const dieuxN = dx.joueurs.filter(function (j) { return j.dieu }).map(function (j) { return j.nom })
+        const humainsN = dx.joueurs.filter(function (j) { return !j.dieu }).map(function (j) { return j.nom })
+        finSoiree("dieux", gagnant === "humains"
+            ? { type: "camps", gagnants: humainsN, points: 2, titres: [{ titre: "Le Chasseur de dieux", noms: humainsN }] }
+            : { type: "camps", gagnants: dieuxN, points: 4, titres: [{ titre: "L'Olympien", noms: dieuxN }] },
+            "ecran-dx-fin")
         afficher("ecran-dx-fin")
         setTimeout(function () {
             confettis()
@@ -429,6 +435,16 @@
     }
 
     $("dx-rejouer").addEventListener("click", function () { son("lancer"); lancer() })
+
+    JEUX_SOIREE.dieux = {
+        remplir: function (joueurs) {
+            $("dx-joueurs").textContent = ""
+            choisiAMain = false
+            joueurs.forEach(function (n) { ajouterJoueur(n, false) })
+            majReglages()
+            sauver()
+        }
+    }
 
     // ---------- Abandon ----------
     window.abandonnerDieux = function () {

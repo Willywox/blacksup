@@ -402,6 +402,13 @@
             li.appendChild(nom); li.appendChild(role)
             bilan.appendChild(li)
         })
+        const imposteurs = inf.joueurs.filter(function (j) { return j.role !== "civil" }).map(function (j) { return j.nom })
+        const civils = inf.joueurs.filter(function (j) { return j.role === "civil" }).map(function (j) { return j.nom })
+        const blancs = inf.joueurs.filter(function (j) { return j.role === "white" }).map(function (j) { return j.nom })
+        finSoiree("infiltre", gagnant === "civils"
+            ? { type: "camps", gagnants: civils, points: 2, titres: [{ titre: "Le Flic", noms: civils }] }
+            : { type: "camps", gagnants: gagnant === "white" ? blancs : imposteurs, points: 4, titres: [{ titre: "Le Caméléon", noms: gagnant === "white" ? blancs : imposteurs }] },
+            "ecran-inf-fin")
         afficher("ecran-inf-fin")
         setTimeout(function () {
             confettis()
@@ -410,6 +417,15 @@
     }
 
     $("inf-rejouer").addEventListener("click", function () { son("lancer"); lancerPartie() })
+
+    JEUX_SOIREE.infiltre = {
+        remplir: function (joueurs) {
+            $("inf-joueurs").textContent = ""
+            joueurs.forEach(function (n) { ajouterJoueur(n, false) })
+            majReglages()
+            sauver()
+        }
+    }
 
     // ---------- Abandon ----------
     window.abandonnerInfiltre = function () {

@@ -183,12 +183,24 @@
         $("my-fin-sous-titre").textContent = menteur
             ? "Roi du mytho : " + menteur.nom + ", avec " + menteur.pieges + (menteur.pieges > 1 ? " personnes piégées." : " personne piégée.")
             : "Personne n'a réussi à piéger qui que ce soit. Des saints."
+        let devin = 0
+        my.joueurs.forEach(function (j) { devin = Math.max(devin, j.devines) })
+        const titres = []
+        if (menteur) titres.push({ titre: "Le Roi du mytho", noms: my.joueurs.filter(function (j) { return j.pieges === menteur.pieges }).map(function (j) { return j.nom }) })
+        if (devin) titres.push({ titre: "Le Détecteur de mensonges", noms: my.joueurs.filter(function (j) { return j.devines === devin }).map(function (j) { return j.nom }) })
+        finSoiree("mytho", {
+            type: "individuel",
+            classement: my.joueurs.map(function (j) { return { nom: j.nom, points: j.points } }),
+            titres: titres
+        }, "ecran-my-fin")
         afficher("ecran-my-fin")
         setTimeout(function () {
             confettis()
             son("victoire", { ensuite: function () { musique(true) } })
         }, reduit ? 0 : 500)
     }
+
+    JEUX_SOIREE.mytho = { remplir: function (joueurs) { liste.remplacer(joueurs) } }
 
     window.abandonnerMytho = function () {
         if (!enJeuMY) return

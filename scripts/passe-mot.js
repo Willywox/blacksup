@@ -515,9 +515,14 @@
     function afficherFin() {
         enJeuPM = false
         if (window.garderEcranAllume) window.garderEcranAllume(false)
-        if (pm.coop) { afficherFinCoop(); return }
+        if (pm.coop) { afficherFinCoop(); finSoiree("passe-mot", null, "ecran-pm-fin"); return }
         const res = rendreClassement($("pm-fin-classement"), true)
         const enTete = res.ordre.filter(function (d) { return res.rangs[d] === 1 })
+        finSoiree("passe-mot", {
+            type: "equipes",
+            equipes: pm.duos.map(function (d, i) { return { noms: d.joueurs.slice(), rang: res.rangs[i] } }),
+            titres: [{ titre: "Le Télépathe", noms: enTete.reduce(function (l, d) { return l.concat(pm.duos[d].joueurs) }, []) }]
+        }, "ecran-pm-fin")
         const titre = $("pm-fin-titre"), sous = $("pm-fin-sous-titre")
         sous.textContent = ""
         if (enTete.length === 1) {
@@ -544,6 +549,17 @@
     }
 
     $("pm-rejouer").addEventListener("click", function () { afficher("ecran-pm-config") })
+
+    // Mode soirée : duos tirés au sort, en duos contre duos
+    JEUX_SOIREE["passe-mot"] = {
+        remplir: function (duos) {
+            $("pm-mode-versus").checked = true
+            $("pm-liste-duos").textContent = ""
+            duos.forEach(function (d) { ajouterDuo(d, false) })
+            majMode()
+            sauver()
+        }
+    }
 
     // ---------- Abandon (retour à l'accueil, bouton retour du téléphone...) ----------
     window.abandonnerPasseMot = function () {

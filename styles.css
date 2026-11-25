@@ -1838,6 +1838,355 @@ body.nuit-dieux::after {
 .role-revele.vrai { color: var(--texte); }
 .role-revele.mytho { color: var(--or); text-shadow: 0 0 30px rgba(var(--or-rvb), .5); }
 
+/* ---------- Mode soirée ---------- */
+
+/* Ambiance : confettis qui tombent doucement + liseré lumineux en haut */
+html.mode-soiree .app::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: .55;
+    background-image:
+        radial-gradient(circle at 20% 30%, rgba(var(--or-rvb), .55) 0 1.6px, transparent 2.2px),
+        radial-gradient(circle at 70% 60%, rgba(var(--corail-rvb), .45) 0 1.4px, transparent 2px),
+        radial-gradient(circle at 45% 85%, rgba(var(--or-rvb), .35) 0 1.2px, transparent 1.8px),
+        radial-gradient(circle at 85% 15%, rgba(var(--or-rvb), .4) 0 1px, transparent 1.6px),
+        radial-gradient(120% 50% at 50% -10%, rgba(var(--or-rvb), .16), transparent 60%);
+    background-size: 140px 160px, 190px 210px, 110px 130px, 230px 170px, 100% 100%;
+    animation: so-tombe 38s linear infinite;
+}
+@keyframes so-tombe {
+    from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; }
+    to { background-position: 40px 640px, -60px 840px, 30px 520px, -20px 680px, 0 0; }
+}
+html.mode-soiree .app::after {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    z-index: 30;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--or), var(--corail), var(--or), transparent);
+    background-size: 200% 100%;
+    animation: so-liseret 4s linear infinite;
+}
+@keyframes so-liseret { from { background-position: 200% 0; } to { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { html.mode-soiree .app::before, html.mode-soiree .app::after { animation: none; } }
+
+.titre-fete {
+    background: linear-gradient(100deg, var(--texte) 30%, var(--or) 45%, var(--eclat) 50%, var(--or) 55%, var(--texte) 70%);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: so-brille 6s ease-in-out infinite;
+}
+@keyframes so-brille { 0%, 100% { background-position: 100% 0; } 50% { background-position: 0 0; } }
+
+.btn-fete { overflow: hidden; }
+.btn-fete::after {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 40%;
+    left: -60%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .35), transparent);
+    transform: skewX(-20deg);
+    animation: so-reflet 3.6s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes so-reflet { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+
+/* Carte d'accueil */
+.carte-soiree {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 20px 20px;
+    border-radius: 22px;
+    border: 1px solid rgba(var(--or-rvb), .5);
+    background: linear-gradient(135deg, rgba(var(--or-rvb), .2), rgba(var(--corail-rvb), .08) 60%, rgba(var(--or-rvb), .04)), var(--surface);
+    color: var(--texte);
+    font: inherit;
+    text-align: left;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 14px 40px -18px rgba(var(--or-rvb), .55);
+    transition: transform .25s var(--ressort);
+}
+.carte-soiree:active { transform: scale(.98); }
+.carte-soiree-fond {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: radial-gradient(circle, rgba(var(--or-rvb), .5) 0 1.4px, transparent 2px), radial-gradient(circle, rgba(var(--corail-rvb), .4) 0 1.2px, transparent 1.8px);
+    background-size: 46px 38px, 64px 52px;
+    background-position: 0 0, 20px 14px;
+    opacity: .6;
+    animation: so-tombe-carte 14s linear infinite;
+}
+@keyframes so-tombe-carte { to { background-position: 0 380px, 20px 534px; } }
+.carte-soiree-icone {
+    position: relative;
+    flex-shrink: 0;
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    color: var(--sur-or);
+    background: var(--or);
+    box-shadow: 0 0 0 6px rgba(var(--or-rvb), .15), 0 0 30px rgba(var(--or-rvb), .5);
+    animation: respire 3s ease-in-out infinite;
+}
+.carte-soiree-textes { position: relative; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.carte-soiree-sur { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--or); font-weight: 600; }
+.carte-soiree-titre { font-family: var(--serif); font-style: var(--italique); text-transform: var(--casse-titre); font-size: 24px; line-height: 1.15; }
+.carte-soiree-desc { font-size: 13px; line-height: 1.45; color: var(--texte-2); }
+.lien-historique { margin-top: -10px; }
+
+/* Avatars */
+.avatar {
+    flex-shrink: 0;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: inline-grid; place-items: center;
+    overflow: hidden;
+    background: rgba(var(--or-rvb), .16);
+    border: 1.5px solid rgba(var(--or-rvb), .55);
+    color: var(--or);
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1;
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar-petit { width: 34px; height: 34px; font-size: 15px; }
+.avatar-moyen { width: 48px; height: 48px; font-size: 20px; }
+.avatar-grand { width: 84px; height: 84px; font-size: 34px; border-width: 2px; }
+.avatar-geant { width: 128px; height: 128px; font-size: 52px; border-width: 3px; box-shadow: 0 0 0 8px rgba(var(--or-rvb), .12), 0 20px 50px -20px rgba(var(--or-rvb), .7); }
+.avatars { display: inline-flex; align-items: center; justify-content: center; }
+.avatars.plusieurs .avatar + .avatar { margin-left: -12px; }
+.avatars.plusieurs .avatar-geant + .avatar-geant { margin-left: -34px; }
+.avatars.plusieurs .avatar { box-shadow: 0 0 0 3px var(--fond); }
+.avatars.plusieurs .avatar-geant { width: 104px; height: 104px; }
+
+/* Joueurs de la soirée */
+.so-joueurs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.so-joueurs li {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 8px 8px 8px;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--ligne);
+}
+.so-joueurs .so-nom { flex: 1; min-width: 0; font-size: 17px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.so-pts-mini { font-size: 12px; color: var(--or); }
+.so-photo-btn { position: relative; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 50%; }
+.so-badge-apn {
+    position: absolute; right: -2px; bottom: -2px;
+    width: 20px; height: 20px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--or); color: var(--sur-or);
+    box-shadow: 0 0 0 2px var(--fond);
+}
+.so-ajout { display: flex; align-items: center; gap: 10px; }
+.so-ajout .champ-joueur { flex: 1; min-width: 0; }
+.avatar-photo { width: 48px; height: 48px; padding: 0; cursor: pointer; border-style: dashed; color: var(--or); }
+.avatar-photo.a-photo { border-style: solid; }
+
+/* Écran central */
+.so-entete { display: flex; flex-direction: column; gap: 10px; }
+.so-finale-bandeau {
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: linear-gradient(90deg, rgba(var(--corail-rvb), .18), rgba(var(--or-rvb), .18));
+    border: 1px solid rgba(var(--or-rvb), .5);
+    font-size: 14px;
+    text-align: center;
+}
+.so-finale-bandeau b { color: var(--or); }
+.so-classement { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.so-ligne {
+    display: grid;
+    grid-template-columns: 22px auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px 10px 12px;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--ligne);
+}
+.so-ligne.premier { border-color: rgba(var(--or-rvb), .6); background: linear-gradient(135deg, rgba(var(--or-rvb), .14), rgba(var(--or-rvb), .02) 60%), var(--surface); }
+.so-rang { font-family: var(--serif); font-size: 18px; color: var(--discret-2); text-align: center; }
+.so-ligne.premier .so-rang, .so-ligne.premier .so-points { color: var(--or); }
+.so-milieu { min-width: 0; }
+.so-nom { margin: 0; font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.so-titres-ligne { margin: 4px 0 0; display: flex; flex-wrap: wrap; gap: 4px; font-size: 12px; color: var(--discret); }
+.so-puce-titre { padding: 2px 8px; border-radius: 999px; background: rgba(var(--or-rvb), .12); color: var(--or); font-size: 11px; white-space: nowrap; }
+.so-points { font-family: var(--serif); font-weight: 700; font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums; }
+.so-bloc { display: flex; flex-direction: column; gap: 12px; }
+.so-jeux { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.so-jeu {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+    padding: 14px;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--ligne);
+    color: var(--texte);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: transform .2s var(--ressort), border-color .25s, background-color .25s, box-shadow .25s;
+}
+.so-jeu:active { transform: scale(.96); }
+.so-jeu:disabled { opacity: .38; cursor: default; }
+.so-jeu.entracte { border-style: dashed; }
+.so-jeu-icone { color: var(--or); line-height: 0; }
+.so-jeu-icone svg { width: 24px; height: 24px; }
+.so-jeu-nom { font-size: 15px; font-weight: 600; }
+.so-jeu-sous { font-size: 11px; color: var(--discret); }
+.so-jeu.roulette { border-color: var(--or); background: rgba(var(--or-rvb), .18); box-shadow: 0 0 24px -4px rgba(var(--or-rvb), .6); }
+.so-jeu.elu { animation: so-elu .45s ease-in-out 3; }
+@keyframes so-elu { 50% { transform: scale(1.07); } }
+.so-liens { display: flex; justify-content: space-between; gap: 12px; }
+.lien-danger { color: var(--corail) !important; }
+.confirmer { border-color: var(--corail) !important; color: var(--corail) !important; }
+
+/* Bandeau sur l'écran de préparation d'un jeu */
+.so-bandeau {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    width: 100%;
+    padding: 10px 10px 10px 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(var(--or-rvb), .45);
+    background: rgba(var(--or-rvb), .1);
+    font-size: 13px;
+    color: var(--texte-2);
+    text-align: left;
+}
+.so-bandeau.finale { background: linear-gradient(90deg, rgba(var(--corail-rvb), .18), rgba(var(--or-rvb), .18)); color: var(--texte); }
+.so-bandeau-btn {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--or);
+    background: transparent;
+    color: var(--or);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Fin d'un jeu pendant la soirée : un seul bouton, vers les points */
+.fin-en-soiree .btn:not(.btn-suite-soiree), .fin-en-soiree .lien-discret { display: none !important; }
+.btn-suite-soiree { margin-top: 4px; }
+
+/* Points gagnés */
+.so-x2 { margin: 0; padding: 4px 12px; border-radius: 999px; background: var(--corail); color: #fff; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.so-gains { list-style: none; margin: 0; padding: 0; width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.so-gains li {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 14px 8px 8px;
+    border-radius: 16px;
+    background: var(--surface);
+    border: 1px solid var(--ligne);
+    animation: monte .6s var(--douce) both;
+}
+.so-gains .so-nom { flex: 1; text-align: left; }
+.so-total { font-size: 12px; color: var(--discret); }
+.so-plus { font-family: var(--serif); font-weight: 700; font-size: 24px; color: var(--or); min-width: 42px; text-align: right; }
+.so-titres { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.so-titre-gagne {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    border-radius: 18px;
+    border: 1px solid rgba(var(--or-rvb), .55);
+    background: linear-gradient(135deg, rgba(var(--or-rvb), .16), transparent 70%);
+    text-align: left;
+    animation: so-titre .7s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes so-titre { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+.so-titre-nom { margin: 0; font-family: var(--serif); font-style: var(--italique); font-size: 19px; color: var(--or); }
+.so-titre-qui { margin: 2px 0 0; font-size: 12px; color: var(--texte-2); }
+
+/* Vote du GOAT du cœur */
+.so-votant { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.so-grille-avatars { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.so-choix-avatar {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 12px 6px;
+    border-radius: 18px;
+    border: 1px solid var(--ligne);
+    background: var(--surface);
+    color: var(--texte);
+    font: inherit; font-size: 13px;
+    cursor: pointer;
+    transition: transform .2s var(--ressort), border-color .2s, background-color .2s;
+}
+.so-choix-avatar span:last-child { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.so-choix-avatar:active { transform: scale(.95); }
+.so-choix-avatar[aria-pressed="true"] { border-color: var(--or); background: rgba(var(--or-rvb), .16); }
+.so-choix-avatar[aria-pressed="true"] .avatar { box-shadow: 0 0 0 3px var(--or); }
+
+/* Cérémonie */
+.so-cer-scene { gap: 14px; }
+.so-cer-scene.revele > * { animation: monte .7s var(--douce) both; }
+.so-cer-scene.revele > *:nth-child(2) { animation-delay: .25s; }
+.so-cer-scene.revele > *:nth-child(3) { animation: so-apparait .9s cubic-bezier(.34,1.56,.64,1) .35s both; }
+.so-cer-scene.revele > *:nth-child(4) { animation-delay: .6s; }
+.so-cer-scene.revele > *:nth-child(5) { animation-delay: .75s; }
+.so-cer-scene.revele > *:nth-child(6) { animation-delay: .9s; }
+@keyframes so-apparait { from { opacity: 0; transform: scale(.4) rotate(-8deg); } to { opacity: 1; transform: none; } }
+.so-cer-couronne { color: var(--or); filter: drop-shadow(0 0 18px rgba(var(--or-rvb), .8)); margin-bottom: -18px; }
+.so-cer-nom { margin: 0; font-size: clamp(26px, 8vw, 34px); font-weight: 700; }
+.so-cer-titre {
+    margin: 0;
+    font-family: var(--serif);
+    font-style: var(--italique);
+    text-transform: var(--casse-titre);
+    font-size: clamp(34px, 11vw, 48px);
+    line-height: 1.05;
+    color: var(--or);
+}
+.so-cer-scene.goat .so-cer-titre { font-size: clamp(44px, 15vw, 64px); text-shadow: 0 0 40px rgba(var(--or-rvb), .6); }
+
+/* Bilan */
+.so-podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 8px; padding-top: 10px; }
+.so-marche { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
+.so-marche-nom { margin: 0; font-size: 13px; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.so-socle {
+    width: 100%;
+    display: grid; place-items: center;
+    border-radius: 14px 14px 4px 4px;
+    background: var(--surface);
+    border: 1px solid var(--ligne);
+    font-family: var(--serif); font-size: 22px; font-weight: 700;
+}
+.so-marche.r1 .so-socle { height: 96px; border-color: rgba(var(--or-rvb), .6); background: linear-gradient(180deg, rgba(var(--or-rvb), .25), rgba(var(--or-rvb), .04)); color: var(--or); }
+.so-marche.r2 .so-socle { height: 68px; }
+.so-marche.r3 .so-socle { height: 48px; }
+.so-mini-couronne { color: var(--or); line-height: 0; margin-bottom: -8px; }
+.so-mini-couronne svg { width: 30px; height: 30px; }
+.so-historique-jeux, .so-historique { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.so-historique-jeux li { display: flex; flex-direction: column; gap: 3px; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--ligne); }
+.so-hj-nom { font-size: 14px; font-weight: 600; }
+.so-hj-detail { font-size: 12px; color: var(--discret); }
+.so-histo-ligne {
+    width: 100%;
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--ligne);
+    color: var(--texte);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
 /* ---------- Mode adulte (18+) ---------- */
 
 .badge-adulte, .bouton-adulte { display: none !important; }
