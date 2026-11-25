@@ -125,7 +125,7 @@ function afficher(id) {
     const precedent = ecranCourant
     ecranCourant = suivant
     document.body.classList.toggle("en-partie", ECRANS_DE_PARTIE.indexOf(id) !== -1)
-    document.body.classList.toggle("sans-btn-son", ["ecran-tour", "ecran-verif", "ecran-pm-revelation", "ecran-pm-duel", "ecran-inf-distribution"].indexOf(id) !== -1)
+    document.body.classList.toggle("sans-btn-son", ["ecran-tour", "ecran-verif", "ecran-pm-revelation", "ecran-pm-duel", "ecran-inf-distribution", "ecran-cm-ecriture", "ecran-cm-tour", "ecran-cm-mime"].indexOf(id) !== -1)
     if (reduit) {
         precedent.classList.remove("actif")
         suivant.classList.add("actif")
@@ -926,7 +926,9 @@ const ROUTES = {
     "#passe-mot": "ecran-pm-config",
     "#passe-mot-regles": "ecran-pm-regles",
     "#infiltre": "ecran-inf-config",
-    "#infiltre-regles": "ecran-inf-regles"
+    "#infiltre-regles": "ecran-inf-regles",
+    "#crea-mime": "ecran-cm-config",
+    "#crea-mime-regles": "ecran-cm-regles"
 }
 
 function abandonnerPartie() {
@@ -942,6 +944,7 @@ function suivreAdresse() {
     if (enJeu) abandonnerPartie()
     if (window.abandonnerPasseMot) window.abandonnerPasseMot()
     if (window.abandonnerInfiltre) window.abandonnerInfiltre()
+    if (window.abandonnerCreaMime) window.abandonnerCreaMime()
     musique(true)
     afficher(id)
 }
@@ -967,7 +970,8 @@ window.addEventListener("hashchange", suivreAdresse)
 const ECRANS_DE_PARTIE = [
     "ecran-intro", "ecran-tour", "ecran-verif", "ecran-score",
     "ecran-pm-revelation", "ecran-pm-duel", "ecran-pm-resultat",
-    "ecran-inf-distribution", "ecran-inf-tour", "ecran-inf-vote", "ecran-inf-revelation"
+    "ecran-inf-distribution", "ecran-inf-tour", "ecran-inf-vote", "ecran-inf-revelation",
+    "ecran-cm-ecriture", "ecran-cm-passage", "ecran-cm-tour", "ecran-cm-mime", "ecran-cm-resultat"
 ]
 const PAUSES = []
 let enPause = false
@@ -1000,7 +1004,14 @@ function mettreEnPause() {
     const reste = restesGeles.filter(function (r) { return r !== null })[0]
     const ligne = $("pause-reste")
     ligne.textContent = ""
-    if (reste !== undefined) {
+    if (reste && typeof reste === "object") {
+        // Un chrono qui monte (Créa'Mime) : on affiche le temps déjà écoulé
+        $("pause-surtitre").textContent = "Le chrono est arrêté"
+        const b = document.createElement("b")
+        b.textContent = reste.texte
+        ligne.appendChild(b)
+        ligne.append(" au chrono")
+    } else if (reste !== undefined) {
         $("pause-surtitre").textContent = "Le chrono est arrêté"
         const b = document.createElement("b")
         b.textContent = Math.ceil(reste / 1000)
@@ -1064,6 +1075,7 @@ $("btn-quitter").addEventListener("click", function () {
     abandonnerPartie()
     if (window.abandonnerPasseMot) window.abandonnerPasseMot()
     if (window.abandonnerInfiltre) window.abandonnerInfiltre()
+    if (window.abandonnerCreaMime) window.abandonnerCreaMime()
     location.hash = ""   // retour à l'accueil (la musique revient)
 })
 
