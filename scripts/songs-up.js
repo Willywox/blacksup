@@ -260,7 +260,7 @@
         }, reduit ? 0 : 500)
     }
 
-    JEUX_SOIREE["songs-up"] = { remplir: function (joueurs) { liste.remplacer(joueurs) } }
+    JEUX_SOIREE["songs-up"] = { remplir: function (joueurs) { liste.remplacer(joueurs) }, presents: liste.noms, ajouter: liste.ajouter }
 
     window.abandonnerSongsUp = function () {
         if (!enJeuSU) return

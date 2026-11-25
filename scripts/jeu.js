@@ -642,6 +642,15 @@ JEUX_SOIREE.blacksup = {
         $("interrupteur-joueurs").checked = true
         $("liste-equipes").classList.add("avec-joueurs")
         sauverReglages()
+    },
+    presents: function () { return [].concat.apply([], joueursSaisis()) },
+    ajouter: function (nom) {
+        // Dans l'équipe la moins nombreuse
+        const blocs = blocsEquipes()
+        if (!blocs.length) return
+        const cible = blocs.slice().sort(function (a, b) { return a.querySelectorAll(".puce").length - b.querySelectorAll(".puce").length })[0]
+        ajouterPuce(cible.querySelector(".puces"), nom, true)
+        sauverReglages()
     }
 }
 

@@ -443,7 +443,9 @@
             joueurs.forEach(function (n) { ajouterJoueur(n, false) })
             majReglages()
             sauver()
-        }
+        },
+        presents: function () { return noms() },
+        ajouter: function (nom) { if (ajouterJoueur(nom, true)) sauver() }
     }
 
     // ---------- Abandon ----------

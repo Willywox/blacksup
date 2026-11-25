@@ -558,6 +558,17 @@
             duos.forEach(function (d) { ajouterDuo(d, false) })
             majMode()
             sauver()
+        },
+        presents: function () {
+            return Array.from(document.querySelectorAll("#pm-liste-duos .joueur-duo")).map(function (c) { return c.value.trim() }).filter(Boolean)
+        },
+        ajouter: function (nom) {
+            // Première place libre, sinon un nouveau duo
+            const vide = Array.from(document.querySelectorAll("#pm-liste-duos .joueur-duo")).filter(function (c) { return !c.value.trim() })[0]
+            if (vide) vide.value = nom
+            else ajouterDuo([nom], true)
+            majAjout()
+            sauver()
         }
     }
 

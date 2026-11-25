@@ -499,6 +499,11 @@
             })
             majPrep()
             sauver()
+        },
+        presents: function () { return joueursDe(0).concat(joueursDe(1)) },
+        ajouter: function (nom) {
+            const e = joueursDe(0).length <= joueursDe(1).length ? 0 : 1
+            if (ajouterJoueur(e, nom, true)) sauver()
         }
     }
 

@@ -88,7 +88,9 @@ function listeJoueurs(o) {
         maj(); sauver()
     }
 
-    return { noms: noms, sauver: sauver, remplacer: remplacer }
+    function ajouterUn(nom) { if (ajouter(nom, true)) sauver() }
+
+    return { noms: noms, sauver: sauver, remplacer: remplacer, ajouter: ajouterUn }
 }
 
 // Carte à maintenir appuyée : visible tant qu'on appuie ; auVu() après la première fois

@@ -200,7 +200,7 @@
         }, reduit ? 0 : 500)
     }
 
-    JEUX_SOIREE.mytho = { remplir: function (joueurs) { liste.remplacer(joueurs) } }
+    JEUX_SOIREE.mytho = { remplir: function (joueurs) { liste.remplacer(joueurs) }, presents: liste.noms, ajouter: liste.ajouter }
 
     window.abandonnerMytho = function () {
         if (!enJeuMY) return

@@ -414,7 +414,7 @@
     function donnees(id) {
         const tous = noms()
         const n = tous.length
-        if (id === "blacksup") return tirage(tous, n <= 7 ? 2 : (n <= 11 ? 3 : 4))
+        if (id === "blacksup") return tirage(tous, 2)
         if (id === "crea-mime") return tirage(tous, 2)
         if (id === "passe-mot") {
             const duos = Math.min(4, Math.floor(n / 2))
@@ -462,8 +462,54 @@
             }
             const barre = ecran.querySelector(".barre-haut")
             if (barre) barre.after(b); else ecran.prepend(b)
+            // Les joueurs de la soirée absents de ce jeu, à ajouter d'un toucher
+            if (!j.entracte && JEUX_SOIREE[j.id] && JEUX_SOIREE[j.id].presents) {
+                const r = document.createElement("div")
+                r.className = "so-absents"
+                b.after(r)
+            }
+            if (!j.entracte && JEUX_SOIREE[j.id] && JEUX_SOIREE[j.id].presents && !ecran.dataset.suiviAbsents) {
+                ecran.dataset.suiviAbsents = "1"
+                let attente = null
+                new MutationObserver(function () {
+                    clearTimeout(attente)
+                    attente = setTimeout(function () { majAbsents(j) }, 60)
+                }).observe(ecran, { childList: true, subtree: true })
+                ecran.addEventListener("change", function () { clearTimeout(attente); attente = setTimeout(function () { majAbsents(j) }, 100) })
+                ecran.addEventListener("input", function () { clearTimeout(attente); attente = setTimeout(function () { majAbsents(j) }, 200) })
+            }
         }
         majBandeau(j)
+        majAbsents(j)
+    }
+    function majAbsents(j) {
+        const r = $(j.ecran).querySelector(".so-absents")
+        if (!r || !S) return
+        const presents = JEUX_SOIREE[j.id].presents().map(function (n) { return n.toLowerCase() })
+        const absents = S.joueurs.filter(function (x) { return presents.indexOf(x.nom.toLowerCase()) === -1 })
+        const cle = absents.map(function (x) { return x.nom }).join("|")
+        if (r.dataset.cle === cle) return
+        r.dataset.cle = cle
+        r.textContent = ""
+        r.hidden = !absents.length
+        if (!absents.length) return
+        const t = document.createElement("span")
+        t.className = "so-absents-titre"
+        t.textContent = j.equipes ? "Ajouter (dans l'équipe la plus petite) :" : "Ajouter :"
+        r.appendChild(t)
+        absents.forEach(function (x) {
+            const b = document.createElement("button")
+            b.type = "button"
+            b.className = "so-absent"
+            b.dataset.son = "aucun"
+            b.appendChild(avatar(x, "avatar-mini"))
+            const n = document.createElement("span"); n.textContent = x.nom
+            b.appendChild(n)
+            const plus = document.createElement("span"); plus.className = "so-absent-plus"; plus.textContent = "+"
+            b.appendChild(plus)
+            b.addEventListener("click", function () { son("clic"); JEUX_SOIREE[j.id].ajouter(x.nom); setTimeout(function () { majAbsents(j) }, 50) })
+            r.appendChild(b)
+        })
     }
     function majBandeau(j) {
         const b = $(j.ecran).querySelector(".so-bandeau")
@@ -475,7 +521,7 @@
         b.classList.toggle("finale", !!S.finaleArmee && !j.entracte)
     }
     function retirerBandeaux() {
-        document.querySelectorAll(".so-bandeau").forEach(function (b) { b.remove() })
+        document.querySelectorAll(".so-bandeau, .so-absents").forEach(function (b) { b.remove() })
         document.querySelectorAll(".btn-suite-soiree").forEach(function (b) { b.remove() })
         document.querySelectorAll(".fin-en-soiree").forEach(function (e) { e.classList.remove("fin-en-soiree") })
     }
