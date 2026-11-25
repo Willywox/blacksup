@@ -125,7 +125,7 @@ function afficher(id) {
     const precedent = ecranCourant
     ecranCourant = suivant
     document.body.classList.toggle("en-partie", ECRANS_DE_PARTIE.indexOf(id) !== -1)
-    document.body.classList.toggle("sans-btn-son", ["ecran-tour", "ecran-verif", "ecran-pm-revelation", "ecran-pm-duel", "ecran-inf-distribution", "ecran-cm-ecriture", "ecran-cm-tour", "ecran-cm-mime"].indexOf(id) !== -1)
+    document.body.classList.toggle("sans-btn-son", ["ecran-tour", "ecran-verif", "ecran-pm-revelation", "ecran-pm-duel", "ecran-inf-distribution", "ecran-cm-ecriture", "ecran-cm-tour", "ecran-cm-mime", "ecran-dx-distribution", "ecran-dx-nuit"].indexOf(id) !== -1)
     if (reduit) {
         precedent.classList.remove("actif")
         suivant.classList.add("actif")
@@ -960,7 +960,9 @@ const ROUTES = {
     "#infiltre": "ecran-inf-config",
     "#infiltre-regles": "ecran-inf-regles",
     "#crea-mime": "ecran-cm-config",
-    "#crea-mime-regles": "ecran-cm-regles"
+    "#crea-mime-regles": "ecran-cm-regles",
+    "#dieux": "ecran-dx-config",
+    "#dieux-regles": "ecran-dx-regles"
 }
 
 function abandonnerPartie() {
@@ -977,6 +979,7 @@ function suivreAdresse() {
     if (window.abandonnerPasseMot) window.abandonnerPasseMot()
     if (window.abandonnerInfiltre) window.abandonnerInfiltre()
     if (window.abandonnerCreaMime) window.abandonnerCreaMime()
+    if (window.abandonnerDieux) window.abandonnerDieux()
     musique(true)
     afficher(id)
 }
@@ -1003,7 +1006,8 @@ const ECRANS_DE_PARTIE = [
     "ecran-intro", "ecran-tour", "ecran-verif", "ecran-score",
     "ecran-pm-revelation", "ecran-pm-duel", "ecran-pm-resultat",
     "ecran-inf-distribution", "ecran-inf-tour", "ecran-inf-vote", "ecran-inf-revelation",
-    "ecran-cm-ecriture", "ecran-cm-passage", "ecran-cm-tour", "ecran-cm-mime", "ecran-cm-resultat"
+    "ecran-cm-ecriture", "ecran-cm-passage", "ecran-cm-tour", "ecran-cm-mime", "ecran-cm-resultat",
+    "ecran-dx-distribution", "ecran-dx-nuit", "ecran-dx-jour", "ecran-dx-vote", "ecran-dx-revelation"
 ]
 const PAUSES = []
 let enPause = false
@@ -1036,7 +1040,11 @@ function mettreEnPause() {
     const reste = restesGeles.filter(function (r) { return r !== null })[0]
     const ligne = $("pause-reste")
     ligne.textContent = ""
-    if (reste && typeof reste === "object") {
+    if (reste && typeof reste === "object" && reste.message) {
+        // Un jeu sans chrono mais avec une séquence en cours (la nuit des Dieux)
+        $("pause-surtitre").textContent = "On souffle un peu"
+        ligne.textContent = reste.message
+    } else if (reste && typeof reste === "object") {
         // Un chrono qui monte (Créa'Mime) : on affiche le temps déjà écoulé
         $("pause-surtitre").textContent = "Le chrono est arrêté"
         const b = document.createElement("b")
@@ -1108,6 +1116,7 @@ $("btn-quitter").addEventListener("click", function () {
     if (window.abandonnerPasseMot) window.abandonnerPasseMot()
     if (window.abandonnerInfiltre) window.abandonnerInfiltre()
     if (window.abandonnerCreaMime) window.abandonnerCreaMime()
+    if (window.abandonnerDieux) window.abandonnerDieux()
     location.hash = ""   // retour à l'accueil (la musique revient)
 })
 

@@ -24,19 +24,20 @@
             if (apparence) document.documentElement.setAttribute("data-theme", apparence)
         } catch (e) {}
     </script>
-    <link rel="stylesheet" href="styles.css?v=16">
-    <script src="scripts/animations.js?v=16" defer></script>
-    <script src="scripts/app.js?v=16" defer></script>
-    <script src="scripts/sons.js?v=16" defer></script>
-    <script src="scripts/mots.js?v=16" defer></script>
-    <script src="scripts/mots-adultes.js?v=16" defer></script>
-    <script src="scripts/jeu.js?v=16" defer></script>
-    <script src="scripts/passe-mot.js?v=16" defer></script>
-    <script src="scripts/infiltre-paires.js?v=16" defer></script>
-    <script src="scripts/infiltre.js?v=16" defer></script>
-    <script src="scripts/crea-mime.js?v=16" defer></script>
-    <script src="scripts/apparence.js?v=16" defer></script>
-    <script src="scripts/adulte.js?v=16" defer></script>
+    <link rel="stylesheet" href="styles.css?v=17">
+    <script src="scripts/animations.js?v=17" defer></script>
+    <script src="scripts/app.js?v=17" defer></script>
+    <script src="scripts/sons.js?v=17" defer></script>
+    <script src="scripts/mots.js?v=17" defer></script>
+    <script src="scripts/mots-adultes.js?v=17" defer></script>
+    <script src="scripts/jeu.js?v=17" defer></script>
+    <script src="scripts/passe-mot.js?v=17" defer></script>
+    <script src="scripts/infiltre-paires.js?v=17" defer></script>
+    <script src="scripts/infiltre.js?v=17" defer></script>
+    <script src="scripts/crea-mime.js?v=17" defer></script>
+    <script src="scripts/dieux.js?v=17" defer></script>
+    <script src="scripts/apparence.js?v=17" defer></script>
+    <script src="scripts/adulte.js?v=17" defer></script>
 </head>
 <body>
     <main class="app">
@@ -121,6 +122,19 @@
                         <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
                     </a>
                     <a href="#crea-mime-regles" class="carte-jeu-regles">Les règles</a>
+                </article>
+
+                <article class="carte-jeu">
+                    <a href="#dieux" class="carte-jeu-principal">
+                        <span class="icone-jeu" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"></path></svg></span>
+                        <span class="textes-jeu">
+                            <span class="nom-jeu">Les Dieux</span>
+                            <span class="desc-jeu">Des dieux se cachent parmi vous et se connaissent. Démasquez-les avant qu'il soit trop tard.</span>
+                            <span class="meta-jeu">Tous suspects · 5 à 16 joueurs</span>
+                        </span>
+                        <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+                    </a>
+                    <a href="#dieux-regles" class="carte-jeu-regles">Les règles</a>
                 </article>
 
                 <button type="button" class="carte-jeu bientot" data-jeu="Vacarme">
@@ -918,6 +932,165 @@
             <div class="pousse"></div>
             <div class="pile">
                 <button id="cm-rejouer" class="btn btn-or" type="button">Rejouer</button>
+                <a href="#" class="btn btn-contour">Retour à l'accueil</a>
+            </div>
+        </section>
+
+
+        <!-- ===================== LES DIEUX ===================== -->
+
+        <!-- Les Dieux : règles -->
+        <section id="ecran-dx-regles" class="ecran" style="gap: 22px">
+            <div class="barre-haut">
+                <a href="#" class="btn-rond" aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre">Les Dieux</p>
+                <div class="vide"></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px">
+                <h1 class="titre">Des dieux marchent<br><em>parmi vous.</em></h1>
+                <p class="texte-doux">Ils ont l'air humains. Ils votent comme vous, débattent comme vous. Leur seul avantage&#160;: ils savent qui sont les autres dieux.</p>
+            </div>
+            <div class="liste-regles">
+                <article class="regle">
+                    <p class="chiffre">I</p>
+                    <div>
+                        <h2>Les rôles</h2>
+                        <p>Chacun découvre en secret s'il est <b>Humain</b> ou <b>Dieu</b>. Puis vient la nuit&#160;: tout le monde ferme les yeux, et seuls les dieux les ouvrent pour se reconnaître. Le téléphone vous guide de sa voix.</p>
+                    </div>
+                </article>
+                <article class="regle">
+                    <p class="chiffre">II</p>
+                    <div>
+                        <h2>La société</h2>
+                        <p>Aucune règle, aucun chrono&#160;: organisez-vous comme vous voulez. Débattez, accusez, formez des alliances. Quand la majorité est d'accord, désignez une personne à éliminer. Son rôle est révélé, et elle se tait jusqu'à la fin.</p>
+                    </div>
+                </article>
+                <article class="regle">
+                    <p class="chiffre">III</p>
+                    <div>
+                        <h2>La fin</h2>
+                        <p>Plus aucun dieu&#160;: <b>les humains gagnent</b>. Dès qu'il y a autant de dieux que d'humains, plus aucune majorité n'est possible&#160;: <b>les dieux gagnent</b>.</p>
+                    </div>
+                </article>
+            </div>
+            <a href="#dieux" class="btn btn-or">Compris, on joue</a>
+        </section>
+
+        <!-- Les Dieux : préparation -->
+        <section id="ecran-dx-config" class="ecran">
+            <div class="barre-haut">
+                <a href="#" class="btn-rond" aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre">Les Dieux</p>
+                <div class="vide"></div>
+            </div>
+            <h1 class="titre">Qui est sur Terre&#160;?</h1>
+            <fieldset class="champ groupe">
+                <legend class="etiquette">Les joueurs <span id="dx-compte" class="compte"></span></legend>
+                <div class="puces inf-puces" id="dx-joueurs"></div>
+                <div class="ajout-joueur">
+                    <input type="text" class="champ-joueur" id="dx-champ" maxlength="15" autocomplete="off" enterkeyhint="done" placeholder="Prénom d'un joueur" aria-label="Ajouter un joueur">
+                    <button type="button" class="petit-btn" id="dx-ajouter" data-son="aucun" aria-label="Ajouter ce joueur"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+                </div>
+                <p class="aide-champ" id="dx-aide"></p>
+            </fieldset>
+            <fieldset class="champ groupe">
+                <legend class="etiquette">Dieux</legend>
+                <div class="reglage" style="margin-top: 0">
+                    <button type="button" class="petit-btn" id="dx-moins" data-son="aucun" aria-label="Un dieu de moins"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+                    <p class="valeur" aria-live="polite"><b id="dx-nb">2</b><span id="dx-nb-texte">dieux</span></p>
+                    <button type="button" class="petit-btn" id="dx-plus" data-son="aucun" aria-label="Un dieu de plus"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+                </div>
+            </fieldset>
+            <a href="#dieux-regles" class="lien-discret">Revoir les règles</a>
+            <div class="pousse"></div>
+            <button id="dx-lancer" class="btn btn-or" type="button" data-son="lancer">Distribuer les rôles</button>
+        </section>
+
+        <!-- Les Dieux : distribution des rôles -->
+        <section id="ecran-dx-distribution" class="ecran centre">
+            <p class="surtitre" id="dx-dist-progres">Joueur 1 sur 6</p>
+            <div class="pile-centre" style="gap: 10px">
+                <p class="etiquette">Passe le téléphone à</p>
+                <p class="nom-equipe" id="dx-dist-nom"></p>
+                <p class="consigne">Personne d'autre ne regarde&#160;!</p>
+            </div>
+            <button type="button" class="carte-secrete" id="dx-carte" data-son="aucun" aria-label="Maintenir appuyé pour découvrir ton rôle">
+                <span class="carte-secrete-cache"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg><span>Maintenir pour découvrir ton rôle</span></span>
+                <span class="carte-secrete-mot dx-role-carte" id="dx-role"></span>
+            </button>
+            <button id="dx-vu" class="btn btn-or btn-grand" type="button" disabled>C'est vu, je passe</button>
+        </section>
+
+        <!-- Les Dieux : la nuit -->
+        <section id="ecran-dx-nuit" class="ecran centre dx-nuit">
+            <p class="surtitre" id="dx-nuit-surtitre">La nuit tombe</p>
+            <div class="pile-centre" style="gap: 18px">
+                <svg class="dx-lune" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"></path></svg>
+                <p class="dx-consigne-nuit" id="dx-nuit-texte" aria-live="assertive">Tout le monde ferme les yeux…</p>
+                <p class="info-bas" id="dx-nuit-son"></p>
+            </div>
+            <div class="dx-etapes" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+            <div class="pousse"></div>
+            <button id="dx-nuit-debut" class="btn btn-or btn-grand" type="button">Commencer la nuit</button>
+        </section>
+
+        <!-- Les Dieux : le jour -->
+        <section id="ecran-dx-jour" class="ecran centre">
+            <p class="surtitre" id="dx-jour-numero">Jour 1</p>
+            <div class="pile-centre" style="gap: 14px">
+                <svg class="dx-soleil" width="58" height="58" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"></path></svg>
+                <h1 class="titre" style="text-align: center">Le jour se lève</h1>
+                <p class="consigne">Débattez, accusez, organisez-vous comme vous voulez. Quand la majorité a décidé, désignez la personne à éliminer.</p>
+            </div>
+            <div class="dx-compteurs">
+                <div><b id="dx-nb-vivants">6</b><span>encore en vie</span></div>
+                <div><b id="dx-nb-dieux">2</b><span id="dx-nb-dieux-texte">dieux restants</span></div>
+            </div>
+            <ul class="dx-vivants" id="dx-vivants"></ul>
+            <div class="pousse"></div>
+            <button id="dx-vers-vote" class="btn btn-or" type="button">Désigner la personne éliminée</button>
+            <button id="dx-refaire-nuit" class="lien-discret" type="button" style="background: none; border: 0; cursor: pointer">Refaire la nuit</button>
+        </section>
+
+        <!-- Les Dieux : le vote -->
+        <section id="ecran-dx-vote" class="ecran centre">
+            <p class="surtitre">La sentence</p>
+            <h1 class="titre" style="text-align: center">Qui est éliminé&#160;?</h1>
+            <div class="grille-vote" id="dx-vote"></div>
+            <div class="pousse"></div>
+            <button id="dx-eliminer" class="btn btn-erreur btn-grand" type="button" disabled>Choisissez un joueur</button>
+            <button id="dx-annuler-vote" class="lien-discret" type="button" style="background: none; border: 0; cursor: pointer">Revenir au débat</button>
+        </section>
+
+        <!-- Les Dieux : révélation -->
+        <section id="ecran-dx-revelation" class="ecran centre">
+            <p class="surtitre" id="dx-rev-jour">Jour 1</p>
+            <div class="pile-centre" style="gap: 14px">
+                <p class="nom-equipe" id="dx-rev-nom"></p>
+                <p class="etiquette">était</p>
+                <p class="role-revele" id="dx-rev-role"></p>
+                <p class="consigne" id="dx-rev-detail"></p>
+            </div>
+            <div class="pousse"></div>
+            <button id="dx-continuer" class="btn btn-or" type="button">Le jour continue</button>
+        </section>
+
+        <!-- Les Dieux : fin -->
+        <section id="ecran-dx-fin" class="ecran centre">
+            <p class="surtitre">Fin de partie</p>
+            <div class="pile-centre" style="gap: 10px">
+                <span class="dx-fin-icone" id="dx-fin-icone" aria-hidden="true"></span>
+                <h1 class="nom-equipe" id="dx-fin-titre" style="font-size: clamp(30px, 10vw, 42px)"></h1>
+                <p class="texte-doux" id="dx-fin-sous-titre" style="font-size: 15px; color: var(--texte-2)"></p>
+            </div>
+            <ul class="bilan-roles" id="dx-fin-bilan"></ul>
+            <div class="pousse"></div>
+            <div class="pile">
+                <button id="dx-rejouer" class="btn btn-or" type="button">Rejouer</button>
                 <a href="#" class="btn btn-contour">Retour à l'accueil</a>
             </div>
         </section>

@@ -1730,6 +1730,53 @@ html.change-apparence, html.change-apparence body, html.change-apparence *:not(.
 .cm-bilan-ligne .chrono-joueur.penalite { color: var(--corail); }
 .cm-bilan-ligne .phrase { grid-column: 1 / -1; font-size: 13px; color: var(--discret); }
 
+/* ---------- Les Dieux ---------- */
+
+.dx-role-carte { flex-direction: column; gap: 10px; }
+.dx-role-carte small { font-family: var(--sans); font-size: 14px; line-height: 1.45; color: var(--texte-2); max-width: 260px; }
+.dx-role-carte .dieu { color: var(--or); }
+
+.dx-nuit .dx-lune { color: var(--or); animation: respire 4s ease-in-out infinite; }
+.dx-consigne-nuit {
+    margin: 0;
+    max-width: 320px;
+    font-family: var(--serif);
+    font-size: clamp(26px, 8vw, 34px);
+    line-height: 1.2;
+    text-align: center;
+    transition: opacity .5s;
+}
+.dx-consigne-nuit.change { animation: monte .7s var(--douce) both; }
+.dx-etapes { display: flex; gap: 8px; }
+.dx-etapes span { width: 26px; height: 3px; border-radius: 2px; background: var(--ligne-2); transition: background-color .5s; }
+.dx-etapes span.faite { background: var(--or); }
+.dx-nuit.en-cours #dx-nuit-debut { visibility: hidden; }
+body.nuit-dieux::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: rgba(0, 0, 0, .55);
+    transition: opacity 1s;
+}
+
+.dx-soleil { animation: respire 6s ease-in-out infinite; }
+.dx-compteurs { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.dx-compteurs div { padding: 14px; border-radius: 16px; background: var(--surface); border: 1px solid var(--ligne); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.dx-compteurs b { font-family: var(--serif); font-size: 30px; line-height: 1; }
+.dx-compteurs div:last-child b { color: var(--or); }
+.dx-compteurs span { font-size: 12px; color: var(--discret); }
+.dx-vivants { list-style: none; margin: 0; padding: 0; width: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.dx-vivants li { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--ligne-2); font-size: 14px; }
+.dx-vivants li.mort { color: var(--discret-2); text-decoration: line-through; border-style: dashed; }
+.dx-vivants li.mort.dieu { color: var(--or); border-color: rgba(var(--or-rvb), .5); }
+
+.role-revele.humain { color: var(--texte); }
+.role-revele.dieu { color: var(--or); text-shadow: 0 0 30px rgba(var(--or-rvb), .5); }
+.bilan-roles li.dieu .bilan-role { color: var(--or); }
+.dx-fin-icone svg { color: var(--or); }
+
 /* ---------- Mode adulte (18+) ---------- */
 
 .badge-adulte, .bouton-adulte { display: none !important; }
