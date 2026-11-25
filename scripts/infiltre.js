@@ -373,9 +373,11 @@
         const champ = $("inf-white-mot")
         if (!champ.value.trim()) return
         champ.blur()
+        const proposition = champ.value
+        champ.value = ""   // on n'en garde aucune trace à l'écran
         const civil = inf.joueurs.filter(function (j) { return j.role === "civil" })[0]
         $("inf-white-devine").hidden = true
-        if (civil && bonneReponse(champ.value, civil.mot)) {
+        if (civil && bonneReponse(proposition, civil.mot)) {
             son("lancer")
             $("inf-rev-detail").textContent = "Incroyable, il a trouvé ! Le mot était « " + civil.mot + " »."
             const c = $("inf-continuer")
