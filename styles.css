@@ -1614,6 +1614,26 @@ html.change-apparence, html.change-apparence body, html.change-apparence *:not(.
 .apercu-theme[data-theme="manga"] { border: 2px solid #141414; border-radius: 6px; box-shadow: 4px 4px 0 #141414; }
 .apercu-theme[data-theme="manga"][aria-pressed="true"] { border-color: var(--or); box-shadow: 4px 4px 0 var(--or); }
 
+/* ---------- Black's Up, manche 3 : le mot s'efface ---------- */
+
+.indice-revoir {
+    display: none;
+    margin: 0;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--or);
+}
+.carte-mot.masquable { touch-action: none; -webkit-user-select: none; user-select: none; }
+.carte-mot.masquable .mot { transition: opacity 1s ease, filter 1s ease; }
+.carte-mot.masquable.efface .mot { opacity: 0; filter: blur(12px); }
+.carte-mot.masquable.efface .indice-revoir { display: flex; position: absolute; left: 0; right: 0; bottom: 22px; justify-content: center; animation: monte .6s var(--douce) .6s both; }
+.carte-mot.masquable.efface { cursor: pointer; }
+.carte-mot.masquable.efface.revoir .mot { opacity: 1; filter: none; transition-duration: .15s; }
+.carte-mot.masquable.efface.rapide:not(.revoir) .mot { transition-duration: .12s; }
+.carte-mot.masquable.efface.revoir .indice-revoir { visibility: hidden; }
+.carte-mot.masquable.efface.revoir { border-color: rgba(var(--or-rvb), .6); }
+
 /* ---------- Créa'Mime ---------- */
 
 .cm-equipes { display: flex; flex-direction: column; gap: 22px; }
@@ -1661,6 +1681,19 @@ html.change-apparence, html.change-apparence body, html.change-apparence *:not(.
 .cm-chrono.long { color: var(--or); }
 .cm-chrono.tres-long { color: var(--corail); }
 #ecran-cm-mime .revoir-mot { max-width: 100%; }
+.revoir-grand {
+    width: 100%;
+    min-height: 64px;
+    padding: 12px 18px;
+    border-radius: 18px;
+    border: 1px dashed rgba(var(--or-rvb), .6);
+    background: var(--surface);
+    color: var(--or);
+    font-size: 15px;
+}
+.revoir-grand .revoir-cache { display: inline-flex; align-items: center; gap: 10px; }
+.revoir-grand.visible { border-style: solid; background: var(--surface-2); }
+.revoir-grand.visible .revoir-mot-texte { font-size: 19px !important; color: var(--texte); line-height: 1.35; }
 #ecran-cm-mime .revoir-mot-texte { font-size: 16px; white-space: normal; }
 #cm-abandon.confirmer { background: rgba(var(--corail-rvb), .14); border-color: var(--corail); }
 

@@ -213,12 +213,40 @@ function commencerTour() {
     setTimeout(lancerChrono, reduit ? 0 : 420)
 }
 
+// Manche 3 (Mimez) : le mot s'affiche 2 s puis s'efface en 1 s,
+// pour que l'équipe ne le voie pas pendant les grands gestes.
+// Le joueur garde le doigt sur la carte pour le revoir.
+const AFFICHAGE_MIME_MS = 2000
+let minuterieEffacement = null
+
 function ecrireMot(mot) {
     const el = $("mot")
     el.textContent = mot
     el.classList.toggle("long", mot.length > 18 && mot.length <= 30)
     el.classList.toggle("tres-long", mot.length > 30)
+    const carte = $("carte-mot")
+    clearTimeout(minuterieEffacement)
+    carte.classList.remove("efface", "revoir", "rapide")
+    carte.classList.toggle("masquable", partie.manche === 2)
+    if (partie.manche === 2) {
+        minuterieEffacement = setTimeout(function () { carte.classList.add("efface") }, AFFICHAGE_MIME_MS)
+    }
 }
+
+// Appui long sur la carte pour revoir le mot (manche 3)
+;(function () {
+    const carte = $("carte-mot")
+    function montrer(e) {
+        if (!carte.classList.contains("masquable") || !carte.classList.contains("efface")) return
+        if (e) e.preventDefault()
+        carte.classList.add("revoir", "rapide")
+    }
+    function cacher() { carte.classList.remove("revoir") }
+    carte.addEventListener("pointerdown", montrer)
+    carte.addEventListener("pointerup", cacher)
+    carte.addEventListener("pointerleave", cacher)
+    carte.addEventListener("pointercancel", cacher)
+})()
 
 function majCompteur(anime) {
     const n = partie.trouves.length
@@ -291,7 +319,11 @@ $("btn-trouve").addEventListener("click", function (e) {
             { opacity: 0, transform: "translateY(22px) scale(.96)", filter: "blur(4px)" },
             { opacity: 1, transform: "none", filter: "none" }
         ], { duration: 320, easing: "cubic-bezier(.2,.7,.2,1)", fill: "forwards" })
-    }).then(function () { verrou = false })
+    }).then(function () {
+        verrou = false
+        // On libère l'animation pour que l'effacement de la manche 3 puisse agir
+        if (mot.getAnimations) mot.getAnimations().forEach(function (an) { an.cancel() })
+    })
     animer($("carte-mot"), [
         { borderColor: couleur("or") },
         { borderColor: couleur("ligne") }
