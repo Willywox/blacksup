@@ -195,6 +195,8 @@
         inf.premier = Math.floor(Math.random() * inf.joueurs.length)
         inf.distribue = 0
         inf.tour = 1
+        inf.whiteGagne = false
+        inf.dernierOrdre = null
         enJeuINF = true
         musique(false)
         if (window.garderEcranAllume) window.garderEcranAllume(true)
@@ -261,14 +263,11 @@
 
     function preparerTour() {
         $("inf-tour-numero").textContent = "Tour " + inf.tour
-        // L'ordre tourne : au tour 1 on part du premier tiré au sort, ensuite du joueur suivant encore en jeu
+        // Nouvel ordre de parole à chaque tour (Mister White compris), différent du tour précédent
         const v = vivants()
-        let depart = v.indexOf(inf.premier)
-        if (depart === -1) {
-            depart = v.findIndex(function (i) { return i > inf.premier })
-            if (depart === -1) depart = 0
-        }
-        const ordre = v.slice(depart).concat(v.slice(0, depart))
+        let ordre = melanger(v.slice())
+        for (let essai = 0; essai < 10 && inf.dernierOrdre && v.length > 2 && ordre.join() === inf.dernierOrdre; essai++) ordre = melanger(v.slice())
+        inf.dernierOrdre = ordre.join()
         const ol = $("inf-ordre")
         ol.textContent = ""
         ordre.forEach(function (i, k) {
@@ -341,6 +340,8 @@
             detail.textContent = "Démasqué… mais il a encore une chance."
             son("trouve")
             $("inf-white-devine").hidden = false
+            $("inf-white-mot").value = ""
+            $("inf-white-valider").disabled = true
             $("inf-continuer").hidden = true
         }
         const fin = verifierFin()
@@ -348,10 +349,42 @@
         afficher("ecran-inf-revelation")
     }
 
-    $("inf-white-oui").addEventListener("click", function () { son("lancer"); terminer("white") })
-    $("inf-white-non").addEventListener("click", function () {
-        son("erreur")
+    // Mister White tape sa réponse : l'app vérifie (accents, majuscules, article et petite faute tolérés)
+    function normaliser(t) {
+        return String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/[’']/g, " ").replace(/[^a-z0-9 ]/g, " ")
+            .replace(/^\s*(le|la|les|l|un|une|des|du|de|d)\s+/, "")
+            .replace(/\s+/g, " ").trim()
+    }
+    function distance(a, b) {
+        const m = []
+        for (let i = 0; i <= a.length; i++) { m[i] = [i]; for (let j = 1; j <= b.length; j++) m[i][j] = i ? Math.min(m[i - 1][j] + 1, m[i][j - 1] + 1, m[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)) : j }
+        return m[a.length][b.length]
+    }
+    function bonneReponse(prop, mot) {
+        const p = normaliser(prop), m = normaliser(mot)
+        if (!p) return false
+        if (p === m || p.replace(/s$/, "") === m.replace(/s$/, "") || p.replace(/ /g, "") === m.replace(/ /g, "")) return true
+        return m.length >= 5 && distance(p, m) <= 1
+    }
+    $("inf-white-mot").addEventListener("input", function () { $("inf-white-valider").disabled = !this.value.trim() })
+    $("inf-white-mot").addEventListener("keydown", function (e) { if (e.key === "Enter" && this.value.trim()) { e.preventDefault(); $("inf-white-valider").click() } })
+    $("inf-white-valider").addEventListener("click", function () {
+        const champ = $("inf-white-mot")
+        if (!champ.value.trim()) return
+        champ.blur()
+        const civil = inf.joueurs.filter(function (j) { return j.role === "civil" })[0]
         $("inf-white-devine").hidden = true
+        if (civil && bonneReponse(champ.value, civil.mot)) {
+            son("lancer")
+            $("inf-rev-detail").textContent = "Incroyable, il a trouvé ! Le mot était « " + civil.mot + " »."
+            const c = $("inf-continuer")
+            c.textContent = "Voir le résultat"
+            c.hidden = false
+            inf.whiteGagne = true
+            return
+        }
+        son("erreur")
         $("inf-rev-detail").textContent = "Raté ! Le mot des civils reste secret."
         const fin = verifierFin()
         const c = $("inf-continuer")
@@ -369,6 +402,7 @@
     }
 
     $("inf-continuer").addEventListener("click", function () {
+        if (inf.whiteGagne) { terminer("white"); return }
         const fin = verifierFin()
         if (fin) terminer(fin)
         else { inf.tour++; preparerTour() }

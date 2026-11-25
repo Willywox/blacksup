@@ -24,27 +24,27 @@
             if (apparence) document.documentElement.setAttribute("data-theme", apparence)
         } catch (e) {}
     </script>
-    <link rel="stylesheet" href="styles.css?v=19">
-    <script src="scripts/animations.js?v=19" defer></script>
-    <script src="scripts/app.js?v=19" defer></script>
-    <script src="scripts/sons.js?v=19" defer></script>
-    <script src="scripts/mots.js?v=19" defer></script>
-    <script src="scripts/mots-adultes.js?v=19" defer></script>
-    <script src="scripts/jeu.js?v=19" defer></script>
-    <script src="scripts/passe-mot.js?v=19" defer></script>
-    <script src="scripts/infiltre-paires.js?v=19" defer></script>
-    <script src="scripts/infiltre.js?v=19" defer></script>
-    <script src="scripts/crea-mime.js?v=19" defer></script>
-    <script src="scripts/dieux.js?v=19" defer></script>
-    <script src="scripts/outils-joueurs.js?v=19" defer></script>
-    <script src="scripts/songs.js?v=19" defer></script>
-    <script src="scripts/songs-up.js?v=19" defer></script>
-    <script src="scripts/qui-mytho-contenus.js?v=19" defer></script>
-    <script src="scripts/qui-de-nous.js?v=19" defer></script>
-    <script src="scripts/mytho.js?v=19" defer></script>
-    <script src="scripts/soiree.js?v=19" defer></script>
-    <script src="scripts/apparence.js?v=19" defer></script>
-    <script src="scripts/adulte.js?v=19" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20">
+    <script src="scripts/animations.js?v=20" defer></script>
+    <script src="scripts/app.js?v=20" defer></script>
+    <script src="scripts/sons.js?v=20" defer></script>
+    <script src="scripts/mots.js?v=20" defer></script>
+    <script src="scripts/mots-adultes.js?v=20" defer></script>
+    <script src="scripts/jeu.js?v=20" defer></script>
+    <script src="scripts/passe-mot.js?v=20" defer></script>
+    <script src="scripts/infiltre-paires.js?v=20" defer></script>
+    <script src="scripts/infiltre.js?v=20" defer></script>
+    <script src="scripts/crea-mime.js?v=20" defer></script>
+    <script src="scripts/dieux.js?v=20" defer></script>
+    <script src="scripts/outils-joueurs.js?v=20" defer></script>
+    <script src="scripts/songs.js?v=20" defer></script>
+    <script src="scripts/songs-up.js?v=20" defer></script>
+    <script src="scripts/qui-mytho-contenus.js?v=20" defer></script>
+    <script src="scripts/qui-de-nous.js?v=20" defer></script>
+    <script src="scripts/mytho.js?v=20" defer></script>
+    <script src="scripts/soiree.js?v=20" defer></script>
+    <script src="scripts/apparence.js?v=20" defer></script>
+    <script src="scripts/adulte.js?v=20" defer></script>
 </head>
 <body>
     <main class="app">
@@ -766,9 +766,9 @@
                 <p class="consigne" id="inf-rev-detail"></p>
             </div>
             <div class="pile" id="inf-white-devine" hidden>
-                <p class="consigne" style="margin: 0 auto 6px">Mister White, à toi&#160;: quel est le mot des civils&#160;?</p>
-                <button id="inf-white-oui" class="btn btn-or" type="button" data-son="aucun">Il a trouvé</button>
-                <button id="inf-white-non" class="btn btn-contour" type="button" data-son="aucun">Raté</button>
+                <p class="consigne" style="margin: 0 auto 6px">Mister White, prends le téléphone et tape <b>en secret</b> le mot des civils. Une seule chance&#160;!</p>
+                <input type="text" class="saisie" id="inf-white-mot" maxlength="40" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" placeholder="Le mot des civils" aria-label="Le mot des civils">
+                <button id="inf-white-valider" class="btn btn-or" type="button" data-son="aucun" disabled>Valider ma réponse</button>
             </div>
             <div class="pousse"></div>
             <button id="inf-continuer" class="btn btn-or" type="button">Tour suivant</button>
