@@ -331,10 +331,10 @@
         $("inf-continuer").hidden = false
 
         if (j.role === "civil") {
-            detail.textContent = "Aïe, un innocent est tombé. Son mot était « " + j.mot + " »."
+            detail.textContent = "Aïe, un innocent est tombé. Son mot reste secret jusqu'à la fin."
             son("erreur")
         } else if (j.role === "infiltre") {
-            detail.textContent = "Bien vu ! Son mot était « " + j.mot + " »."
+            detail.textContent = "Bien vu ! Son mot reste secret jusqu'à la fin de la partie."
             son("trouve")
         } else {
             detail.textContent = "Démasqué… mais il a encore une chance."
