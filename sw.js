@@ -4,7 +4,7 @@
 // pour que tous les téléphones récupèrent la nouvelle version.
 // =========================================================
 
-const VERSION = "blacksup-v30"
+const VERSION = "blacksup-v31"
 
 const FICHIERS = [
     "./",

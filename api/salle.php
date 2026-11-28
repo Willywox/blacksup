@@ -271,6 +271,16 @@ switch ($action) {
         });
         repondre($r);
 
+    // ---------- L'hôte ferme la salle ----------
+    case 'fermer':
+        $code = strtoupper(texte($entree['code'] ?? '', 4));
+        avecSalle($dossier, $code, false, function (&$salle) use ($entree) {
+            if (!estHote($salle, $entree)) erreur('Réservé à l\'hôte', 403);
+            return true;
+        });
+        @unlink($dossier . '/' . $code . '.php');
+        repondre(['ok' => true]);
+
     default:
         erreur('Action inconnue');
 }

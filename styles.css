@@ -2682,3 +2682,10 @@ body.avec-aide .ecran { padding-bottom: 112px; transition: padding-bottom .5s va
     }
     .logo-serrure .trace, .trophee path { stroke-dashoffset: 0; }
 }
+
+/* Fermer la partie en ligne (accueil et panneau d'invitation) */
+.lien-fermer-en-ligne, .so-salle-fermer { display: block; margin: 8px auto 0; background: none; border: 0; font-family: inherit; cursor: pointer; }
+.lien-fermer-en-ligne[hidden] { display: none; }
+.lien-fermer-en-ligne.confirmer, .so-salle-fermer.confirmer { color: var(--erreur, #e07a6a); }
+.duo-en-ligne .lien-fermer-en-ligne { grid-column: 1 / -1; flex-basis: 100%; }
+body:has(#ecran-accueil.actif) .chat-bouton { display: none; }

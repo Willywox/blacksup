@@ -181,6 +181,9 @@
     // CÔTÉ HÔTE
     // =====================================================
     let hote = lire(CLE_HOTE)           // { code, cleHote, seq, vj }
+    // Au lancement : une salle sans soirée en cours et sans aucun joueur est un reste (bouton touché pour essayer) → on la ferme
+    let verifOrpheline = !!hote && !(window.Soiree && Soiree.enCours && Soiree.enCours())
+    if (verifOrpheline) hote.vj = 0
     let joueursSalle = []                // [{ id, nom, photo, enLigne }]
     let partage = {}
     let dernierPublie = "", minuteurPub = null, minuteurBoucle = null, dernierAnnuaire = ""
@@ -202,7 +205,7 @@
         },
         inscrits: function () { return joueursSalle.slice() },
         creer: creerSalle,
-        fermer: fermerSalle,
+        fermer: function () { fermerSalle(true); majAccueilJoueur() },
         diffuser: diffuser,
         partage: function () { return partage },
         ecrirePartage: function (champ, valeur) {
@@ -248,7 +251,8 @@
             return r.code
         })
     }
-    function fermerSalle() {
+    function fermerSalle(prevenir) {
+        if (prevenir && hote) appel("fermer", { code: hote.code, cleHote: hote.cleHote }).catch(function () {})
         hote = null
         Chat.vider()
         ecrire(CLE_HOTE, null)
@@ -275,6 +279,10 @@
                     majPanneaux()
                     if (window.Soiree && Soiree.rafraichirConnexions) Soiree.rafraichirConnexions()
                 }
+            }
+            if (verifOrpheline) {
+                verifOrpheline = false
+                if (!joueursSalle.length && ["ecran-soiree-joueurs", "ecran-soiree"].indexOf(ecranActuel) === -1) { fermerSalle(true); majAccueilJoueur(); return }
             }
             if (r.partage) {
                 const sig = JSON.stringify(r.partage)
@@ -395,6 +403,10 @@
         })
         box.appendChild(p)
         el.appendChild(box)
+        const f = document.createElement("button")
+        f.type = "button"; f.className = "lien-discret so-salle-fermer"; f.textContent = "Fermer la partie en ligne"
+        boutonFermer(f)
+        el.appendChild(f)
     }
     window.majPanneauxSalle = majPanneaux
 
@@ -542,8 +554,27 @@
         if (!b) return
         b.textContent = moi ? "Revenir à la partie " + moi.code : (messageSortie || "Rejoindre avec un code")
         const c = $("lien-creer-en-ligne")
-        if (c) c.querySelector("span").textContent = hote ? "Ma partie en ligne · " + hote.code : "Créer une partie en ligne"
+        if (c) c.querySelector("span").textContent = hote ? "Reprendre ma partie en ligne (" + hote.code + ")" : "Créer une partie en ligne"
+        const f = $("lien-fermer-en-ligne")
+        if (f && !f.classList.contains("confirmer")) { f.hidden = !hote; f.textContent = "Fermer la partie en ligne " + (hote ? hote.code : "") }
     }
+    let minuteurFermer = null
+    function boutonFermer(b) {
+        b.addEventListener("click", function () {
+            if (!b.classList.contains("confirmer")) {
+                b.dataset.texte = b.textContent
+                b.textContent = "Toucher encore : les téléphones seront déconnectés"
+                b.classList.add("confirmer"); son("clic")
+                clearTimeout(minuteurFermer)
+                minuteurFermer = setTimeout(function () { b.classList.remove("confirmer"); b.textContent = b.dataset.texte }, 3500)
+                return
+            }
+            clearTimeout(minuteurFermer)
+            b.classList.remove("confirmer")
+            Salle.fermer()
+        })
+    }
+    if ($("lien-fermer-en-ligne")) boutonFermer($("lien-fermer-en-ligne"))
     $("lien-rejoindre").addEventListener("click", function () { location.hash = moi ? "#salle" : "#rejoindre" })
     // Raccourci : ouvre la soirée et la salle d'un coup
     $("lien-creer-en-ligne").addEventListener("click", function () {
