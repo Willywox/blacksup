@@ -107,6 +107,7 @@
         el.appendChild(t); el.appendChild(a)
         $("su-carte").classList.remove("visible", "vu")
         $("su-go").disabled = true
+        carteEnLigne($("su-carte"), su.joueurs[su.fredonneur].nom, su.joueurs[su.fredonneur].nom + " voit le son sur son téléphone", $("su-go"))
     }
 
     carteAMaintenir($("su-carte"), function () { $("su-go").disabled = false })
@@ -131,6 +132,7 @@
 
     function lancerJauge() {
         jauge.fin = performance.now() + su.temps * 1000
+        jauge.finServeur = (window.Salle ? Salle.versServeur(Date.now() + su.temps * 1000) : 0)
         jauge.derniere = su.temps
         jauge.active = true
         $("su-jauge").classList.remove("urgent")
@@ -166,6 +168,7 @@
         },
         relancer: function (reste) {
             jauge.fin = performance.now() + reste
+            jauge.finServeur = (window.Salle ? Salle.versServeur(Date.now() + reste) : 0)
             jauge.active = true
             jauge.image = requestAnimationFrame(boucle)
         }
@@ -260,7 +263,32 @@
         }, reduit ? 0 : 500)
     }
 
-    JEUX_SOIREE["songs-up"] = { remplir: function (joueurs) { liste.remplacer(joueurs) }, presents: liste.noms, ajouter: liste.ajouter }
+    JEUX_SOIREE["songs-up"] = {
+        enLigne: function (ecran) {
+            const phase = { "ecran-su-revelation": "revelation", "ecran-su-tour": "tour", "ecran-su-qui": "qui", "ecran-su-resultat": "resultat", "ecran-su-fin": "fin" }[ecran] || "preparation"
+            if (phase === "preparation" || !su) return { public: { phase: "preparation" } }
+            const f = su.joueurs[su.fredonneur]
+            const s = sonActuel()
+            const prives = {}
+            if (phase === "revelation" || phase === "tour" || phase === "qui") prives[f.nom] = { titre: s[0], artiste: s[1] }
+            return {
+                public: {
+                    phase: phase,
+                    etape: su.tour,
+                    numero: su.tour,
+                    fredonneur: f.nom,
+                    objectif: su.objectif,
+                    finServeur: phase === "tour" && jauge.active ? jauge.finServeur : null,
+                    resultat: phase === "resultat" ? { titre: s[0], artiste: s[1], gain: $("su-res-gain").textContent } : null,
+                    fin: phase === "fin" ? { titre: $("su-fin-titre").textContent, detail: $("su-fin-sous-titre").textContent } : null,
+                    scores: scoresIndividuels(su.joueurs)
+                },
+                prives: prives
+            }
+        },
+        surMessage: function (type, de) {
+            if (type === "autre-son" && document.getElementById("ecran-su-revelation").classList.contains("actif") && su.joueurs[su.fredonneur].nom.toLowerCase() === String(de).toLowerCase()) $("su-autre").click()
+        }, remplir: function (joueurs) { liste.remplacer(joueurs) }, presents: liste.noms, ajouter: liste.ajouter }
 
     window.abandonnerSongsUp = function () {
         if (!enJeuSU) return

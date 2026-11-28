@@ -24,27 +24,28 @@
             if (apparence) document.documentElement.setAttribute("data-theme", apparence)
         } catch (e) {}
     </script>
-    <link rel="stylesheet" href="styles.css?v=23">
-    <script src="scripts/animations.js?v=23" defer></script>
-    <script src="scripts/app.js?v=23" defer></script>
-    <script src="scripts/sons.js?v=23" defer></script>
-    <script src="scripts/mots.js?v=23" defer></script>
-    <script src="scripts/mots-adultes.js?v=23" defer></script>
-    <script src="scripts/jeu.js?v=23" defer></script>
-    <script src="scripts/passe-mot.js?v=23" defer></script>
-    <script src="scripts/infiltre-paires.js?v=23" defer></script>
-    <script src="scripts/infiltre.js?v=23" defer></script>
-    <script src="scripts/crea-mime.js?v=23" defer></script>
-    <script src="scripts/dieux.js?v=23" defer></script>
-    <script src="scripts/outils-joueurs.js?v=23" defer></script>
-    <script src="scripts/songs.js?v=23" defer></script>
-    <script src="scripts/songs-up.js?v=23" defer></script>
-    <script src="scripts/qui-mytho-contenus.js?v=23" defer></script>
-    <script src="scripts/qui-de-nous.js?v=23" defer></script>
-    <script src="scripts/mytho.js?v=23" defer></script>
-    <script src="scripts/soiree.js?v=23" defer></script>
-    <script src="scripts/apparence.js?v=23" defer></script>
-    <script src="scripts/adulte.js?v=23" defer></script>
+    <link rel="stylesheet" href="styles.css?v=24">
+    <script src="scripts/animations.js?v=24" defer></script>
+    <script src="scripts/app.js?v=24" defer></script>
+    <script src="scripts/sons.js?v=24" defer></script>
+    <script src="scripts/mots.js?v=24" defer></script>
+    <script src="scripts/mots-adultes.js?v=24" defer></script>
+    <script src="scripts/jeu.js?v=24" defer></script>
+    <script src="scripts/passe-mot.js?v=24" defer></script>
+    <script src="scripts/infiltre-paires.js?v=24" defer></script>
+    <script src="scripts/infiltre.js?v=24" defer></script>
+    <script src="scripts/crea-mime.js?v=24" defer></script>
+    <script src="scripts/dieux.js?v=24" defer></script>
+    <script src="scripts/outils-joueurs.js?v=24" defer></script>
+    <script src="scripts/songs.js?v=24" defer></script>
+    <script src="scripts/songs-up.js?v=24" defer></script>
+    <script src="scripts/qui-mytho-contenus.js?v=24" defer></script>
+    <script src="scripts/qui-de-nous.js?v=24" defer></script>
+    <script src="scripts/mytho.js?v=24" defer></script>
+    <script src="scripts/soiree.js?v=24" defer></script>
+    <script src="scripts/en-ligne.js?v=24" defer></script>
+    <script src="scripts/apparence.js?v=24" defer></script>
+    <script src="scripts/adulte.js?v=24" defer></script>
 </head>
 <body>
     <main class="app">
@@ -77,6 +78,7 @@
                     <span class="carte-soiree-desc" id="carte-soiree-desc">Enchaînez les jeux, cumulez les points, couronnez le GOAT de la soirée.</span>
                 </span>
             </button>
+            <button type="button" class="btn btn-contour btn-rejoindre" id="lien-rejoindre">Rejoindre une partie avec un code</button>
             <a href="#historique" class="lien-discret lien-historique" id="lien-historique" hidden>Historique des soirées</a>
 
             <p class="etiquette titre-section">Choisis ton jeu</p>
@@ -885,6 +887,10 @@
                 <h1 class="titre" id="cm-ecr-titre"></h1>
                 <p class="texte-doux" id="cm-ecr-texte"></p>
             </div>
+            <div class="so-bandeau" id="cm-en-ligne" data-fixe hidden>
+                <span class="so-bandeau-texte">L'équipe peut écrire sur ses téléphones. Les phrases sont floutées ici.</span>
+                <button type="button" class="so-bandeau-btn" id="cm-montrer">Afficher</button>
+            </div>
             <div class="cm-phrases" id="cm-phrases"></div>
             <p class="aide-champ" id="cm-ecr-aide"></p>
             <div class="pousse"></div>
@@ -1513,6 +1519,7 @@
                 <h1 class="titre titre-fete">Qui fait la fête&#160;?</h1>
                 <p class="texte-doux">Touchez un rond pour prendre la photo de chacun. Ça rend le classement bien plus drôle.</p>
             </div>
+            <div class="so-salle"></div>
             <ul class="so-joueurs" id="so-joueurs"></ul>
             <div class="so-ajout">
                 <button type="button" class="avatar avatar-photo" id="so-photo-nouveau" data-son="aucun" aria-label="Prendre une photo pour le nouveau joueur"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg></button>
@@ -1538,6 +1545,7 @@
                 <h1 class="titre titre-fete" id="so-titre">Le classement</h1>
                 <p class="so-finale-bandeau" id="so-finale-bandeau" hidden>Finale&#160;: le prochain jeu compte <b>double</b></p>
             </div>
+            <div class="so-salle"></div>
             <ol class="so-classement" id="so-classement"></ol>
             <div class="so-bloc">
                 <p class="etiquette">Quel jeu maintenant&#160;?</p>
@@ -1635,6 +1643,48 @@
             <p class="texte-doux" id="so-historique-vide">Aucune soirée terminée pour l'instant. La première légende reste à écrire.</p>
             <div class="pousse"></div>
             <button id="so-effacer" class="btn btn-contour lien-danger" type="button">Effacer l'historique</button>
+        </section>
+
+
+        <!-- ===================== EN LIGNE (téléphone d'un joueur) ===================== -->
+
+        <section id="ecran-rejoindre" class="ecran">
+            <div class="barre-haut">
+                <a href="#" class="btn-rond" data-accueil aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre">Rejoindre</p>
+                <div class="vide"></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+                <h1 class="titre titre-fete">Entre dans la partie</h1>
+                <p class="texte-doux">Le code à 4 lettres est affiché sur le téléphone de l'hôte.</p>
+            </div>
+            <input type="text" class="sl-code" id="sl-code" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" inputmode="text" placeholder="CODE" aria-label="Code de la partie">
+            <div class="sl-identite">
+                <button type="button" class="avatar avatar-photo sl-photo" id="sl-photo" data-son="aucun" aria-label="Prendre un selfie"></button>
+                <input type="text" class="champ-joueur" id="sl-nom" maxlength="15" autocomplete="off" enterkeyhint="go" placeholder="Ton prénom" aria-label="Ton prénom">
+            </div>
+            <p class="aide-champ">Touche le rond pour prendre ton selfie.</p>
+            <input type="file" id="sl-fichier" accept="image/*" capture="user" hidden>
+            <p class="aide-champ alerte" id="sl-erreur" aria-live="polite"></p>
+            <div class="pousse"></div>
+            <button id="sl-rejoindre" class="btn btn-or btn-fete" type="button" disabled>Rejoindre la partie</button>
+        </section>
+
+        <section id="ecran-salle" class="ecran ecran-soiree">
+            <div class="barre-haut">
+                <a href="#" class="btn-rond" data-accueil aria-label="Retour à l'accueil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+                </a>
+                <p class="surtitre"><span class="sl-connexion" id="sl-connexion" aria-hidden="true"></span><span id="sl-surtitre">Partie</span></p>
+                <div class="vide"></div>
+            </div>
+            <p class="sl-alerte" id="sl-hote-absent" hidden>L'hôte semble déconnecté… La partie reprendra dès son retour.</p>
+            <p class="texte-doux" id="sl-fin-message"></p>
+            <div class="sl-contenu" id="sl-contenu"></div>
+            <div class="pousse"></div>
+            <button id="sl-quitter" class="lien-discret lien-danger" type="button" style="background: none; border: 0; cursor: pointer">Quitter la partie</button>
         </section>
 
     </main>

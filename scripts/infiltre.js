@@ -206,6 +206,9 @@
 
     // ---------- Distribution : chacun voit son mot en secret ----------
     function preparerDistribution() {
+        // Les joueurs connectés voient leur mot sur leur téléphone : on passe directement aux autres
+        while (inf.distribue < inf.joueurs.length && estEnLigne(inf.joueurs[inf.distribue].nom)) inf.distribue++
+        if (inf.distribue >= inf.joueurs.length) { preparerTour(); return }
         const j = inf.joueurs[inf.distribue]
         $("inf-dist-progres").textContent = "Joueur " + (inf.distribue + 1) + " sur " + inf.joueurs.length
         $("inf-dist-nom").textContent = j.nom
@@ -268,6 +271,7 @@
         let ordre = melanger(v.slice())
         for (let essai = 0; essai < 10 && inf.dernierOrdre && v.length > 2 && ordre.join() === inf.dernierOrdre; essai++) ordre = melanger(v.slice())
         inf.dernierOrdre = ordre.join()
+        inf.ordreNoms = ordre.map(function (i) { return inf.joueurs[i].nom })
         const ol = $("inf-ordre")
         ol.textContent = ""
         ordre.forEach(function (i, k) {
@@ -455,6 +459,44 @@
     $("inf-rejouer").addEventListener("click", function () { son("lancer"); lancerPartie() })
 
     JEUX_SOIREE.infiltre = {
+        enLigne: function (ecran) {
+            let phase = { "ecran-inf-distribution": "distribution", "ecran-inf-tour": "tour", "ecran-inf-vote": "vote", "ecran-inf-revelation": "revelation", "ecran-inf-fin": "fin" }[ecran] || "preparation"
+            if (phase !== "fin" && !enJeuINF) phase = "preparation"
+            if (phase === "preparation") return { public: { phase: phase } }
+            const whiteAttend = phase === "revelation" && !$("inf-white-devine").hidden
+            if (whiteAttend) phase = "white"
+            const der = derniereElimination !== null ? inf.joueurs[derniereElimination] : null
+            const prives = {}
+            inf.joueurs.forEach(function (j) {
+                prives[j.nom] = j.role === "white" ? { white: true, deviner: whiteAttend && der === j } : { mot: j.mot }
+            })
+            return {
+                public: {
+                    phase: phase,
+                    etape: inf.tour,
+                    tour: inf.tour,
+                    ordre: inf.ordreNoms || [],
+                    vivants: inf.joueurs.filter(function (j) { return !j.elimine }).map(function (j) { return j.nom }),
+                    elimines: inf.joueurs.filter(function (j) { return j.elimine }).map(function (j) { return { nom: j.nom, role: NOMS_ROLES[j.role], or: j.role !== "civil" } }),
+                    revelation: der ? { nom: der.nom, role: NOMS_ROLES[der.role], detail: $("inf-rev-detail").textContent } : null,
+                    fin: phase === "fin" ? {
+                        titre: $("inf-fin-titre").textContent,
+                        mots: $("inf-fin-mots").textContent,
+                        roles: inf.joueurs.map(function (j) { return { nom: j.nom, role: NOMS_ROLES[j.role] + (j.mot ? " · " + j.mot : "") } })
+                    } : null
+                },
+                prives: phase === "fin" ? {} : prives
+            }
+        },
+        surMessage: function (type, de, donnees) {
+            // Mister White a tapé sa réponse sur son téléphone
+            if (type !== "white" || $("inf-white-devine").hidden || derniereElimination === null) return
+            const w = inf.joueurs[derniereElimination]
+            if (!w || w.role !== "white" || w.nom.toLowerCase() !== String(de).toLowerCase()) return
+            $("inf-white-mot").value = String(donnees || "")
+            $("inf-white-valider").disabled = false
+            $("inf-white-valider").click()
+        },
         remplir: function (joueurs) {
             $("inf-joueurs").textContent = ""
             joueurs.forEach(function (n) { ajouterJoueur(n, false) })

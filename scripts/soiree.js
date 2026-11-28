@@ -39,6 +39,14 @@
             else localStorage.removeItem(CLE_SOIREE)
         } catch (e) {}
         majAmbiance()
+        if (window.Salle && Salle.actif()) {
+            if (S) {
+                const carte = {}
+                S.joueurs.forEach(function (j) { carte[j.nom] = j.photo || null })
+                Salle.annuaire(carte)
+            }
+            Salle.diffuser()
+        }
     }
     function historique() {
         try { const h = JSON.parse(localStorage.getItem(CLE_HISTO) || "[]"); return Array.isArray(h) ? h : [] } catch (e) { return [] }
@@ -63,6 +71,7 @@
     function noms() { return S.joueurs.map(function (j) { return j.nom }) }
 
     window.Soiree = { enCours: enCours, finDeJeu: finDeJeu }
+    window.lirePhotoCarree = function (f) { return lirePhoto(f) }
 
     // ---------- Ambiance festive ----------
     function majAmbiance() {
@@ -388,6 +397,7 @@
     })
     $("so-abandonner").addEventListener("click", function () {
         if (!armer("so-abandonner", "Toucher encore pour tout effacer")) return
+        if (window.Salle) Salle.fermer()
         S = null
         sauver()
         location.hash = ""
@@ -521,7 +531,7 @@
         b.classList.toggle("finale", !!S.finaleArmee && !j.entracte)
     }
     function retirerBandeaux() {
-        document.querySelectorAll(".so-bandeau, .so-absents").forEach(function (b) { b.remove() })
+        document.querySelectorAll(".so-bandeau:not([data-fixe]), .so-absents").forEach(function (b) { b.remove() })
         document.querySelectorAll(".btn-suite-soiree").forEach(function (b) { b.remove() })
         document.querySelectorAll(".fin-en-soiree").forEach(function (e) { e.classList.remove("fin-en-soiree") })
     }
@@ -643,9 +653,53 @@
         if (S.coeurApplique) { lancerCeremonie(); return }
         retirerBandeaux()
         musique(false)
-        vote = { ordre: melanger(noms()), i: 0, choix: null }
+        // Les joueurs connectés votent sur leur téléphone ; les autres sur celui-ci
+        const enLigne = noms().filter(function (n) { return window.Salle && Salle.estConnecte(n) })
+        vote = { ordre: melanger(noms().filter(function (n) { return enLigne.indexOf(n) === -1 })), i: 0, choix: null, enLigne: enLigne, id: "coeur-" + Date.now() }
         S.votes = {}
+        if (!vote.ordre.length) { attendreVotesEnLigne(); return }
         preparerVotant()
+    }
+    function votesManquants() {
+        return vote.enLigne.filter(function (n) { return !S.votes[n] })
+    }
+    function attendreVotesEnLigne() {
+        vote.attente = true
+        $("so-vote-progres").textContent = "GOAT du cœur"
+        $("so-vote-nom").textContent = "Votes sur les téléphones"
+        const av = $("so-vote-avatar")
+        const n = el0("span"); n.className = "avatar avatar-grand"; n.id = "so-vote-avatar"; n.textContent = "♥"
+        av.replaceWith(n)
+        const g = $("so-vote-grille")
+        g.textContent = ""
+        const manquent = votesManquants()
+        const p = el0("p"); p.className = "consigne"
+        p.textContent = manquent.length ? "En attente de : " + listeNoms(manquent) : "Tous les votes sont là !"
+        g.appendChild(p)
+        const ok = $("so-vote-ok")
+        ok.disabled = false
+        ok.textContent = manquent.length ? "Clore le vote sans les attendre" : "Place à la cérémonie"
+        if (!document.getElementById("ecran-soiree-vote").classList.contains("actif")) afficher("ecran-soiree-vote")
+        else if (window.Salle) Salle.diffuser()
+        if (!manquent.length) setTimeout(function () { if (vote && vote.attente && !votesManquants().length) compterVotes() }, 1200)
+    }
+    function el0(t) { return document.createElement(t) }
+    function compterVotes() {
+        vote.attente = false
+        S.joueurs.forEach(function (j) { j.coeur = 0 })
+        Object.keys(S.votes).forEach(function (v) { const c = joueur(S.votes[v]); if (c && c.nom !== v) { c.coeur++; c.points++ } })
+        S.coeurApplique = true
+        S.finaleJouee = true
+        sauver()
+        lancerCeremonie()
+    }
+    Soiree.voteEnLigne = function (de, pour) {
+        if (!vote || !S || S.coeurApplique) return
+        const v = joueur(de), c = joueur(pour)
+        if (!v || !c || v.nom === c.nom || vote.enLigne.indexOf(v.nom) === -1) return
+        S.votes[v.nom] = c.nom
+        sauver()
+        if (vote.attente) attendreVotesEnLigne()
     }
     function preparerVotant() {
         const v = joueur(vote.ordre[vote.i])
@@ -683,18 +737,14 @@
         } else afficher("ecran-soiree-vote")
     }
     $("so-vote-ok").addEventListener("click", function () {
+        if (vote && vote.attente) { compterVotes(); return }
         if (!vote || !vote.choix) return
         son("trouve")
         S.votes[vote.ordre[vote.i]] = vote.choix
         vote.i++
         if (vote.i < vote.ordre.length) { preparerVotant(); return }
-        // Tous les votes sont là : 1 point par vote reçu
-        S.joueurs.forEach(function (j) { j.coeur = 0 })
-        Object.keys(S.votes).forEach(function (v) { const c = joueur(S.votes[v]); if (c) { c.coeur++; c.points++ } })
-        S.coeurApplique = true
-        S.finaleJouee = true
-        sauver()
-        lancerCeremonie()
+        if (vote.enLigne.length) { attendreVotesEnLigne(); return }
+        compterVotes()
     })
 
     // ---------- Cérémonie ----------
@@ -740,6 +790,7 @@
         $("so-cer-couronne").hidden = !e.goat
         $("so-cer-suite").textContent = etape === etapes.length - 1 ? "Voir le bilan de la soirée" : "Suivant"
         sc.classList.remove("revele"); void sc.offsetWidth; sc.classList.add("revele")
+        if (window.Salle) Salle.diffuser()
         setTimeout(function () {
             if (e.goat) { confettis(); setTimeout(confettis, 700); son("victoire", { ensuite: function () { musique(true) } }) }
             else son(e.son)
@@ -766,6 +817,7 @@
         sauver()
         bilanCourant = entree
         bilanDepuisCeremonie = true
+        if (window.Salle && Salle.actif()) { Salle.diffuser(); setTimeout(function () { if (!S) Salle.fermer() }, 60000) }
         location.hash = "#soiree-bilan"
     }
 
@@ -855,6 +907,65 @@
         preparerHistorique()
         majAmbiance()
     })
+
+    // ---------- En ligne : ce que voient les téléphones des joueurs ----------
+    Soiree.etatPublic = function () {
+        const src = S || bilanCourant
+        if (!src) return null
+        const personne = src.joueurs.every(function (j) { return !j.points })
+        return {
+            classement: classement(src.joueurs).map(function (j) { return { nom: j.nom, points: j.points, rang: j._rang, titres: resumeTitres(j.titres).concat(j.mentions || []) } }),
+            personne: personne,
+            nbJeux: src.jeux.length,
+            finale: !!(S && S.finaleArmee)
+        }
+    }
+    Soiree.vueEnLigne = function (ecran) {
+        if (ecran === "ecran-soiree-gains" && dernier) {
+            return { vue: "gains", gains: { jeu: dernier.nom, finale: dernier.finale, liste: Object.keys(dernier.gains).sort(function (a, b) { return dernier.gains[b] - dernier.gains[a] }).map(function (n) { return { nom: n, points: dernier.gains[n] } }), titres: dernier.titres } }
+        }
+        if (ecran === "ecran-soiree-vote" && vote && S) {
+            return { vue: "vote", vote: { id: vote.id, enLigne: vote.enLigne, recus: Object.keys(S.votes || {}), candidats: noms() } }
+        }
+        if (ecran === "ecran-soiree-ceremonie" && etapes[etape]) {
+            const e = etapes[etape]
+            return { vue: "ceremonie", etape: { etiquette: e.etiquette, titre: e.titre, detail: e.detail, goat: !!e.goat, noms: e.gens.map(function (j) { return j.nom }) } }
+        }
+        if (ecran === "ecran-soiree-bilan" && bilanCourant && bilanDepuisCeremonie) {
+            const b = Object.assign({}, bilanCourant, { joueurs: bilanCourant.joueurs.map(function (j) { return Object.assign({}, j, { photo: null }) }) })
+            return { vue: "bilan", bilan: { goats: classement(bilanCourant.joueurs).filter(function (j) { return j._rang === 1 }).map(function (j) { return j.nom }), entree: b } }
+        }
+        return { vue: S ? "hub" : "attente" }
+    }
+    // Un joueur a rejoint la salle depuis son téléphone
+    Soiree.joueurEnLigne = function (j) {
+        const nom = String(j.nom || "").trim()
+        if (!nom) return
+        const surEcranJoueurs = location.hash === "#soiree-joueurs"
+        if (surEcranJoueurs) {
+            const b = brouillon.filter(function (x) { return x.nom.toLowerCase() === nom.toLowerCase() })[0]
+            if (b) { if (j.photo && b.photo !== j.photo) { b.photo = j.photo; rendreJoueurs() } }
+            else if (brouillon.length < JOUEURS_MAX) { brouillon.push({ nom: nom, photo: j.photo || null }); rendreJoueurs(); son("trouve") }
+        }
+        if (!S) return
+        const x = joueur(nom)
+        if (x) { if (j.photo && x.photo !== j.photo) { x.photo = j.photo; sauver() } return }
+        if (S.joueurs.length >= JOUEURS_MAX) return
+        S.joueurs.push({ nom: nom, photo: j.photo || null, points: 0, coeur: 0, titres: [] })
+        sauver()
+        if (location.hash === "#soiree") { rendreClassement($("so-classement"), S.joueurs); rendreJeux() }
+    }
+    // Le joueur garde le bilan de la soirée dans son historique
+    Soiree.garderBilan = function (entree, photos) {
+        if (!entree || !entree.id) return
+        const h = historique()
+        if (h.some(function (x) { return x.id === entree.id })) return
+        const copie = JSON.parse(JSON.stringify(entree))
+        copie.joueurs.forEach(function (j) { j.photo = (photos || {})[j.nom] || null })
+        h.unshift(copie)
+        sauverHistorique(h)
+        majAmbiance()
+    }
 
     // ---------- Navigation ----------
     // Pendant une soirée, les boutons « retour à l'accueil » des jeux ramènent à la soirée

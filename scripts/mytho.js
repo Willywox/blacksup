@@ -78,6 +78,7 @@
         c.appendChild(t); c.appendChild(e)
         $("my-carte").classList.remove("visible", "vu")
         $("my-vu").disabled = true
+        carteEnLigne($("my-carte"), conteur().nom, conteur().nom + " voit sa consigne sur son téléphone", $("my-vu"))
         afficher("ecran-my-secret")
     }
     carteAMaintenir($("my-carte"), function () { $("my-vu").disabled = false })
@@ -200,7 +201,30 @@
         }, reduit ? 0 : 500)
     }
 
-    JEUX_SOIREE.mytho = { remplir: function (joueurs) { liste.remplacer(joueurs) }, presents: liste.noms, ajouter: liste.ajouter }
+    JEUX_SOIREE.mytho = {
+        enLigne: function (ecran) {
+            let phase = { "ecran-my-secret": "secret", "ecran-my-recit": "recit", "ecran-my-vote": "vote", "ecran-my-resultat": "resultat", "ecran-my-fin": "fin" }[ecran] || "preparation"
+            if (phase === "preparation" || !my) return { public: { phase: "preparation" } }
+            const c = my.ordre[my.position] !== undefined ? conteur() : null
+            const prives = {}
+            if (c && (phase === "secret" || phase === "recit")) prives[c.nom] = { consigne: my.mytho ? "mytho" : "verite", theme: my.theme }
+            return {
+                public: {
+                    phase: phase,
+                    etape: my.position,
+                    histoire: (Math.min(my.position, my.ordre.length - 1) + 1) + " / " + my.ordre.length,
+                    conteur: c ? c.nom : "",
+                    theme: my.theme,
+                    resultat: phase === "resultat" ? { verdict: $("my-res-verdict").textContent, gain: $("my-res-gain").textContent } : null,
+                    fin: phase === "fin" ? { titre: $("my-fin-titre").textContent, detail: $("my-fin-sous-titre").textContent } : null,
+                    scores: scoresIndividuels(my.joueurs)
+                },
+                prives: prives
+            }
+        },
+        surMessage: function (type, de) {
+            if (type === "theme" && document.getElementById("ecran-my-secret").classList.contains("actif") && conteur().nom.toLowerCase() === String(de).toLowerCase()) $("my-autre").click()
+        }, remplir: function (joueurs) { liste.remplacer(joueurs) }, presents: liste.noms, ajouter: liste.ajouter }
 
     window.abandonnerMytho = function () {
         if (!enJeuMY) return

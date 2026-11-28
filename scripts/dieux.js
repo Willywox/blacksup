@@ -134,6 +134,8 @@
 
     // ---------- Distribution des rôles (en secret) ----------
     function preparerDistribution() {
+        while (dx.distribue < dx.joueurs.length && estEnLigne(dx.joueurs[dx.distribue].nom)) dx.distribue++
+        if (dx.distribue >= dx.joueurs.length) { preparerNuit(); return }
         const j = dx.joueurs[dx.distribue]
         $("dx-dist-progres").textContent = "Joueur " + (dx.distribue + 1) + " sur " + dx.joueurs.length
         $("dx-dist-nom").textContent = j.nom
@@ -362,6 +364,7 @@
     $("dx-eliminer").addEventListener("click", function () {
         if (choix === null) return
         const j = dx.joueurs[choix]
+        dx.dernier = choix
         j.elimine = true
         $("dx-rev-jour").textContent = "Jour " + dx.jour
         $("dx-rev-nom").textContent = j.nom
@@ -437,6 +440,28 @@
     $("dx-rejouer").addEventListener("click", function () { son("lancer"); lancer() })
 
     JEUX_SOIREE.dieux = {
+        enLigne: function (ecran) {
+            let phase = { "ecran-dx-distribution": "distribution", "ecran-dx-nuit": "nuit", "ecran-dx-jour": "jour", "ecran-dx-vote": "vote", "ecran-dx-revelation": "revelation", "ecran-dx-fin": "fin" }[ecran] || "preparation"
+            if (phase !== "fin" && !enJeuDX) phase = "preparation"
+            if (phase === "preparation") return { public: { phase: phase } }
+            const der = dx.dernier !== undefined && dx.dernier !== null ? dx.joueurs[dx.dernier] : null
+            const prives = {}
+            dx.joueurs.forEach(function (j) { prives[j.nom] = { role: j.dieu ? "dieu" : "humain" } })
+            return {
+                public: {
+                    phase: phase,
+                    etape: dx.jour,
+                    jour: dx.jour,
+                    vivants: vivants().map(function (j) { return j.nom }),
+                    elimines: dx.joueurs.filter(function (j) { return j.elimine }).map(function (j) { return { nom: j.nom, role: j.dieu ? "Dieu" : "Humain", or: j.dieu } }),
+                    dieuxRestants: vivants().filter(function (j) { return j.dieu }).length,
+                    revelation: der && der.elimine ? { nom: der.nom, role: der.dieu ? "Un Dieu" : "Humain" } : null,
+                    nuit: phase === "nuit" ? { texte: $("dx-nuit-texte").textContent, surtitre: $("dx-nuit-surtitre").textContent } : null,
+                    fin: phase === "fin" ? { titre: $("dx-fin-titre").textContent, detail: $("dx-fin-sous-titre").textContent } : null
+                },
+                prives: phase === "fin" ? {} : prives
+            }
+        },
         remplir: function (joueurs) {
             $("dx-joueurs").textContent = ""
             choisiAMain = false

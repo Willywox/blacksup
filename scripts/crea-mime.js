@@ -145,6 +145,7 @@
         cm.tours = []
         cm.index = 0
         cm.ecrit = 0
+        cm.partie = Date.now() % 1000000
         enJeuCM = true
         musique(false)
         if (window.garderEcranAllume) window.garderEcranAllume(true)
@@ -177,6 +178,8 @@
             label.appendChild(l1); label.appendChild(l2)
             const champ = document.createElement("textarea")
             champ.id = "cm-phrase-" + i
+            champ.dataset.champ = prefixeEcriture() + "-" + i
+            champ.addEventListener("input", function () { if (!champ.dataset.distant && window.Salle && Salle.actif()) Salle.ecrirePartage(champ.dataset.champ, champ.value) })
             champ.rows = 2
             champ.maxLength = 160
             champ.placeholder = ["Le Père Noël boit un Coca-Cola sur la Lune", "Un chien fait du ski avec Beyoncé",
@@ -193,6 +196,12 @@
             zone.appendChild(bloc)
         }
         $("cm-ecr-aide").textContent = ""
+        // En ligne : l'équipe qui écrit peut le faire sur ses téléphones ; ici, les phrases sont floutées
+        const enLigne = cm.equipes[auteur].joueurs.some(estEnLigne)
+        const barre = $("cm-en-ligne")
+        barre.hidden = !enLigne
+        zone.classList.toggle("masque", enLigne)
+        $("cm-montrer").textContent = "Afficher"
         afficher("ecran-cm-ecriture")
     }
 
@@ -277,6 +286,7 @@
         $("cm-revoir-phrase").textContent = t.phrase
         $("cm-carte").classList.remove("visible", "vu")
         $("cm-go").disabled = true
+        carteEnLigne($("cm-carte"), t.joueur, t.joueur + " voit sa phrase sur son téléphone", $("cm-go"))
         afficher("ecran-cm-tour")
     }
 
@@ -317,6 +327,7 @@
     function demarrerChrono(depuis) {
         chronoCM.cumul = depuis
         chronoCM.debut = performance.now()
+        chronoCM.debutServeur = (window.Salle ? Salle.versServeur(Date.now()) : 0)
         chronoCM.actif = true
         chronoCM.image = requestAnimationFrame(boucle)
     }
@@ -491,7 +502,47 @@
 
     $("cm-rejouer").addEventListener("click", function () { afficher("ecran-cm-config") })
 
+    function prefixeEcriture() { return "cm" + (cm.partie || 0) + "-" + cm.ecrit }
+    $("cm-montrer").addEventListener("click", function () {
+        const z = $("cm-phrases")
+        z.classList.toggle("masque")
+        this.textContent = z.classList.contains("masque") ? "Afficher" : "Masquer"
+    })
+    function tempsEquipe(e) {
+        return cm.tours.filter(function (t) { return t.equipe === e && t.temps !== null }).reduce(function (s, t) { return s + t.temps }, 0)
+    }
     JEUX_SOIREE["crea-mime"] = {
+        enLigne: function (ecran) {
+            const phase = { "ecran-cm-ecriture": "ecriture", "ecran-cm-passage": "passage", "ecran-cm-tour": "tour", "ecran-cm-mime": "mime", "ecran-cm-resultat": "resultat", "ecran-cm-fin": "fin" }[ecran] || "preparation"
+            if (phase === "preparation" || !cm.equipes.length) return { public: { phase: "preparation" } }
+            const pub = { phase: phase, etape: cm.ecrit + "-" + cm.index }
+            const prives = {}
+            if (phase === "ecriture") {
+                const a = cm.ecrit
+                Object.assign(pub, { nb: nbPhrases(), prefixe: prefixeEcriture(), auteurs: cm.equipes[a].joueurs, equipeAuteur: cm.equipes[a].nom, equipeCible: cm.equipes[autre(a)].nom })
+            }
+            const t = cm.tours[cm.index]
+            if (t && (phase === "tour" || phase === "mime" || phase === "resultat")) {
+                Object.assign(pub, { tour: (cm.index + 1) + " / " + cm.tours.length, mime: t.joueur, equipe: cm.equipes[t.equipe].nom,
+                    debutServeur: chronoCM.debutServeur || 0, cumul: chronoCM.cumul, chronoActif: chronoCM.actif })
+                if (phase !== "resultat") prives[t.joueur] = { phrase: t.phrase }
+            }
+            if (phase === "resultat") pub.resultat = { titre: $("cm-res-surtitre").textContent, phrase: $("cm-res-phrase").textContent, detail: $("cm-res-temps").textContent }
+            if (phase === "fin") pub.fin = { titre: $("cm-fin-titre").textContent, detail: $("cm-fin-sous-titre").textContent }
+            if (cm.tours.length) pub.scores = [0, 1].map(function (e) { return { equipe: cm.equipes[e].nom, signe: SYMBOLES[e].signe, couleur: SYMBOLES[e].couleur, points: formatTemps(tempsEquipe(e)), noms: cm.equipes[e].joueurs, ms: tempsEquipe(e) } })
+            return { public: pub, prives: prives }
+        },
+        // Les phrases tapées sur les téléphones arrivent dans les champs de l'hôte
+        surPartage: function (partage) {
+            document.querySelectorAll("#cm-phrases textarea[data-champ]").forEach(function (t) {
+                const v = (partage[t.dataset.champ] || {}).valeur
+                if (typeof v !== "string" || v === t.value || document.activeElement === t) return
+                t.value = v
+                t.dataset.distant = "1"
+                t.dispatchEvent(new Event("input"))
+                delete t.dataset.distant
+            })
+        },
         remplir: function (equipes) {
             ;[0, 1].forEach(function (e) { $("cm-joueurs-" + e).textContent = "" })
             ;[0, 1].forEach(function (e) {

@@ -67,6 +67,17 @@ let modeAdulte = false
 // Chaque jeu déclare ici comment recevoir les joueurs de la soirée : JEUX_SOIREE[jeu] = { remplir(joueurs) }
 // et, à la fin d'une partie, envoie son résultat avec finSoiree(jeu, resultat, idEcranDeFin)
 const JEUX_SOIREE = {}
+// En ligne : ce joueur est-il connecté avec son téléphone ?
+function estEnLigne(nom) { return !!(window.Salle && Salle.estConnecte(nom)) }
+// Carte secrète : si tous ces joueurs sont connectés, ils voient le secret sur leur téléphone
+function carteEnLigne(carte, noms, texte, bouton) {
+    noms = [].concat(noms).filter(Boolean)
+    const ok = noms.length > 0 && noms.every(estEnLigne)
+    carte.classList.toggle("en-ligne", ok)
+    carte.dataset.enLigne = ok ? texte : ""
+    if (ok && bouton) bouton.disabled = false
+    return ok
+}
 function finSoiree(jeu, resultat, ecran) {
     if (window.Soiree && window.Soiree.enCours()) window.Soiree.finDeJeu(jeu, resultat, ecran)
 }
@@ -269,6 +280,7 @@ function majCompteur(anime) {
 
 function lancerChrono() {
     chrono.fin = performance.now() + partie.duree * 1000
+    chrono.finServeur = (window.Salle ? Salle.versServeur(Date.now() + partie.duree * 1000) : 0)
     chrono.derniereSeconde = partie.duree
     chrono.enCours = true
     chrono.image = requestAnimationFrame(boucleChrono)
@@ -636,6 +648,24 @@ const JOUEURS_MAX = 15
 
 // Mode soirée : équipes tirées au sort, prénoms activés
 JEUX_SOIREE.blacksup = {
+    enLigne: function (ecran) {
+        const phase = { "ecran-intro": "intro", "ecran-tour": "tour", "ecran-verif": "verif", "ecran-score": "score" }[ecran] || "preparation"
+        if (phase === "preparation" || !partie.scores.length) return { public: { phase: "preparation" } }
+        const totaux = partie.equipes.map(function (_, e) { return partie.scores.reduce(function (s, m) { return s + (m[e] || 0) }, 0) })
+        const fin = phase === "score" && !$("btn-rejouer").hidden
+        return { public: {
+            phase: phase,
+            manche: MANCHES[partie.manche].nom,
+            numeroManche: partie.manche + 1,
+            equipe: partie.equipes[partie.equipe],
+            joueur: joueurDe(partie.equipe) || null,
+            restants: partie.chapeau.length,
+            finServeur: phase === "tour" && chrono.enCours ? chrono.finServeur : null,
+            scores: partie.equipes.map(function (nom, e) { return { equipe: nom, signe: SYMBOLES[e].signe, couleur: SYMBOLES[e].couleur, points: totaux[e], noms: partie.joueurs[e] || [] } })
+                .sort(function (a, b) { return b.points - a.points }),
+            fin: fin ? $("score-titre").textContent : null
+        } }
+    },
     remplir: function (equipes) {
         $("liste-equipes").textContent = ""
         equipes.forEach(function (j) { ajouterEquipe("", j, false) })
@@ -1013,7 +1043,9 @@ const ROUTES = {
     "#soiree": "ecran-soiree",
     "#soiree-joueurs": "ecran-soiree-joueurs",
     "#soiree-bilan": "ecran-soiree-bilan",
-    "#historique": "ecran-historique"
+    "#historique": "ecran-historique",
+    "#rejoindre": "ecran-rejoindre",
+    "#salle": "ecran-salle"
 }
 
 function abandonnerPartie() {
@@ -1081,6 +1113,7 @@ enregistrerPause({
     },
     relancer: function (reste) {
         chrono.fin = performance.now() + reste
+        chrono.finServeur = (window.Salle ? Salle.versServeur(Date.now() + reste) : 0)
         chrono.enCours = true
         chrono.image = requestAnimationFrame(boucleChrono)
     }

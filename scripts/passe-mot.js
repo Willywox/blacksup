@@ -266,6 +266,7 @@
         $("pm-revoir-mot").textContent = pm.mots[pm.index]
         const carte = $("pm-carte-secrete")
         carte.classList.remove("visible", "vu")
+        carteEnLigne(carte, pm.duos.map(function (_, d) { return donneur(d) }), "Le mot s'affiche sur le téléphone de ceux qui font deviner")
         afficher("ecran-pm-revelation")
     }
 
@@ -330,6 +331,7 @@
     function lancerJauge() {
         arreterJauge()
         jauge.fin = performance.now() + SECONDES_INDICE * 1000
+        jauge.finServeur = (window.Salle ? Salle.versServeur(Date.now() + SECONDES_INDICE * 1000) : 0)
         jauge.derniere = SECONDES_INDICE
         jauge.active = true
         $("pm-jauge").classList.remove("urgent")
@@ -552,6 +554,28 @@
 
     // Mode soirée : duos tirés au sort, en duos contre duos
     JEUX_SOIREE["passe-mot"] = {
+        enLigne: function (ecran) {
+            const phase = { "ecran-pm-revelation": "revelation", "ecran-pm-duel": "duel", "ecran-pm-resultat": "resultat", "ecran-pm-fin": "fin" }[ecran] || "preparation"
+            if (phase === "preparation" || !pm.duos || !pm.mots) return { public: { phase: "preparation" } }
+            const prives = {}
+            if (phase === "revelation" || phase === "duel") pm.duos.forEach(function (_, d) { prives[donneur(d)] = { mot: pm.mots[pm.index] } })
+            return {
+                public: {
+                    phase: phase,
+                    etape: pm.index + "-" + pm.indice,
+                    numero: (pm.index + 1) + " / " + pm.nbMots,
+                    donneurs: pm.duos.map(function (_, d) { return donneur(d) }),
+                    points: $("pm-duel-points").textContent,
+                    roles: $("pm-duel-roles").textContent,
+                    finServeur: phase === "duel" && jauge.active ? jauge.finServeur : null,
+                    resultat: phase === "resultat" ? { mot: pm.mots[pm.index], gain: $("pm-res-gain").textContent } : null,
+                    fin: phase === "fin" ? { titre: $("pm-fin-titre").textContent } : null,
+                    scores: pm.duos.map(function (d, i) { return { equipe: nomDuo(i), signe: SYMBOLES[i].signe, couleur: SYMBOLES[i].couleur, points: pm.scores[i], noms: d.joueurs } })
+                        .sort(function (a, b) { return b.points - a.points })
+                },
+                prives: prives
+            }
+        },
         remplir: function (duos) {
             $("pm-mode-versus").checked = true
             $("pm-liste-duos").textContent = ""
@@ -590,6 +614,7 @@
         },
         relancer: function (reste) {
             jauge.fin = performance.now() + reste
+            jauge.finServeur = (window.Salle ? Salle.versServeur(Date.now() + reste) : 0)
             jauge.active = true
             jauge.image = requestAnimationFrame(boucleJauge)
         }

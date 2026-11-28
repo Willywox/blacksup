@@ -4,7 +4,7 @@
 // pour que tous les téléphones récupèrent la nouvelle version.
 // =========================================================
 
-const VERSION = "blacksup-v23"
+const VERSION = "blacksup-v24"
 
 const FICHIERS = [
     "./",
@@ -28,6 +28,7 @@ const FICHIERS = [
     "./scripts/qui-de-nous.js",
     "./scripts/mytho.js",
     "./scripts/soiree.js",
+    "./scripts/en-ligne.js",
     "./scripts/apparence.js",
     "./scripts/adulte.js",
     "./scripts/mots.js",
@@ -71,6 +72,7 @@ self.addEventListener("fetch", function (e) {
     const req = e.request
     if (req.method !== "GET") return
     const url = new URL(req.url)
+    if (url.pathname.indexOf("/api/") !== -1) return   // les parties en ligne ne passent jamais par le cache
 
     // Polices Google : on les garde une fois téléchargées
     if (url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com") {

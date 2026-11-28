@@ -34,6 +34,8 @@
 
     function decompte() {
         etat = "decompte"
+        pointezServeur = window.Salle ? Salle.versServeur(Date.now() + 2700) : null
+        if (window.diffuserJeu) diffuserJeu()
         $("qdn-pointez").disabled = true
         $("qdn-passer").hidden = true
         $("qdn-question").classList.remove("entre")
@@ -67,6 +69,14 @@
         else if (etat === "pointe") questionSuivante()
     })
     $("qdn-passer").addEventListener("click", questionSuivante)
+
+    // En ligne : la question et le compte à rebours s'affichent sur tous les téléphones
+    let pointezServeur = null
+    JEUX_SOIREE["qui-de-nous"] = {
+        enLigne: function () {
+            return { public: { phase: etat, etape: numero, question: $("qdn-question").textContent, numero: numero, pointezServeur: etat === "question" ? null : pointezServeur } }
+        }
+    }
 
     // Chaque arrivée sur l'écran : nouvelle question
     new MutationObserver(function () {

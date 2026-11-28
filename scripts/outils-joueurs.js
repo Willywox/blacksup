@@ -113,6 +113,14 @@ function carteAMaintenir(carte, auVu) {
     carte.addEventListener("blur", cacher)
 }
 
+// En ligne : scores individuels triés, avec rang (égalités comprises)
+function scoresIndividuels(joueurs) {
+    const l = joueurs.map(function (j) { return { nom: j.nom, points: j.points } }).sort(function (a, b) { return b.points - a.points })
+    let rang = 0, prec = null
+    l.forEach(function (x, i) { if (x.points !== prec) { rang = i + 1; prec = x.points } x.rang = rang; x.premier = rang === 1 && x.points > 0 })
+    return l
+}
+
 // Classement individuel : joueurs = [{ nom, points, detail }]
 function rendreClassementJoueurs(ol, joueurs, mettreEnAvant) {
     ol.textContent = ""
