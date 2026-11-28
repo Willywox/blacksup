@@ -579,10 +579,12 @@
                 pub.parallele = true
                 pub.etape = "par-" + cm.pret.join("-")
                 pub.nb = nbPhrases()
-                pub.ecritures = [0, 1].map(function (e) { return { equipe: e, nom: cm.equipes[e].nom, auteurs: cm.equipes[e].joueurs, prefixe: prefixeDe(e), pret: cm.pret[e], cible: cm.equipes[autre(e)].nom } })
+                pub.ecritures = [0, 1].map(function (e) { return { equipe: e, nom: cm.equipes[e].nom, auteurs: cm.equipes[e].joueurs, prefixe: prefixeDe(e), pret: cm.pret[e], pretes: pretesDe(e), cible: cm.equipes[autre(e)].nom } })
+                ;[0, 1].forEach(function (e) { cm.equipes[e].joueurs.forEach(function (n) { prives[n] = { partage: [prefixeDe(e)] } }) })
             } else if (phase === "ecriture") {
                 const a = cm.ecrit
-                Object.assign(pub, { nb: nbPhrases(), prefixe: prefixeEcriture(), auteurs: cm.equipes[a].joueurs, equipeAuteur: cm.equipes[a].nom, equipeCible: cm.equipes[autre(a)].nom })
+                Object.assign(pub, { nb: nbPhrases(), prefixe: prefixeEcriture(), auteurs: cm.equipes[a].joueurs, equipeAuteur: cm.equipes[a].nom, equipeCible: cm.equipes[autre(a)].nom, pretes: pretesDe(a) })
+                cm.equipes[a].joueurs.forEach(function (n) { prives[n] = { partage: [prefixeEcriture()] } })
             }
             const t = cm.tours[cm.index]
             if (t && (phase === "tour" || phase === "mime" || phase === "resultat")) {

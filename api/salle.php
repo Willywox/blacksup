@@ -181,7 +181,15 @@ switch ($action) {
             $nom = mb_strtolower($salle['joueurs'][$id]['nom']);
             $prives = (array) $salle['prives'];
             $rep['prive'] = $prives[$nom] ?? null;
-            $rep['partage'] = $salle['partage'];
+            // Textes partagés : seulement ceux que l'hôte autorise pour ce joueur (ex. les phrases de SON équipe)
+            $autorises = (is_array($rep['prive']) && isset($rep['prive']['partage']) && is_array($rep['prive']['partage'])) ? $rep['prive']['partage'] : [];
+            $filtre = [];
+            foreach ((array) $salle['partage'] as $cle => $val) {
+                foreach ($autorises as $prefixe) {
+                    if (is_string($prefixe) && $prefixe !== '' && strpos($cle, $prefixe . '-') === 0) { $filtre[$cle] = $val; break; }
+                }
+            }
+            $rep['partage'] = $filtre ?: new stdClass();
             $rep['moi'] = $salle['joueurs'][$id]['nom'];
             if ((int) ($entree['va'] ?? 0) !== $salle['va']) { $rep['annuaire'] = $salle['annuaire']; $rep['va'] = $salle['va']; }
             return $rep;

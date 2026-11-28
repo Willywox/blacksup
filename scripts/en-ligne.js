@@ -723,6 +723,8 @@
         if (v.message) box.appendChild(el("p", "vote-message", v.message))
         const moiVivant = (j.vivants || []).some(estMoi)
         const aVote = (v.votants || []).some(estMoi)
+        const participe = moiVivant || (j.elimines || []).some(function (x) { return estMoi(x.nom) })
+        if (!participe) { box.appendChild(el("p", "sl-detail", "Tu ne joues pas cette partie : regarde les autres s'accuser. Tu entreras dans la prochaine.")); return box }
         if (!moiVivant) { box.appendChild(el("p", "sl-detail", "Tu ne votes plus : tu as été éliminé.")); return box }
         if (aVote) {
             box.appendChild(el("p", "sl-titre", mesVotes[v.etape] ? "Tu as voté pour " + mesVotes[v.etape] : "Tu as voté"))
@@ -918,11 +920,11 @@
                 setTimeout(function () { majChampsPartages(); majValider() }, 0)
                 zone.dataset.valider = "1"
             } else if (m && m.pret) {
-                f.appendChild(carteInfo(m.nom, "Phrases validées ✓", autreE && !autreE.pret ? autreE.nom + " écrit encore vos phrases… " + compterPretes({ nb: j.nb, prefixe: autreE.prefixe }) + " / " + j.nb + " prêtes." : "Toutes les phrases sont créées ! Place au spectacle."))
+                f.appendChild(carteInfo(m.nom, "Phrases validées ✓", autreE && !autreE.pret ? autreE.nom + " écrit encore vos phrases… " + (autreE.pretes || 0) + " / " + j.nb + " prêtes." : "Toutes les phrases sont créées ! Place au spectacle."))
             } else {
                 f.appendChild(carteInfo("Créa'Mime", "Les équipes écrivent…", null))
             }
-            if (m && !m.pret && autreE) f.appendChild(el("p", "sl-detail", autreE.pret ? autreE.nom + " a déjà validé ses phrases !" : autreE.nom + " écrit aussi vos phrases (" + compterPretes({ nb: j.nb, prefixe: autreE.prefixe }) + " / " + j.nb + " prêtes)."))
+            if (m && !m.pret && autreE) f.appendChild(el("p", "sl-detail", autreE.pret ? autreE.nom + " a déjà validé ses phrases !" : autreE.nom + " écrit aussi vos phrases (" + (autreE.pretes || 0) + " / " + j.nb + " prêtes)."))
         } else if (j.phase === "ecriture") {
             const dansEquipe = (j.auteurs || []).some(estMoi)
             if (dansEquipe) {
@@ -945,7 +947,7 @@
                 f.appendChild(zone)
                 setTimeout(majChampsPartages, 0)
             } else {
-                const pret = compterPretes(j)
+                const pret = j.pretes || 0
                 f.appendChild(carteInfo(j.equipeAuteur + " écrit", "Vos phrases se préparent…", pret + " / " + j.nb + " phrases prêtes. Soyez prêts à souffrir."))
             }
         }
