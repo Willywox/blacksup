@@ -159,6 +159,9 @@ switch ($action) {
             $t = maintenant();
             $hote = estHote($salle, $entree);
             $rep = ['v' => $salle['v'], 't' => $t, 'nomHote' => $salle['nomHote']];
+            // Chat : les messages arrivés depuis le dernier lu
+            $depuisChat = (int) ($entree['chat'] ?? 0);
+            $rep['chat'] = array_values(array_filter($salle['chat'] ?? [], function ($m) use ($depuisChat) { return $m['n'] > $depuisChat; }));
             if ($hote) {
                 $salle['vuHote'] = $t;
                 // L'hôte récupère les joueurs (si changés), le partage et les messages reçus
@@ -249,6 +252,22 @@ switch ($action) {
             $salle['partage'][$cle] = ['valeur' => mb_substr((string) ($entree['valeur'] ?? ''), 0, 200), 'par' => $par, 't' => maintenant()];
             $salle['v']++;
             return ['v' => $salle['v']];
+        });
+        repondre($r);
+
+    // ---------- Chat de la partie ----------
+    case 'chat':
+        $code = strtoupper(texte($entree['code'] ?? '', 4));
+        $r = avecSalle($dossier, $code, true, function (&$salle) use ($entree) {
+            if (estHote($salle, $entree)) $de = 'L\'hôte';
+            else { $id = joueurAuth($salle, $entree); $de = $salle['joueurs'][$id]['nom']; $salle['joueurs'][$id]['vu'] = maintenant(); }
+            $texte = texte($entree['texte'] ?? '', 200);
+            if ($texte === '') erreur('Message vide');
+            if (!isset($salle['chat'])) $salle['chat'] = [];
+            $salle['chatSeq'] = ($salle['chatSeq'] ?? 0) + 1;
+            $salle['chat'][] = ['n' => $salle['chatSeq'], 'de' => $de, 'texte' => $texte, 't' => maintenant()];
+            if (count($salle['chat']) > 150) $salle['chat'] = array_slice($salle['chat'], -150);
+            return ['ok' => true, 'n' => $salle['chatSeq']];
         });
         repondre($r);
 

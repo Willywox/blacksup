@@ -64,6 +64,107 @@
     }
 
     // =====================================================
+    // CHAT DE LA PARTIE (hôte et joueurs)
+    // =====================================================
+    const Chat = (function () {
+        let messages = [], dernier = 0, nonLus = 0, ouvert = false
+        const REACTIONS = ["😂", "🔥", "👏", "😱", "🤫", "GOAT"]
+        const bouton = document.createElement("button")
+        bouton.type = "button"
+        bouton.className = "chat-bouton"
+        bouton.dataset.son = "aucun"
+        bouton.setAttribute("aria-label", "Ouvrir le chat")
+        bouton.hidden = true
+        bouton.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"></path></svg><span class="chat-badge" hidden></span>'
+        const panneau = document.createElement("div")
+        panneau.className = "chat-panneau"
+        panneau.hidden = true
+        panneau.innerHTML = '<div class="chat-tete"><p class="chat-titre">Le chat de la partie</p><button type="button" class="chat-fermer" aria-label="Fermer le chat">' +
+            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>' +
+            '<div class="chat-liste" aria-live="polite"></div><div class="chat-reactions"></div>' +
+            '<form class="chat-saisie"><input type="text" maxlength="200" autocomplete="off" enterkeyhint="send" placeholder="Écris un message…" aria-label="Message"><button type="submit" aria-label="Envoyer">' +
+            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 16-2-6z"></path></svg></button></form>'
+        document.body.appendChild(bouton)
+        document.body.appendChild(panneau)
+        const liste = panneau.querySelector(".chat-liste")
+        const champ = panneau.querySelector("input")
+        const badge = bouton.querySelector(".chat-badge")
+        REACTIONS.forEach(function (r) {
+            const b = document.createElement("button")
+            b.type = "button"; b.textContent = r
+            b.addEventListener("click", function () { envoyerChat(r) })
+            panneau.querySelector(".chat-reactions").appendChild(b)
+        })
+        function monNom() { return hote ? "L'hôte" : (moi ? moi.nom : "") }
+        function heure(t) { const d = new Date(t - decalage); return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0") }
+        function rendre() {
+            liste.textContent = ""
+            if (!messages.length) {
+                const v = document.createElement("p"); v.className = "chat-vide"; v.textContent = "Personne n'a encore parlé. Lance les hostilités !"
+                liste.appendChild(v)
+            }
+            let precedent = null
+            messages.forEach(function (m) {
+                const miens = m.de === monNom()
+                const p = document.createElement("div")
+                p.className = "chat-msg" + (miens ? " moi" : "") + (m.de === "L'hôte" ? " hote" : "") + (/^\p{Extended_Pictographic}+$|^GOAT$/u.test(m.texte) ? " reaction" : "")
+                if (precedent !== m.de && !miens) { const n = document.createElement("span"); n.className = "chat-de"; n.textContent = m.de; p.appendChild(n) }
+                const t = document.createElement("span"); t.className = "chat-texte"; t.textContent = m.texte
+                const h = document.createElement("span"); h.className = "chat-heure"; h.textContent = heure(m.t)
+                p.appendChild(t); p.appendChild(h)
+                liste.appendChild(p)
+                precedent = m.de
+            })
+            liste.scrollTop = liste.scrollHeight
+        }
+        function majBadge() {
+            badge.hidden = !nonLus
+            badge.textContent = nonLus > 9 ? "9+" : nonLus
+        }
+        function envoyerChat(texte) {
+            texte = String(texte || "").trim()
+            if (!texte) return
+            const donnees = hote ? { code: hote.code, cleHote: hote.cleHote, texte: texte } : (moi ? { code: moi.code, id: moi.id, cle: moi.cle, texte: texte } : null)
+            if (!donnees) return
+            son("clic")
+            appel("chat", donnees).then(function () {
+                // le message revient par la boucle ; on accélère juste l'affichage
+                messages.push({ n: -1, de: monNom(), texte: texte, t: maintenantServeur(), provisoire: true })
+                rendre()
+            }).catch(function () {})
+        }
+        bouton.addEventListener("click", function () { ouvrir(!ouvert) })
+        panneau.querySelector(".chat-fermer").addEventListener("click", function () { ouvrir(false) })
+        panneau.querySelector("form").addEventListener("submit", function (e) { e.preventDefault(); envoyerChat(champ.value); champ.value = "" })
+        function ouvrir(o) {
+            ouvert = o
+            panneau.hidden = !o
+            bouton.classList.toggle("ouvert", o)
+            if (o) { nonLus = 0; majBadge(); rendre() }
+        }
+        return {
+            dernier: function () { return dernier },
+            recevoir: function (liste2) {
+                if (!liste2 || !liste2.length) return
+                messages = messages.filter(function (m) { return !m.provisoire })
+                let nouveaux = 0
+                liste2.forEach(function (m) {
+                    if (m.n <= dernier) return
+                    dernier = m.n
+                    messages.push(m)
+                    if (m.de !== monNom()) nouveaux++
+                })
+                if (messages.length > 150) messages = messages.slice(-150)
+                if (ouvert) rendre()
+                else if (nouveaux) { nonLus += nouveaux; majBadge(); bouton.classList.remove("secoue"); void bouton.offsetWidth; bouton.classList.add("secoue") }
+            },
+            vider: function () { messages = []; dernier = 0; nonLus = 0; majBadge(); ouvrir(false) },
+            afficherBouton: function (v) { bouton.hidden = !v; if (!v) ouvrir(false) }
+        }
+    })()
+    window.ChatPartie = Chat
+
+    // =====================================================
     // CÔTÉ HÔTE
     // =====================================================
     let hote = lire(CLE_HOTE)           // { code, cleHote, seq, vj }
@@ -119,8 +220,10 @@
     function creerSalle(nomHote) {
         return appel("creer", { nomHote: nomHote || "" }).then(function (r) {
             hote = { code: r.code, cleHote: r.cleHote, seq: 0, vj: 0 }
+            Chat.vider()
             ecrire(CLE_HOTE, hote)
             dernierPublie = ""; dernierAnnuaire = ""
+            Chat.afficherBouton(true)
             boucleHote()
             diffuser()
             majPanneaux()
@@ -129,9 +232,11 @@
     }
     function fermerSalle() {
         hote = null
+        Chat.vider()
         ecrire(CLE_HOTE, null)
         joueursSalle = []
         clearTimeout(minuteurBoucle)
+        Chat.afficherBouton(routeJoueur() && !!moi)
         majPanneaux()
     }
 
@@ -139,9 +244,10 @@
         clearTimeout(minuteurBoucle)
         if (!hote) return
         const h = hote
-        appel("etat", { code: h.code, cleHote: h.cleHote, vj: h.vj, depuis: h.seq }).then(function (r) {
+        appel("etat", { code: h.code, cleHote: h.cleHote, vj: h.vj, depuis: h.seq, chat: Chat.dernier() }).then(function (r) {
             if (hote !== h) return
             enErreur = false
+            Chat.recevoir(r.chat)
             if (r.joueurs) {
                 const avant = joueursSalle.map(function (j) { return j.id + j.enLigne + (j.photo ? j.photo.length : 0) }).join()
                 joueursSalle = r.joueurs
@@ -324,6 +430,7 @@
         $("sl-erreur").textContent = ""
         const ident = moi && moi.code === code ? { id: moi.id, cle: moi.cle } : {}
         appel("rejoindre", Object.assign({ code: code, nom: nom, photo: photoJoueur }, ident)).then(function (r) {
+            if (!moi || moi.code !== code) Chat.vider()
             moi = { code: code, id: r.id, cle: r.cle, nom: nom, photo: photoJoueur }
             ecrire(CLE_JOUEUR, moi)
             ecrire("blacksup-mon-prenom", nom)
@@ -341,8 +448,9 @@
     function boucleJoueur() {
         clearTimeout(minuteurJoueur)
         if (!moi || !routeJoueur()) return
-        appel("etat", { code: moi.code, id: moi.id, cle: moi.cle, v: vue.v, va: vue.va }).then(function (r) {
+        appel("etat", { code: moi.code, id: moi.id, cle: moi.cle, v: vue.v, va: vue.va, chat: Chat.dernier() }).then(function (r) {
             $("sl-connexion").classList.remove("perdue")
+            Chat.recevoir(r.chat)
             vue.hoteEnLigne = r.hoteEnLigne
             $("sl-hote-absent").hidden = r.hoteEnLigne !== false
             if (r.inchange) { rafraichirChronos(); return }
@@ -367,6 +475,7 @@
     }
     function quitterSalle() {
         moi = null
+        Chat.vider()
         ecrire(CLE_JOUEUR, null)
         clearTimeout(minuteurJoueur)
         document.documentElement.classList.remove("mode-soiree")
@@ -396,9 +505,17 @@
     function majAccueilJoueur() {
         const b = $("lien-rejoindre")
         if (!b) return
-        b.textContent = moi ? "Revenir à la partie " + moi.code : (messageSortie || "Rejoindre une partie avec un code")
+        b.textContent = moi ? "Revenir à la partie " + moi.code : (messageSortie || "Rejoindre avec un code")
+        const c = $("lien-creer-en-ligne")
+        if (c) c.querySelector("span").textContent = hote ? "Ma partie en ligne · " + hote.code : "Créer une partie en ligne"
     }
     $("lien-rejoindre").addEventListener("click", function () { location.hash = moi ? "#salle" : "#rejoindre" })
+    // Raccourci : ouvre la soirée et la salle d'un coup
+    $("lien-creer-en-ligne").addEventListener("click", function () {
+        const enCours = window.Soiree && Soiree.enCours()
+        location.hash = enCours ? "#soiree" : "#soiree-joueurs"
+        if (!hote) creerSalle("").catch(function () {})
+    })
 
     // ---------- Rendu de la vue joueur ----------
     function el(tag, classe, texte) {
@@ -1020,6 +1137,7 @@
     function surAdresse() {
         if (location.hash === "#rejoindre") preparerRejoindre()
         document.documentElement.classList.toggle("vue-joueur", routeJoueur() || location.hash === "#rejoindre")
+        Chat.afficherBouton((routeJoueur() && !!moi) || !!hote)
         if (routeJoueur()) {
             if (!moi) { location.replace("#rejoindre"); return }
             derniereCle = ""
