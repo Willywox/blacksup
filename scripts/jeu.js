@@ -523,7 +523,7 @@ function afficherScores() {
         $("score-surtitre").textContent = "Fin de partie"
         if (enTete.length === 1) {
             remplirEquipe(titre, enTete[0])
-            sousTitre.textContent = "Grands vainqueurs de la soirée"
+            sousTitre.textContent = "Grands vainqueurs de la partie"
         } else {
             titre.textContent = enTete.length === n ? "Égalité parfaite" : "Égalité au sommet"
             sousTitre.appendChild(nomsEnTete())
@@ -650,7 +650,10 @@ const JOUEURS_MAX = 15
 JEUX_SOIREE.blacksup = {
     enLigne: function (ecran) {
         const phase = { "ecran-intro": "intro", "ecran-tour": "tour", "ecran-verif": "verif", "ecran-score": "score" }[ecran] || "preparation"
-        if (phase === "preparation" || !partie.scores.length) return { public: { phase: "preparation" } }
+        if (phase === "preparation" || !partie.scores.length) {
+            const noms = Array.from(document.querySelectorAll("#liste-equipes .bloc-equipe")).map(function (b, e) { const i = b.querySelector("input"); return (i && (i.value.trim() || i.placeholder)) || "Équipe " + (e + 1) })
+            return { public: { phase: "preparation", equipes: joueursSaisis().map(function (l, e) { return { nom: noms[e], noms: l, signe: SYMBOLES[e].signe, couleur: SYMBOLES[e].couleur } }) } }
+        }
         const totaux = partie.equipes.map(function (_, e) { return partie.scores.reduce(function (s, m) { return s + (m[e] || 0) }, 0) })
         const fin = phase === "score" && !$("btn-rejouer").hidden
         return { public: {
@@ -663,7 +666,8 @@ JEUX_SOIREE.blacksup = {
             finServeur: phase === "tour" && chrono.enCours ? chrono.finServeur : null,
             scores: partie.equipes.map(function (nom, e) { return { equipe: nom, signe: SYMBOLES[e].signe, couleur: SYMBOLES[e].couleur, points: totaux[e], noms: partie.joueurs[e] || [] } })
                 .sort(function (a, b) { return b.points - a.points }),
-            fin: fin ? $("score-titre").textContent : null
+            fin: fin ? $("score-titre").textContent : null,
+            equipes: partie.equipes.map(function (nom, e) { return { nom: nom, noms: partie.joueurs[e] || [], signe: SYMBOLES[e].signe, couleur: SYMBOLES[e].couleur } })
         } }
     },
     remplir: function (equipes) {
@@ -1091,8 +1095,8 @@ const ECRANS_DE_PARTIE = [
     "ecran-intro", "ecran-tour", "ecran-verif", "ecran-score",
     "ecran-pm-revelation", "ecran-pm-duel", "ecran-pm-resultat",
     "ecran-inf-distribution", "ecran-inf-tour", "ecran-inf-vote", "ecran-inf-revelation",
-    "ecran-cm-ecriture", "ecran-cm-passage", "ecran-cm-tour", "ecran-cm-mime", "ecran-cm-resultat",
-    "ecran-dx-distribution", "ecran-dx-nuit", "ecran-dx-jour", "ecran-dx-vote", "ecran-dx-revelation",
+    "ecran-cm-ecriture", "ecran-cm-statut", "ecran-cm-passage", "ecran-cm-tour", "ecran-cm-mime", "ecran-cm-resultat",
+    "ecran-dx-distribution", "ecran-dx-nuit", "ecran-dx-jour", "ecran-dx-vote", "ecran-dx-revelation", "ecran-dx-vus", "ecran-inf-vus",
     "ecran-su-revelation", "ecran-su-tour", "ecran-su-qui", "ecran-su-resultat",
     "ecran-my-secret", "ecran-my-recit", "ecran-my-vote", "ecran-my-resultat"
 ]

@@ -266,7 +266,9 @@
         $("pm-revoir-mot").textContent = pm.mots[pm.index]
         const carte = $("pm-carte-secrete")
         carte.classList.remove("visible", "vu")
-        carteEnLigne(carte, pm.duos.map(function (_, d) { return donneur(d) }), "Le mot s'affiche sur le téléphone de ceux qui font deviner")
+        if (carteEnLigne(carte, pm.duos.map(function (_, d) { return donneur(d) }), "Le mot s'affiche sur le téléphone de ceux qui font deviner")) {
+            consigne.textContent = "Le mot s'affiche sur leur téléphone. Les autres, regardez ailleurs !"
+        }
         afficher("ecran-pm-revelation")
     }
 
@@ -556,7 +558,9 @@
     JEUX_SOIREE["passe-mot"] = {
         enLigne: function (ecran) {
             const phase = { "ecran-pm-revelation": "revelation", "ecran-pm-duel": "duel", "ecran-pm-resultat": "resultat", "ecran-pm-fin": "fin" }[ecran] || "preparation"
-            if (phase === "preparation" || !pm.duos || !pm.mots) return { public: { phase: "preparation" } }
+            if (phase === "preparation" || !pm.duos || !pm.mots) {
+                return { public: { phase: "preparation", equipes: blocsDuos().map(function (b, d) { return { nom: "Duo " + (d + 1), noms: Array.from(b.querySelectorAll(".joueur-duo")).map(function (c) { return c.value.trim() }).filter(Boolean), signe: SYMBOLES[d].signe, couleur: SYMBOLES[d].couleur } }) } }
+            }
             const prives = {}
             if (phase === "revelation" || phase === "duel") pm.duos.forEach(function (_, d) { prives[donneur(d)] = { mot: pm.mots[pm.index] } })
             return {
@@ -570,6 +574,7 @@
                     finServeur: phase === "duel" && jauge.active ? jauge.finServeur : null,
                     resultat: phase === "resultat" ? { mot: pm.mots[pm.index], gain: $("pm-res-gain").textContent } : null,
                     fin: phase === "fin" ? { titre: $("pm-fin-titre").textContent } : null,
+                    equipes: pm.duos.map(function (d, i) { return { nom: nomDuo(i), noms: d.joueurs, signe: SYMBOLES[i].signe, couleur: SYMBOLES[i].couleur } }),
                     scores: pm.duos.map(function (d, i) { return { equipe: nomDuo(i), signe: SYMBOLES[i].signe, couleur: SYMBOLES[i].couleur, points: pm.scores[i], noms: d.joueurs } })
                         .sort(function (a, b) { return b.points - a.points })
                 },

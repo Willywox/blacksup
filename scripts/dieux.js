@@ -125,6 +125,8 @@
         dx.joueurs = liste.map(function (nom, i) { return { nom: nom, dieu: roles[i], elimine: false } })
         dx.jour = 1
         dx.distribue = 0
+        dx.partie = Date.now()
+        dx.dernier = null
         enJeuDX = true
         musique(false)
         if (window.garderEcranAllume) window.garderEcranAllume(true)
@@ -135,7 +137,7 @@
     // ---------- Distribution des rôles (en secret) ----------
     function preparerDistribution() {
         while (dx.distribue < dx.joueurs.length && estEnLigne(dx.joueurs[dx.distribue].nom)) dx.distribue++
-        if (dx.distribue >= dx.joueurs.length) { preparerNuit(); return }
+        if (dx.distribue >= dx.joueurs.length) { finDistribution(); return }
         const j = dx.joueurs[dx.distribue]
         $("dx-dist-progres").textContent = "Joueur " + (dx.distribue + 1) + " sur " + dx.joueurs.length
         $("dx-dist-nom").textContent = j.nom
@@ -185,8 +187,16 @@
     $("dx-vu").addEventListener("click", function () {
         dx.distribue++
         if (dx.distribue < dx.joueurs.length) preparerDistribution()
-        else preparerNuit()
+        else finDistribution()
     })
+
+    // En ligne : écran commun « qui a vu son rôle », puis la nuit
+    const vusDX = suiviVus({ prefixe: "dx", quoi: "son rôle", suite: function () { preparerNuit() } })
+    function finDistribution() {
+        const enLigne = dx.joueurs.filter(function (j) { return estEnLigne(j.nom) }).map(function (j) { return j.nom })
+        if (!enLigne.length) { preparerNuit(); return }
+        vusDX.ouvrir(dx.joueurs.map(function (j) { return j.nom }), dx.joueurs.map(function (j) { return j.nom }).filter(function (n) { return enLigne.indexOf(n) === -1 }))
+    }
 
     // ---------- La voix ----------
     const synthese = window.speechSynthesis
@@ -311,6 +321,24 @@
     // ---------- Le jour ----------
     function vivants() { return dx.joueurs.filter(function (j) { return !j.elimine }) }
 
+    // En ligne : chacun vote sur son téléphone, l'appli élimine le plus voté
+    const voteDX = voteEnLigne({
+        conteneur: $("dx-vote-ligne"), bouton: $("dx-reveler"), forcer: $("dx-reveler-forcer"),
+        vivants: function () { return vivants().map(function (j) { return j.nom }) },
+        surChangement: function () { majVotesJour() },
+        surResultat: function (nom, d) {
+            choix = dx.joueurs.findIndex(function (j) { return j.nom === nom })
+            dx.decompte = voteDX.texteDecompte(d)
+            $("dx-eliminer").disabled = false
+            $("dx-eliminer").click()
+        }
+    })
+    function majVotesJour() {
+        const p = $("dx-jour-votes")
+        p.hidden = !voteDX.actif()
+        p.textContent = "Votes reçus : " + voteDX.compte() + " · chacun peut voter sur son téléphone"
+    }
+
     function preparerJour() {
         $("dx-jour-numero").textContent = "Jour " + dx.jour
         const v = vivants()
@@ -328,6 +356,8 @@
         })
         // Refaire la nuit : seulement avant la première élimination
         $("dx-refaire-nuit").hidden = dx.joueurs.some(function (j) { return j.elimine })
+        voteDX.nouveauTour(dx.partie + "-" + dx.jour)
+        majVotesJour()
         afficher("ecran-dx-jour")
     }
     $("dx-refaire-nuit").addEventListener("click", preparerNuit)
@@ -335,6 +365,13 @@
     // ---------- Le vote ----------
     $("dx-vers-vote").addEventListener("click", function () {
         choix = null
+        const enLigne = voteDX.actif()
+        $("dx-vote").hidden = enLigne
+        $("dx-eliminer").hidden = enLigne
+        $("dx-vote-ligne").hidden = !enLigne
+        $("dx-reveler").hidden = !enLigne
+        $("dx-reveler-forcer").hidden = true
+        if (enLigne) { voteDX.rendre(); afficher("ecran-dx-vote"); return }
         const grille = $("dx-vote")
         grille.textContent = ""
         dx.joueurs.forEach(function (j, i) {
@@ -378,6 +415,7 @@
         son(j.dieu ? "trouve" : "erreur")
         const fin = verifierFin()
         $("dx-continuer").textContent = fin ? "Voir le résultat" : "Le jour continue"
+        if (dx.decompte) { $("dx-rev-detail").textContent += " Votes : " + dx.decompte + "."; dx.decompte = null }
         afficher("ecran-dx-revelation")
     })
 
@@ -440,8 +478,12 @@
     $("dx-rejouer").addEventListener("click", function () { son("lancer"); lancer() })
 
     JEUX_SOIREE.dieux = {
+        surMessage: function (type, de, donnees) {
+            if (type === "vu") vusDX.recevoir(de, donnees)
+            if (type === "vote") voteDX.recevoir(de, donnees)
+        },
         enLigne: function (ecran) {
-            let phase = { "ecran-dx-distribution": "distribution", "ecran-dx-nuit": "nuit", "ecran-dx-jour": "jour", "ecran-dx-vote": "vote", "ecran-dx-revelation": "revelation", "ecran-dx-fin": "fin" }[ecran] || "preparation"
+            let phase = { "ecran-dx-vus": "vus", "ecran-dx-distribution": "distribution", "ecran-dx-nuit": "nuit", "ecran-dx-jour": "jour", "ecran-dx-vote": "vote", "ecran-dx-revelation": "revelation", "ecran-dx-fin": "fin" }[ecran] || "preparation"
             if (phase !== "fin" && !enJeuDX) phase = "preparation"
             if (phase === "preparation") return { public: { phase: phase } }
             const der = dx.dernier !== undefined && dx.dernier !== null ? dx.joueurs[dx.dernier] : null
@@ -455,7 +497,9 @@
                     vivants: vivants().map(function (j) { return j.nom }),
                     elimines: dx.joueurs.filter(function (j) { return j.elimine }).map(function (j) { return { nom: j.nom, role: j.dieu ? "Dieu" : "Humain", or: j.dieu } }),
                     dieuxRestants: vivants().filter(function (j) { return j.dieu }).length,
-                    revelation: der && der.elimine ? { nom: der.nom, role: der.dieu ? "Un Dieu" : "Humain" } : null,
+                    revelation: der && der.elimine ? { nom: der.nom, role: der.dieu ? "Un Dieu" : "Humain", detail: $("dx-rev-detail").textContent } : null,
+                    vus: phase === "vus" ? vusDX.public() : null,
+                    vote: (phase === "jour" || phase === "vote") && voteDX.actif() ? voteDX.public() : null,
                     nuit: phase === "nuit" ? { texte: $("dx-nuit-texte").textContent, surtitre: $("dx-nuit-surtitre").textContent } : null,
                     fin: phase === "fin" ? { titre: $("dx-fin-titre").textContent, detail: $("dx-fin-sous-titre").textContent } : null
                 },

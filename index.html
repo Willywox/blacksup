@@ -24,28 +24,28 @@
             if (apparence) document.documentElement.setAttribute("data-theme", apparence)
         } catch (e) {}
     </script>
-    <link rel="stylesheet" href="styles.css?v=24">
-    <script src="scripts/animations.js?v=24" defer></script>
-    <script src="scripts/app.js?v=24" defer></script>
-    <script src="scripts/sons.js?v=24" defer></script>
-    <script src="scripts/mots.js?v=24" defer></script>
-    <script src="scripts/mots-adultes.js?v=24" defer></script>
-    <script src="scripts/jeu.js?v=24" defer></script>
-    <script src="scripts/passe-mot.js?v=24" defer></script>
-    <script src="scripts/infiltre-paires.js?v=24" defer></script>
-    <script src="scripts/infiltre.js?v=24" defer></script>
-    <script src="scripts/crea-mime.js?v=24" defer></script>
-    <script src="scripts/dieux.js?v=24" defer></script>
-    <script src="scripts/outils-joueurs.js?v=24" defer></script>
-    <script src="scripts/songs.js?v=24" defer></script>
-    <script src="scripts/songs-up.js?v=24" defer></script>
-    <script src="scripts/qui-mytho-contenus.js?v=24" defer></script>
-    <script src="scripts/qui-de-nous.js?v=24" defer></script>
-    <script src="scripts/mytho.js?v=24" defer></script>
-    <script src="scripts/soiree.js?v=24" defer></script>
-    <script src="scripts/en-ligne.js?v=24" defer></script>
-    <script src="scripts/apparence.js?v=24" defer></script>
-    <script src="scripts/adulte.js?v=24" defer></script>
+    <link rel="stylesheet" href="styles.css?v=26">
+    <script src="scripts/animations.js?v=26" defer></script>
+    <script src="scripts/app.js?v=26" defer></script>
+    <script src="scripts/sons.js?v=26" defer></script>
+    <script src="scripts/mots.js?v=26" defer></script>
+    <script src="scripts/mots-adultes.js?v=26" defer></script>
+    <script src="scripts/jeu.js?v=26" defer></script>
+    <script src="scripts/outils-joueurs.js?v=26" defer></script>
+    <script src="scripts/passe-mot.js?v=26" defer></script>
+    <script src="scripts/infiltre-paires.js?v=26" defer></script>
+    <script src="scripts/infiltre.js?v=26" defer></script>
+    <script src="scripts/crea-mime.js?v=26" defer></script>
+    <script src="scripts/dieux.js?v=26" defer></script>
+    <script src="scripts/songs.js?v=26" defer></script>
+    <script src="scripts/songs-up.js?v=26" defer></script>
+    <script src="scripts/qui-mytho-contenus.js?v=26" defer></script>
+    <script src="scripts/qui-de-nous.js?v=26" defer></script>
+    <script src="scripts/mytho.js?v=26" defer></script>
+    <script src="scripts/soiree.js?v=26" defer></script>
+    <script src="scripts/en-ligne.js?v=26" defer></script>
+    <script src="scripts/apparence.js?v=26" defer></script>
+    <script src="scripts/adulte.js?v=26" defer></script>
 </head>
 <body>
     <main class="app">
@@ -745,8 +745,22 @@
                 <p class="consigne">Dans cet ordre, chacun dit un mot pour décrire le sien. Puis on débat&#160;!</p>
             </div>
             <ol class="ordre-parole" id="inf-ordre"></ol>
+            <p class="info-bas" id="inf-tour-votes" hidden></p>
             <div class="pousse"></div>
             <button id="inf-vers-vote" class="btn btn-or" type="button">Passer au vote</button>
+        </section>
+
+
+        <section id="ecran-inf-vus" class="ecran centre">
+            <p class="surtitre">Avant de commencer</p>
+            <div class="pile-centre" style="gap: 8px">
+                <h1 class="titre titre-centre-haut">Chacun regarde son mot</h1>
+                <p class="consigne">Sur vos téléphones&#160;: touchez la carte pour voir votre mot. Une coche apparaît dès que c'est fait.</p>
+            </div>
+            <ul class="vus-liste" id="inf-vus-liste"></ul>
+            <div class="pousse"></div>
+            <button id="inf-vus-ok" class="btn btn-or btn-grand" type="button" disabled>En attente</button>
+            <button id="inf-vus-forcer" class="lien-discret" type="button" style="background: none; border: 0; cursor: pointer" hidden>Lancer sans attendre</button>
         </section>
 
         <!-- L'Infiltré : le vote -->
@@ -754,8 +768,11 @@
             <p class="surtitre">Le vote</p>
             <h1 class="titre" style="text-align: center">Qui est éliminé&#160;?</h1>
             <div class="grille-vote" id="inf-vote"></div>
+            <div class="vote-ligne" id="inf-vote-ligne" hidden></div>
             <div class="pousse"></div>
             <button id="inf-eliminer" class="btn btn-erreur btn-grand" type="button" disabled>Choisissez un joueur</button>
+            <button id="inf-reveler" class="btn btn-or btn-grand" type="button" hidden>Révéler le résultat</button>
+            <button id="inf-reveler-forcer" class="lien-discret" type="button" style="background: none; border: 0; cursor: pointer" hidden>Révéler sans attendre</button>
         </section>
 
         <!-- L'Infiltré : révélation du rôle -->
@@ -768,7 +785,7 @@
                 <p class="consigne" id="inf-rev-detail"></p>
             </div>
             <div class="pile" id="inf-white-devine" hidden>
-                <p class="consigne" style="margin: 0 auto 6px">Mister White, prends le téléphone et tape <b>en secret</b> le mot des civils. Une seule chance&#160;!</p>
+                <p class="consigne" id="inf-white-consigne" style="margin: 0 auto 6px">Mister White, prends le téléphone et tape <b>en secret</b> le mot des civils. Une seule chance&#160;!</p>
                 <input type="text" class="saisie" id="inf-white-mot" maxlength="40" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" placeholder="Le mot des civils" aria-label="Le mot des civils">
                 <button id="inf-white-valider" class="btn btn-or" type="button" data-son="aucun" disabled>Valider ma réponse</button>
             </div>
@@ -895,6 +912,19 @@
             <p class="aide-champ" id="cm-ecr-aide"></p>
             <div class="pousse"></div>
             <button id="cm-valider-phrases" class="btn btn-or" type="button" data-son="lancer">Valider nos phrases</button>
+            <button id="cm-ecr-retour" class="lien-discret" type="button" style="background: none; border: 0; cursor: pointer" hidden>Revenir au suivi des équipes</button>
+        </section>
+
+        <!-- Créa'Mime : les deux équipes écrivent en même temps (en ligne) -->
+        <section id="ecran-cm-statut" class="ecran centre">
+            <p class="surtitre">Créa'Mime</p>
+            <div class="pile-centre" style="gap: 8px">
+                <h1 class="titre titre-centre-haut" id="cm-st-titre">Les deux équipes écrivent</h1>
+                <p class="consigne" id="cm-st-consigne">Chaque équipe écrit les phrases de l'autre sur ses téléphones, puis valide.</p>
+            </div>
+            <div class="cm-statut" id="cm-statut"></div>
+            <div class="pousse"></div>
+            <button id="cm-st-go" class="btn btn-or btn-grand" type="button" disabled>En attente des phrases</button>
         </section>
 
         <!-- Créa'Mime : on se passe le téléphone -->
@@ -917,7 +947,7 @@
                 <p class="etiquette">Au tour de</p>
                 <p class="nom-equipe" id="cm-tour-joueur"></p>
                 <p class="sous-equipe" id="cm-tour-equipe"></p>
-                <p class="consigne">Toi seul regardes la phrase&#160;!</p>
+                <p class="consigne" id="cm-tour-consigne">Toi seul regardes la phrase&#160;!</p>
             </div>
             <button type="button" class="carte-secrete cm-carte" id="cm-carte" data-son="aucun" aria-label="Maintenir appuyé pour voir ta phrase">
                 <span class="carte-secrete-cache"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg><span>Maintenir pour voir ta phrase</span></span>
@@ -1075,6 +1105,19 @@
             <button id="dx-vu" class="btn btn-or btn-grand" type="button" disabled>C'est vu, je passe</button>
         </section>
 
+
+        <section id="ecran-dx-vus" class="ecran centre">
+            <p class="surtitre">Avant de commencer</p>
+            <div class="pile-centre" style="gap: 8px">
+                <h1 class="titre titre-centre-haut">Chacun découvre son rôle</h1>
+                <p class="consigne">Sur vos téléphones&#160;: touchez la carte pour voir votre rôle. Une coche apparaît dès que c'est fait.</p>
+            </div>
+            <ul class="vus-liste" id="dx-vus-liste"></ul>
+            <div class="pousse"></div>
+            <button id="dx-vus-ok" class="btn btn-or btn-grand" type="button" disabled>En attente</button>
+            <button id="dx-vus-forcer" class="lien-discret" type="button" style="background: none; border: 0; cursor: pointer" hidden>Lancer sans attendre</button>
+        </section>
+
         <!-- Les Dieux : la nuit -->
         <section id="ecran-dx-nuit" class="ecran centre dx-nuit">
             <p class="surtitre" id="dx-nuit-surtitre">La nuit tombe</p>
@@ -1102,6 +1145,7 @@
             </div>
             <ul class="dx-vivants" id="dx-vivants"></ul>
             <div class="pousse"></div>
+            <p class="info-bas" id="dx-jour-votes" hidden></p>
             <button id="dx-vers-vote" class="btn btn-or" type="button">Désigner la personne éliminée</button>
             <button id="dx-refaire-nuit" class="lien-discret" type="button" style="background: none; border: 0; cursor: pointer">Refaire la nuit</button>
         </section>
@@ -1111,8 +1155,11 @@
             <p class="surtitre">La sentence</p>
             <h1 class="titre" style="text-align: center">Qui est éliminé&#160;?</h1>
             <div class="grille-vote" id="dx-vote"></div>
+            <div class="vote-ligne" id="dx-vote-ligne" hidden></div>
             <div class="pousse"></div>
             <button id="dx-eliminer" class="btn btn-erreur btn-grand" type="button" disabled>Choisissez un joueur</button>
+            <button id="dx-reveler" class="btn btn-or btn-grand" type="button" hidden>Révéler le résultat</button>
+            <button id="dx-reveler-forcer" class="lien-discret" type="button" style="background: none; border: 0; cursor: pointer" hidden>Révéler sans attendre</button>
             <button id="dx-annuler-vote" class="lien-discret" type="button" style="background: none; border: 0; cursor: pointer">Revenir au débat</button>
         </section>
 
@@ -1230,9 +1277,9 @@
         <section id="ecran-su-revelation" class="ecran centre">
             <p class="surtitre" id="su-rev-numero">Son 1</p>
             <div class="pile-centre" style="gap: 10px">
-                <p class="etiquette">Passe le téléphone à</p>
+                <p class="etiquette" id="su-rev-etiquette">Passe le téléphone à</p>
                 <p class="nom-equipe" id="su-rev-nom"></p>
-                <p class="consigne">Les autres, <b>ne regardez pas</b>&#160;!</p>
+                <p class="consigne" id="su-rev-consigne">Les autres, <b>ne regardez pas</b>&#160;!</p>
             </div>
             <button type="button" class="carte-secrete" id="su-carte" data-son="aucun" aria-label="Maintenir appuyé pour voir le son">
                 <span class="carte-secrete-cache"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg><span>Maintenir pour voir le son</span></span>
@@ -1437,7 +1484,7 @@
         <section id="ecran-my-secret" class="ecran centre">
             <p class="surtitre" id="my-sec-numero">Histoire 1 sur 10</p>
             <div class="pile-centre" style="gap: 10px">
-                <p class="etiquette">Passe le téléphone à</p>
+                <p class="etiquette" id="my-sec-etiquette">Passe le téléphone à</p>
                 <p class="nom-equipe" id="my-sec-nom"></p>
                 <p class="consigne" id="my-sec-theme"></p>
             </div>

@@ -2306,6 +2306,29 @@ html.mode-soiree .app::after {
 .sl-qdn { min-height: 220px; }
 .sl-pointez { margin: 0; text-align: center; font-family: var(--serif); font-size: 64px; color: var(--or); font-weight: 700; }
 
+.vue-joueur .aide-install, .vue-joueur .aide-installer { display: none !important; }
+.titre-centre-haut { text-align: center; padding: 0 44px; font-size: clamp(26px, 8vw, 34px); }
+.vus-liste { list-style: none; margin: 0; padding: 0; width: 100%; display: flex; flex-direction: column; gap: 6px; }
+.vus-liste li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; background: var(--surface); border: 1px solid var(--ligne); font-size: 16px; font-weight: 600; text-align: left; transition: border-color .3s, background-color .3s; }
+.vus-liste li small { margin-left: auto; font-size: 12px; font-weight: 400; color: var(--discret); }
+.vus-liste li .so-bandeau-btn { margin-left: auto; }
+.vus-liste li.vu { border-color: rgba(var(--or-rvb), .6); background: rgba(var(--or-rvb), .08); }
+.vus-coche { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; border: 1.5px dashed var(--ligne-2); color: var(--sur-or); }
+.vus-liste li.vu .vus-coche { border: 0; background: var(--or); animation: so-titre .5s cubic-bezier(.34,1.56,.64,1) both; }
+.cm-statut { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.cm-st-equipe { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 14px 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--ligne); text-align: left; }
+.cm-st-equipe.pret { border-color: rgba(var(--or-rvb), .6); background: rgba(var(--or-rvb), .08); }
+.cm-st-nom { margin: 0; font-size: 18px; font-weight: 600; }
+.cm-st-etat { margin: 0; font-size: 13px; color: var(--texte-2); }
+.cm-st-equipe.pret .cm-st-etat { color: var(--or); font-weight: 600; }
+.vote-ligne { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.vote-message { margin: 0; padding: 10px 14px; border-radius: 14px; background: rgba(var(--corail-rvb), .15); border: 1px solid rgba(var(--corail-rvb), .5); font-size: 14px; text-align: center; }
+.sl-vote { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 20px; border: 1px solid rgba(var(--or-rvb), .55); background: rgba(var(--or-rvb), .06); }
+.sl-vote .grille-vote { width: 100%; }
+.sl-equipe { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 16px; border: 1px solid rgba(var(--or-rvb), .45); background: rgba(var(--or-rvb), .08); }
+.sl-equipe .sl-symbole { width: auto; font-size: 24px; }
+.sl-equipe-nom { margin: 2px 0 0; font-size: 15px; font-weight: 600; }
+
 /* Carte secrète du joueur : on touche, ça s'affiche 3 secondes */
 .sl-secret {
     position: relative;

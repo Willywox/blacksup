@@ -107,7 +107,9 @@
         el.appendChild(t); el.appendChild(a)
         $("su-carte").classList.remove("visible", "vu")
         $("su-go").disabled = true
-        carteEnLigne($("su-carte"), su.joueurs[su.fredonneur].nom, su.joueurs[su.fredonneur].nom + " voit le son sur son téléphone", $("su-go"))
+        const enLigneSU = carteEnLigne($("su-carte"), su.joueurs[su.fredonneur].nom, su.joueurs[su.fredonneur].nom + " voit le son sur son téléphone", $("su-go"))
+        $("su-rev-etiquette").textContent = enLigneSU ? "Au tour de" : "Passe le téléphone à"
+        $("su-rev-consigne").innerHTML = enLigneSU ? "Le son s'affiche sur son téléphone." : "Les autres, <b>ne regardez pas</b>&#160;!"
     }
 
     carteAMaintenir($("su-carte"), function () { $("su-go").disabled = false })

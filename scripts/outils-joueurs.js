@@ -146,3 +146,178 @@ function rendreClassementJoueurs(ol, joueurs, mettreEnAvant) {
     })
     return ordre.filter(function (i) { return rangs[i] === 1 })
 }
+
+// =========================================================
+// EN LIGNE — outils partagés par L'Infiltré et Les Dieux
+// =========================================================
+
+// Écran « qui a vu son mot / son rôle » : une coche par joueur, l'hôte lance quand tout le monde a vu
+function suiviVus(o) {
+    // o : { prefixe: "inf" | "dx", quoi: "son mot" | "son rôle", suite: fn }
+    const st = { joueurs: [], vus: {}, partie: 0 }
+    function tousVus() { return st.joueurs.every(function (n) { return st.vus[n] }) }
+    function rendre() {
+        const ul = $(o.prefixe + "-vus-liste")
+        ul.textContent = ""
+        st.joueurs.forEach(function (n) {
+            const li = document.createElement("li")
+            li.className = st.vus[n] ? "vu" : ""
+            const c = document.createElement("span"); c.className = "vus-coche"; c.setAttribute("aria-hidden", "true")
+            c.innerHTML = st.vus[n] ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>' : ""
+            li.appendChild(c)
+            li.appendChild(document.createTextNode(n))
+            const etat = document.createElement("small")
+            etat.textContent = st.vus[n] ? "a vu " + o.quoi : "regarde " + o.quoi + "…"
+            li.appendChild(etat)
+            ul.appendChild(li)
+        })
+        const manque = st.joueurs.filter(function (n) { return !st.vus[n] }).length
+        const b = $(o.prefixe + "-vus-ok")
+        b.disabled = manque > 0
+        b.textContent = manque ? "En attente de " + manque + (manque > 1 ? " joueurs" : " joueur") : "Tout le monde a vu, on lance !"
+        $(o.prefixe + "-vus-forcer").hidden = manque === 0
+    }
+    $(o.prefixe + "-vus-ok").addEventListener("click", function () { if (tousVus()) o.suite() })
+    $(o.prefixe + "-vus-forcer").addEventListener("click", function () {
+        if (this.classList.contains("confirmer")) { this.classList.remove("confirmer"); o.suite(); return }
+        this.classList.add("confirmer"); this.textContent = "Toucher encore pour lancer sans attendre"
+        const b = this
+        setTimeout(function () { b.classList.remove("confirmer"); b.textContent = "Lancer sans attendre" }, 3000)
+    })
+    return {
+        // joueurs : tous ; dejaVus : ceux qui ont vu sur le téléphone de l'hôte
+        ouvrir: function (joueurs, dejaVus) {
+            st.joueurs = joueurs.slice()
+            st.vus = {}
+            st.partie = Date.now() % 100000000
+            ;(dejaVus || []).forEach(function (n) { st.vus[n] = true })
+            $(o.prefixe + "-vus-forcer").textContent = "Lancer sans attendre"
+            rendre()
+            afficher("ecran-" + o.prefixe + "-vus")
+        },
+        recevoir: function (de, donnees) {
+            if (!donnees || donnees.partie !== st.partie) return
+            const nom = st.joueurs.filter(function (n) { return n.toLowerCase() === String(de).toLowerCase() })[0]
+            if (!nom || st.vus[nom]) return
+            st.vus[nom] = true
+            son("clic")
+            rendre()
+            if (window.diffuserJeu) diffuserJeu()
+        },
+        public: function () { return { partie: st.partie, vus: st.joueurs.filter(function (n) { return st.vus[n] }), joueurs: st.joueurs } }
+    }
+}
+
+// Vote d'élimination sur les téléphones : chacun vote quand il veut (définitif),
+// les joueurs sans téléphone votent sur celui de l'hôte, l'appli élimine le plus voté
+function voteEnLigne(o) {
+    // o : { conteneur, bouton, forcer, vivants: fn -> [noms], surResultat: fn(nom, decompte) }
+    const st = { votes: {}, candidats: null, etape: 1, cle: null, message: "", votantLocal: null, choixLocal: null }
+    function vivants() { return o.vivants() }
+    function candidats() { return st.candidats || vivants() }
+    function trouver(liste, nom) { return liste.filter(function (n) { return n.toLowerCase() === String(nom).toLowerCase() })[0] }
+    function actif() { return !!(window.Salle && Salle.actif() && vivants().some(estEnLigne)) }
+    function manquants() { return vivants().filter(function (n) { return !st.votes[n] }) }
+    function nouveauTour(cle) {
+        if (st.cle === cle) return
+        st.cle = cle; st.votes = {}; st.candidats = null; st.etape++; st.message = ""; st.votantLocal = null
+    }
+    function voter(votant, pour) {
+        const v = trouver(vivants(), votant), p = trouver(candidats(), pour)
+        if (!v || !p || v === p || st.votes[v]) return false
+        st.votes[v] = p
+        son("clic")
+        if (o.conteneur.isConnected) rendre()
+        if (o.surChangement) o.surChangement()
+        if (window.diffuserJeu) diffuserJeu()
+        return true
+    }
+    function decompte() {
+        const c = {}
+        Object.keys(st.votes).forEach(function (v) { c[st.votes[v]] = (c[st.votes[v]] || 0) + 1 })
+        return Object.keys(c).sort(function (a, b) { return c[b] - c[a] }).map(function (n) { return { nom: n, voix: c[n] } })
+    }
+    function reveler() {
+        const d = decompte()
+        if (!d.length) return
+        const max = d[0].voix
+        const ex = d.filter(function (x) { return x.voix === max }).map(function (x) { return x.nom })
+        if (ex.length > 1) {
+            st.message = "Égalité entre " + ex.join(" et ") + " : nouveau vote, seulement entre eux !"
+            st.candidats = ex; st.votes = {}; st.etape++; st.votantLocal = null
+            son("erreur")
+            rendre()
+            if (window.diffuserJeu) diffuserJeu()
+            return
+        }
+        st.dernierDecompte = d
+        o.surResultat(ex[0], d)
+    }
+    function texteDecompte(d) { return (d || []).map(function (x) { return x.nom + " " + x.voix }).join(" · ") }
+    function rendre() {
+        const c = o.conteneur
+        c.textContent = ""
+        if (st.message) { const m = document.createElement("p"); m.className = "vote-message"; m.textContent = st.message; c.appendChild(m) }
+        if (st.votantLocal) {
+            // Un joueur sans téléphone vote ici
+            const t = document.createElement("p"); t.className = "consigne"; t.innerHTML = "<b>" + st.votantLocal + "</b>, pour qui votes-tu ? (définitif)"
+            c.appendChild(t)
+            const g = document.createElement("div"); g.className = "grille-vote"
+            candidats().filter(function (n) { return n !== st.votantLocal }).forEach(function (n) {
+                const b = document.createElement("button"); b.type = "button"; b.className = "choix-vote"; b.textContent = n
+                b.setAttribute("aria-pressed", st.choixLocal === n ? "true" : "false")
+                b.addEventListener("click", function () { st.choixLocal = n; rendre() })
+                g.appendChild(b)
+            })
+            c.appendChild(g)
+            const ok = document.createElement("button"); ok.type = "button"; ok.className = "btn btn-or"
+            ok.disabled = !st.choixLocal
+            ok.textContent = st.choixLocal ? "Voter pour " + st.choixLocal : "Choisis un joueur"
+            ok.addEventListener("click", function () { const v = st.votantLocal; st.votantLocal = null; voter(v, st.choixLocal); st.choixLocal = null; rendre() })
+            const an = document.createElement("button"); an.type = "button"; an.className = "lien-discret"; an.textContent = "Annuler"
+            an.style.cssText = "background:none;border:0;cursor:pointer"
+            an.addEventListener("click", function () { st.votantLocal = null; st.choixLocal = null; rendre() })
+            c.appendChild(ok); c.appendChild(an)
+        } else {
+            const ul = document.createElement("ul"); ul.className = "vus-liste"
+            vivants().forEach(function (n) {
+                const li = document.createElement("li"); li.className = st.votes[n] ? "vu" : ""
+                const k = document.createElement("span"); k.className = "vus-coche"
+                k.innerHTML = st.votes[n] ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>' : ""
+                li.appendChild(k); li.appendChild(document.createTextNode(n))
+                if (st.votes[n]) { const s = document.createElement("small"); s.textContent = "a voté"; li.appendChild(s) }
+                else if (estEnLigne(n)) { const s = document.createElement("small"); s.textContent = "vote sur son téléphone…"; li.appendChild(s) }
+                else {
+                    const b = document.createElement("button"); b.type = "button"; b.className = "so-bandeau-btn"; b.textContent = "Voter ici"
+                    b.addEventListener("click", function () { st.votantLocal = n; st.choixLocal = null; rendre() })
+                    li.appendChild(b)
+                }
+                ul.appendChild(li)
+            })
+            c.appendChild(ul)
+        }
+        const manque = manquants().length
+        o.bouton.disabled = manque > 0
+        o.bouton.textContent = manque ? "En attente de " + manque + (manque > 1 ? " votes" : " vote") : "Révéler le résultat"
+        o.forcer.hidden = manque === 0 || !Object.keys(st.votes).length
+    }
+    o.bouton.addEventListener("click", function () { if (actif() && !manquants().length) reveler() })
+    o.forcer.addEventListener("click", function () {
+        if (this.classList.contains("confirmer")) { this.classList.remove("confirmer"); reveler(); return }
+        this.classList.add("confirmer"); this.textContent = "Toucher encore : révéler avec les votes reçus"
+        const b = this
+        setTimeout(function () { b.classList.remove("confirmer"); b.textContent = "Révéler sans attendre" }, 3000)
+    })
+    return {
+        actif: actif,
+        nouveauTour: nouveauTour,
+        rendre: rendre,
+        recevoir: function (de, donnees) { if (donnees && donnees.etape === st.etape) voter(de, donnees.pour) },
+        compte: function () { return Object.keys(st.votes).length + " / " + vivants().length },
+        texteDecompte: texteDecompte,
+        public: function () {
+            return { etape: st.etape, candidats: candidats(), votants: Object.keys(st.votes), message: st.message, decompte: st.dernierDecompte ? texteDecompte(st.dernierDecompte) : null }
+        },
+        oublierDecompte: function () { st.dernierDecompte = null }
+    }
+}

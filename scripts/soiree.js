@@ -237,6 +237,10 @@
                 terminee: false
             }
         }
+        // Ceux qui ont quitté la soirée quittent aussi la partie en ligne
+        const restent = brouillon.map(function (b) { return b.nom.toLowerCase() })
+        const partis = S.joueurs.filter(function (j) { return restent.indexOf(j.nom.toLowerCase()) === -1 }).map(function (j) { return j.nom })
+        if (partis.length && window.Salle) Salle.retirer(partis)
         S.joueurs = brouillon.map(function (b) {
             const ancien = joueur(b.nom)
             return ancien ? Object.assign(ancien, { photo: b.photo }) : { nom: b.nom, photo: b.photo, points: 0, coeur: 0, titres: [] }
@@ -757,12 +761,14 @@
             if (g && g[0].points === j.points) g.push(j); else groupes.push([j])
         })
         etapes = []
-        if (S.joueurs.length >= 4 && groupes.length >= 4) etapes.push({ titre: "Le Nullard", etiquette: "Le titre que personne ne veut", gens: groupes[groupes.length - 1], detail: "Avec " + groupes[groupes.length - 1][0].points + " points. Il fallait bien quelqu'un.", son: "erreur" })
+        if (S.joueurs.length >= 4 && groupes.length >= 2 && groupes[groupes.length - 1][0]._rang > 3) etapes.push({ titre: "Le Nullard", etiquette: "Le titre que personne ne veut", gens: groupes[groupes.length - 1], detail: "Avec " + groupes[groupes.length - 1][0].points + " points. Il fallait bien quelqu'un.", son: "erreur" })
         let maxCoeur = 0
         S.joueurs.forEach(function (j) { maxCoeur = Math.max(maxCoeur, j.coeur || 0) })
         if (maxCoeur > 0) etapes.push({ titre: "Le Chouchou des nanas", etiquette: "GOAT du cœur", gens: S.joueurs.filter(function (j) { return j.coeur === maxCoeur }), detail: maxCoeur + (maxCoeur > 1 ? " votes du cœur" : " vote du cœur"), son: "trouve", coeur: true })
-        if (groupes[2]) etapes.push({ titre: "Le Bronze", etiquette: "Troisième place", gens: groupes[2], detail: groupes[2][0].points + " points", son: "fin-manche" })
-        if (groupes[1]) etapes.push({ titre: "Le Dauphin", etiquette: "Deuxième place", gens: groupes[1], detail: groupes[1][0].points + " points", son: "fin-manche" })
+        // Titres selon le rang réel (deux GOAT ex æquo : le suivant est 3e, donc Le Bronze)
+        const deRang = function (r) { return groupes.filter(function (g) { return g[0]._rang === r })[0] }
+        if (deRang(3)) etapes.push({ titre: "Le Bronze", etiquette: "Troisième place", gens: deRang(3), detail: deRang(3)[0].points + " points", son: "fin-manche" })
+        if (deRang(2)) etapes.push({ titre: "Le Dauphin", etiquette: "Deuxième place", gens: deRang(2), detail: deRang(2)[0].points + " points", son: "fin-manche" })
         etapes.push({ titre: groupes[0].length > 1 ? "Les GOAT" : "Le GOAT", etiquette: "Le GOAT de la soirée est…", gens: groupes[0], detail: groupes[0][0].points + " points. Respect éternel.", son: "victoire", goat: true })
         etape = 0
         // Les mentions spéciales restent dans le bilan
@@ -838,8 +844,11 @@
         const tries = classement(b.joueurs)
         const p = $("so-podium")
         p.textContent = ""
+        // Podium : les trois premiers groupes (les ex æquo partagent leur marche)
+        const groupesB = []
+        tries.forEach(function (j) { const g = groupesB[groupesB.length - 1]; if (g && g[0].points === j.points) g.push(j); else groupesB.push([j]) })
         ;[2, 1, 3].forEach(function (r) {
-            const gens = tries.filter(function (j) { return j._rang === r })
+            const gens = (groupesB[r - 1] || []).filter(function (j) { return j._rang <= 3 })
             const col = document.createElement("div")
             col.className = "so-marche r" + r
             if (gens.length) {

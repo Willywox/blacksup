@@ -15,6 +15,7 @@
     const CLE_HOTE = "blacksup-salle-hote"
     const CLE_JOUEUR = "blacksup-salle-joueur"
     const RYTHME = 1500
+    const RYTHME_JOUEUR = 1000
 
     // ---------- Outils réseau ----------
     let decalage = 0   // horloge du serveur - horloge du téléphone
@@ -100,6 +101,15 @@
             if (sig === dernierAnnuaire) return
             dernierAnnuaire = sig
             appel("publier", { code: hote.code, cleHote: hote.cleHote, annuaire: carte }).catch(function () { dernierAnnuaire = "" })
+        },
+        // Retire des joueurs de la salle (ils ont quitté la soirée) : leur téléphone est prévenu
+        retirer: function (noms) {
+            if (!hote || !noms.length) return
+            const bas2 = noms.map(bas)
+            const ids = joueursSalle.filter(function (j) { return bas2.indexOf(bas(j.nom)) !== -1 }).map(function (j) { return j.id })
+            joueursSalle = joueursSalle.filter(function (j) { return ids.indexOf(j.id) === -1 })
+            majPanneaux()
+            if (ids.length) appel("publier", { code: hote.code, cleHote: hote.cleHote, retirer: ids }).catch(function () {})
         },
         versServeur: function (msLocal) { return msLocal + decalage },
         maintenantServeur: maintenantServeur
@@ -200,9 +210,15 @@
             dernierPublie = sig
             appel("publier", { code: hote.code, cleHote: hote.cleHote, public: etat.public, prives: etat.prives })
                 .catch(function () { dernierPublie = "" })
-        }, 180)
+        }, 60)
     }
     window.diffuserJeu = diffuser
+    // Après chaque toucher de l'hôte, on diffuse tout de suite (et une 2e fois quand les animations ont démarré)
+    document.addEventListener("click", function () {
+        if (!hote) return
+        setTimeout(diffuser, 60)
+        setTimeout(diffuser, 700)
+    }, true)
 
     // ---------- Panneau « inviter » (écran des joueurs et écran central) ----------
     function majPanneaux() {
@@ -261,6 +277,7 @@
     let vue = { v: 0, va: 0, public: null, prive: null, partage: {}, annuaire: {}, moi: "", hoteEnLigne: true }
     let minuteurJoueur = null
     let photoJoueur = null
+    let messageSortie = ""
 
     function routeJoueur() { return location.hash === "#salle" }
 
@@ -339,12 +356,13 @@
         }).catch(function (e) {
             if (e.statut === 404 || e.statut === 403) {
                 quitterSalle()
-                $("sl-fin-message").textContent = e.statut === 404 ? "Cette partie est terminée." : "Tu as été retiré de la partie."
+                messageSortie = e.statut === 404 ? "La partie est terminée · Rejoindre une autre partie" : "Tu as quitté la partie · Rejoindre une partie"
+                majAccueilJoueur()
                 return
             }
             $("sl-connexion").classList.add("perdue")
         }).then(function () {
-            if (moi && routeJoueur()) minuteurJoueur = setTimeout(boucleJoueur, RYTHME)
+            if (moi && routeJoueur()) minuteurJoueur = setTimeout(boucleJoueur, RYTHME_JOUEUR)
         })
     }
     function quitterSalle() {
@@ -378,7 +396,7 @@
     function majAccueilJoueur() {
         const b = $("lien-rejoindre")
         if (!b) return
-        b.textContent = moi ? "Revenir à la partie " + moi.code : "Rejoindre une partie avec un code"
+        b.textContent = moi ? "Revenir à la partie " + moi.code : (messageSortie || "Rejoindre une partie avec un code")
     }
     $("lien-rejoindre").addEventListener("click", function () { location.hash = moi ? "#salle" : "#rejoindre" })
 
@@ -401,7 +419,7 @@
     function listeNoms(l) { return l.length > 1 ? l.slice(0, -1).join(", ") + " et " + l[l.length - 1] : (l[0] || "") }
 
     // Carte secrète : on touche, ça s'affiche 3 secondes, puis ça se cache
-    function carteSecrete(contenu, consigne) {
+    function carteSecrete(contenu, consigne, auPremierCoup) {
         const b = el("button", "sl-secret")
         b.type = "button"
         b.dataset.son = "aucun"
@@ -417,6 +435,7 @@
             if (b.classList.contains("visible")) { b.classList.remove("visible"); clearTimeout(minuteur); return }
             son("clic")
             b.classList.add("visible")
+            if (auPremierCoup) { auPremierCoup(); auPremierCoup = null }
             barre.style.animation = "none"; void barre.offsetWidth; barre.style.animation = ""
             clearTimeout(minuteur)
             minuteur = setTimeout(function () { b.classList.remove("visible") }, 3000)
@@ -491,8 +510,10 @@
         document.documentElement.classList.add("mode-soiree")
         const jeu = pub.jeu || {}
         // Les vues avec des champs à remplir ne sont reconstruites que si leur étape change
-        const cle = pub.vue + "|" + (jeu.id || "") + "|" + (jeu.phase || "") + "|" + (jeu.etape || "") + "|" + JSON.stringify(vue.prive || null) + "|" + (pub.vote ? pub.vote.id + (pub.vote.recus || []).indexOf(vue.moi) : "")
-        const avecChamps = pub.vue === "vote" || (pub.vue === "jeu" && ((jeu.id === "crea-mime" && jeu.phase === "ecriture" && (jeu.auteurs || []).some(estMoi)) || (jeu.id === "infiltre" && jeu.phase === "white" && vue.prive && vue.prive.deviner)))
+        const cle = pub.vue + "|" + (jeu.id || "") + "|" + (jeu.phase || "") + "|" + (jeu.etape || "") + "|" + JSON.stringify(vue.prive || null) + "|" + (pub.vote ? pub.vote.id + (pub.vote.recus || []).indexOf(vue.moi) : "") +
+            "|" + (jeu.vote ? jeu.vote.etape + "-" + (jeu.vote.votants || []).some(estMoi) + "-" + jeu.vote.candidats.join() : "") + "|" + (jeu.vus ? jeu.vus.partie : "")
+        const peutVoter = jeu.vote && (jeu.vivants || []).some(estMoi) && !(jeu.vote.votants || []).some(estMoi)
+        const avecChamps = pub.vue === "vote" || (pub.vue === "jeu" && (peutVoter || (jeu.id === "crea-mime" && jeu.phase === "ecriture" && (jeu.parallele ? (jeu.ecritures || []).some(function (x) { return !x.pret && x.auteurs.some(estMoi) }) : (jeu.auteurs || []).some(estMoi))) || (jeu.id === "infiltre" && jeu.phase === "white" && vue.prive && vue.prive.deviner)))
         if (avecChamps && cle === derniereCle) { majChampsPartages(); return }
         derniereCle = cle
         chronos = []
@@ -610,6 +631,19 @@
         const p = vue.prive || {}
         const R = RENDUS[j.id]
         f.appendChild(el("p", "sl-jeu-nom", j.nom || ""))
+        // Ton équipe (jeux en équipes)
+        const mienne = (j.equipes || []).filter(function (e) { return (e.noms || []).some(estMoi) })[0]
+        if (mienne && j.phase !== "fin") {
+            const c = el("div", "sl-equipe")
+            c.appendChild(el("span", "sl-symbole " + (mienne.couleur || ""), mienne.signe || ""))
+            const t = el("div")
+            t.appendChild(el("p", "sl-etiquette", "Ton équipe"))
+            t.appendChild(el("p", "sl-equipe-nom", mienne.nom + " · " + listeNoms(mienne.noms.filter(function (n) { return !estMoi(n) })) ))
+            c.appendChild(t)
+            f.appendChild(c)
+        } else if (j.equipes && j.equipes.length && j.phase === "preparation") {
+            f.appendChild(carteInfo("", "Les équipes se forment…", "Tu n'es pas encore dans une équipe."))
+        }
         if (R) R(f, j, p)
         else f.appendChild(carteInfo("", "Partie en cours", null))
         const c = classementSoiree(true)
@@ -658,12 +692,85 @@
 
     const RENDUS = {}
 
+    // Qui a vu son mot / son rôle (visible par tous)
+    function listeVus(v, quoi) {
+        const box = el("div", "sl-bloc")
+        box.appendChild(el("p", "etiquette", "Qui a vu " + quoi + " ?"))
+        const ul = el("ul", "vus-liste")
+        ;(v.joueurs || []).forEach(function (n) {
+            const ok = (v.vus || []).indexOf(n) !== -1
+            const li = el("li", ok ? "vu" : "")
+            const c = el("span", "vus-coche")
+            if (ok) c.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>'
+            li.appendChild(c)
+            li.appendChild(document.createTextNode(n + (estMoi(n) ? " (toi)" : "")))
+            li.appendChild(el("small", "", ok ? "c'est fait" : "en attente…"))
+            ul.appendChild(li)
+        })
+        box.appendChild(ul)
+        return box
+    }
+    function signalerVu(v) {
+        const cle = "vu-" + v.partie
+        return function () { if (!envoyes[cle]) { envoyes[cle] = true; envoyer("vu", { partie: v.partie }).catch(function () { envoyes[cle] = false }) } }
+    }
+    const envoyes = {}
+    // Vote d'élimination sur son téléphone (définitif, avec confirmation)
+    const mesVotes = {}
+    function blocVote(j) {
+        const v = j.vote
+        const box = el("div", "sl-vote")
+        if (v.message) box.appendChild(el("p", "vote-message", v.message))
+        const moiVivant = (j.vivants || []).some(estMoi)
+        const aVote = (v.votants || []).some(estMoi)
+        if (!moiVivant) { box.appendChild(el("p", "sl-detail", "Tu ne votes plus : tu as été éliminé.")); return box }
+        if (aVote) {
+            box.appendChild(el("p", "sl-titre", mesVotes[v.etape] ? "Tu as voté pour " + mesVotes[v.etape] : "Tu as voté"))
+            box.appendChild(el("p", "sl-detail", "Ton vote est définitif. Résultat quand tout le monde aura voté."))
+        } else {
+            box.appendChild(el("p", "sl-etiquette", "Ton vote · quand tu veux, mais c'est définitif"))
+            const g = el("div", "grille-vote")
+            let choix = null
+            const ok = el("button", "btn btn-erreur", "Choisis qui éliminer")
+            ok.type = "button"; ok.disabled = true
+            v.candidats.filter(function (n) { return !estMoi(n) }).forEach(function (n) {
+                const b = el("button", "choix-vote", n)
+                b.type = "button"
+                b.setAttribute("aria-pressed", "false")
+                b.addEventListener("click", function () {
+                    choix = n
+                    g.querySelectorAll(".choix-vote").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false") })
+                    ok.disabled = false
+                    ok.classList.remove("confirmer")
+                    ok.textContent = "Voter contre " + n
+                })
+                g.appendChild(b)
+            })
+            ok.addEventListener("click", function () {
+                if (!choix) return
+                if (!ok.classList.contains("confirmer")) { ok.classList.add("confirmer"); ok.textContent = "Sûr ? Toucher encore : vote définitif contre " + choix; return }
+                ok.disabled = true
+                const pour = choix
+                envoyer("vote", { etape: v.etape, pour: pour }).then(function () { mesVotes[v.etape] = pour; son("trouve"); ok.textContent = "Vote envoyé" })
+                    .catch(function () { ok.disabled = false; ok.textContent = "Réessayer" })
+            })
+            box.appendChild(g)
+            box.appendChild(ok)
+        }
+        const p = el("p", "sl-detail", "Votes reçus : " + (v.votants || []).length + " / " + (j.vivants || []).length)
+        p.id = "sl-vote-progres"
+        box.appendChild(p)
+        return box
+    }
+
     RENDUS["infiltre"] = function (f, j, p) {
         const elimine = (j.elimines || []).some(function (x) { return estMoi(x.nom) })
         if (j.phase !== "fin" && (p.mot || p.white)) {
-            f.appendChild(carteSecrete(p.white ? texteSecret("Mister White", "Tu n'as pas de mot. Écoute bien et bluffe !", true) : texteSecret(p.mot, "Ton mot"), "Touche pour voir ton mot (3 secondes)"))
+            f.appendChild(carteSecrete(p.white ? texteSecret("Mister White", "Tu n'as pas de mot. Écoute bien et bluffe !", true) : texteSecret(p.mot, "Ton mot"), "Touche pour voir ton mot (3 secondes)", j.vus ? signalerVu(j.vus) : null))
         }
-        if (elimine && j.phase !== "fin") f.appendChild(carteInfo("", "Tu es éliminé", "Tu te tais jusqu'à la fin de la partie."))
+        if (j.phase === "vus" && j.vus) f.appendChild(listeVus(j.vus, "son mot"))
+        if (j.vote && j.phase !== "fin") f.appendChild(blocVote(j))
+        if (elimine && j.phase !== "fin" && !p.deviner) f.appendChild(carteInfo("", "Tu es éliminé", "Tu te tais jusqu'à la fin de la partie."))
         if (j.phase === "distribution" || j.phase === "preparation") f.appendChild(carteInfo("Tour 1", "Chacun découvre son mot…", null))
         if (j.phase === "tour") {
             const c = carteInfo("Tour " + j.tour, "Décrivez votre mot, dans cet ordre", null)
@@ -674,7 +781,7 @@
             if (k !== -1) c.appendChild(el("p", "sl-detail", k === 0 ? "Tu commences !" : "Tu parles en " + (k + 1) + "e position."))
             f.appendChild(c)
         }
-        if (j.phase === "vote") f.appendChild(carteInfo("Tour " + j.tour, "Le vote", "Débattez puis désignez l'éliminé : l'hôte valide sur son téléphone."))
+        if (j.phase === "vote" && !j.vote) f.appendChild(carteInfo("Tour " + j.tour, "Le vote", "Débattez puis désignez l'éliminé : l'hôte valide sur son téléphone."))
         if (j.phase === "revelation" || j.phase === "white") {
             const r = j.revelation || {}
             f.appendChild(carteInfo(r.nom + " était", r.role, j.phase === "white" ? (p.deviner ? "C'est à toi : tape le mot des civils. Une seule chance !" : "Mister White tente de trouver le mot des civils…") : r.detail))
@@ -703,11 +810,13 @@
                 f.appendChild(ul)
             }
         }
-        if (j.phase !== "fin" && j.phase !== "preparation") f.appendChild(listeJoueursEtat("Les joueurs", j.vivants, j.elimines, true))
+        if (j.phase !== "fin" && j.phase !== "preparation" && j.phase !== "vus") f.appendChild(listeJoueursEtat("Les joueurs", j.vivants, j.elimines, true))
     }
 
     RENDUS["dieux"] = function (f, j, p) {
-        if (j.phase !== "fin" && p.role) f.appendChild(carteSecrete(p.role === "dieu" ? texteSecret("Tu es un Dieu", "Pendant la nuit, ouvre les yeux pour voir les autres dieux.", true) : texteSecret("Tu es Humain", "Démasquez les dieux avant qu'il soit trop tard."), "Touche pour voir ton rôle (3 secondes)"))
+        if (j.phase !== "fin" && j.phase !== "nuit" && p.role) f.appendChild(carteSecrete(p.role === "dieu" ? texteSecret("Tu es un Dieu", "Pendant la nuit, ouvre les yeux pour voir les autres dieux.", true) : texteSecret("Tu es Humain", "Démasquez les dieux avant qu'il soit trop tard."), "Touche pour voir ton rôle (3 secondes)", j.vus ? signalerVu(j.vus) : null))
+        if (j.phase === "vus" && j.vus) f.appendChild(listeVus(j.vus, "son rôle"))
+        if (j.vote && j.phase !== "fin") f.appendChild(blocVote(j))
         if ((j.elimines || []).some(function (x) { return estMoi(x.nom) }) && j.phase !== "fin") f.appendChild(carteInfo("", "Tu es éliminé", "Tu te tais jusqu'à la fin."))
         if (j.phase === "nuit") {
             const c = carteInfo(j.nuit && j.nuit.surtitre || "La nuit", j.nuit && j.nuit.texte || "Tout le monde ferme les yeux.", "Écoutez la voix du téléphone de l'hôte.")
@@ -715,13 +824,13 @@
             f.appendChild(c)
         }
         if (j.phase === "jour") f.appendChild(carteInfo("Jour " + j.jour, "Débat libre", j.dieuxRestants + (j.dieuxRestants > 1 ? " dieux se cachent encore parmi vous." : " dieu se cache encore parmi vous.")))
-        if (j.phase === "vote") f.appendChild(carteInfo("Jour " + j.jour, "La sentence", "L'hôte désigne la personne éliminée."))
-        if (j.phase === "revelation" && j.revelation) f.appendChild(carteInfo(j.revelation.nom + " était", j.revelation.role, null))
+        if (j.phase === "vote" && !j.vote) f.appendChild(carteInfo("Jour " + j.jour, "La sentence", "L'hôte désigne la personne éliminée."))
+        if (j.phase === "revelation" && j.revelation) f.appendChild(carteInfo(j.revelation.nom + " était", j.revelation.role, j.revelation.detail || null))
         if (j.phase === "distribution" || j.phase === "preparation") f.appendChild(carteInfo("", "Les rôles sont distribués…", "Regarde ton rôle en secret."))
         if (j.phase === "fin" && j.fin) {
             f.appendChild(carteInfo("Fin de partie", j.fin.titre, j.fin.detail))
         }
-        if (j.phase !== "fin" && j.phase !== "nuit") f.appendChild(listeJoueursEtat("Sur Terre", j.vivants, j.elimines, true))
+        if (j.phase !== "fin" && j.phase !== "nuit" && j.phase !== "vus") f.appendChild(listeJoueursEtat("Sur Terre", j.vivants, j.elimines, true))
     }
 
     RENDUS["mytho"] = function (f, j, p) {
@@ -769,7 +878,52 @@
     }
 
     RENDUS["crea-mime"] = function (f, j, p) {
-        if (j.phase === "ecriture") {
+        if (j.phase === "ecriture" && j.parallele) {
+            const m = (j.ecritures || []).filter(function (x) { return x.auteurs.some(estMoi) })[0]
+            const autreE = (j.ecritures || []).filter(function (x) { return x !== m })[0]
+            if (m && !m.pret) {
+                f.appendChild(carteInfo(m.nom, "Écrivez " + j.nb + " phrases pour " + m.cible, "Chacun peut écrire depuis son téléphone, tout se met à jour chez vos coéquipiers. Au moins 3 mots par phrase, puis validez."))
+                const zone = el("div", "cm-phrases sl-phrases")
+                const valider = el("button", "btn btn-or btn-fete", "Valider nos phrases")
+                valider.type = "button"
+                const majValider = function () {
+                    const tous = Array.from(zone.querySelectorAll("textarea")).every(function (t) { return t.value.trim().split(/\s+/).filter(Boolean).length >= 3 })
+                    valider.disabled = !tous
+                }
+                for (let i = 0; i < j.nb; i++) {
+                    const bloc = el("div", "cm-phrase-champ")
+                    const lab = el("label")
+                    lab.appendChild(el("span", "", "Phrase " + (i + 1)))
+                    const compte = el("span", "", "")
+                    lab.appendChild(compte)
+                    const t = el("textarea")
+                    t.rows = 2; t.maxLength = 160
+                    t.dataset.champ = m.prefixe + "-" + i
+                    t.placeholder = "Une phrase à faire mimer…"
+                    t.addEventListener("input", function () { majCompte(t, compte); partager(t.dataset.champ, t.value); majValider() })
+                    bloc.appendChild(lab); bloc.appendChild(t)
+                    zone.appendChild(bloc)
+                }
+                valider.addEventListener("click", function () {
+                    valider.disabled = true
+                    // On envoie d'abord les dernières frappes, puis la validation
+                    zone.querySelectorAll("textarea").forEach(function (t) { clearTimeout(minuteursPartage[t.dataset.champ]); appel("partager", { code: moi.code, id: moi.id, cle: moi.cle, champ: t.dataset.champ, valeur: t.value }).catch(function () {}) })
+                    setTimeout(function () {
+                        envoyer("cm-valider", { equipe: m.equipe }).then(function () { valider.textContent = "Validation envoyée…" }).catch(function () { valider.disabled = false })
+                    }, 600)
+                })
+                zone.addEventListener("input", majValider)
+                f.appendChild(zone)
+                f.appendChild(valider)
+                setTimeout(function () { majChampsPartages(); majValider() }, 0)
+                zone.dataset.valider = "1"
+            } else if (m && m.pret) {
+                f.appendChild(carteInfo(m.nom, "Phrases validées ✓", autreE && !autreE.pret ? autreE.nom + " écrit encore vos phrases… " + compterPretes({ nb: j.nb, prefixe: autreE.prefixe }) + " / " + j.nb + " prêtes." : "Toutes les phrases sont créées ! Place au spectacle."))
+            } else {
+                f.appendChild(carteInfo("Créa'Mime", "Les équipes écrivent…", null))
+            }
+            if (m && !m.pret && autreE) f.appendChild(el("p", "sl-detail", autreE.pret ? autreE.nom + " a déjà validé ses phrases !" : autreE.nom + " écrit aussi vos phrases (" + compterPretes({ nb: j.nb, prefixe: autreE.prefixe }) + " / " + j.nb + " prêtes)."))
+        } else if (j.phase === "ecriture") {
             const dansEquipe = (j.auteurs || []).some(estMoi)
             if (dansEquipe) {
                 f.appendChild(carteInfo(j.equipeAuteur, "Écrivez " + j.nb + " phrases pour " + j.equipeCible, "Chacun peut écrire depuis son téléphone : tout se met à jour chez vos coéquipiers. Au moins 3 mots par phrase."))
@@ -817,6 +971,10 @@
     }
     // Les phrases écrites par les coéquipiers arrivent ; on ne touche pas au champ en cours d'écriture
     function majChampsPartages() {
+        setTimeout(function () { document.querySelectorAll("#sl-contenu .sl-phrases").forEach(function (z) { z.dispatchEvent(new Event("input")) }) }, 0)
+        const pv = document.getElementById("sl-vote-progres")
+        const jv = vue.public && vue.public.jeu && vue.public.jeu.vote
+        if (pv && jv) pv.textContent = "Votes reçus : " + (jv.votants || []).length + " / " + (vue.public.jeu.vivants || []).length
         document.querySelectorAll("#sl-contenu textarea[data-champ]").forEach(function (t) {
             if (document.activeElement === t) return
             const v = (vue.partage[t.dataset.champ] || {}).valeur
@@ -826,8 +984,8 @@
     }
 
     RENDUS["blacksup"] = function (f, j) {
-        if (j.phase === "preparation") f.appendChild(carteInfo("", "Les équipes se forment…", null))
-        if (j.manche) {
+        if (j.phase === "preparation" && !(j.equipes || []).length) f.appendChild(carteInfo("", "Les équipes se forment…", null))
+        if (j.manche && !j.fin) {
             const c = carteInfo("Manche " + j.numeroManche + " · " + j.manche, j.joueur ? j.joueur + " fait deviner" : "Au tour de " + j.equipe, j.equipe ? "Pour " + j.equipe + " · " + j.restants + " mots restants" : null)
             if (j.finServeur) c.appendChild(chrono(j.finServeur))
             f.appendChild(c)
@@ -859,10 +1017,10 @@
     // ---------- Navigation ----------
     function surAdresse() {
         if (location.hash === "#rejoindre") preparerRejoindre()
+        document.documentElement.classList.toggle("vue-joueur", routeJoueur() || location.hash === "#rejoindre")
         if (routeJoueur()) {
             if (!moi) { location.replace("#rejoindre"); return }
             derniereCle = ""
-            $("sl-fin-message").textContent = ""
             musique(false)
             boucleJoueur()
         } else {

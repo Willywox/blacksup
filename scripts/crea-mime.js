@@ -146,10 +146,14 @@
         cm.index = 0
         cm.ecrit = 0
         cm.partie = Date.now() % 1000000
+        cm.pret = [false, false]
+        // En ligne : les deux équipes écrivent en même temps sur leurs téléphones
+        cm.parallele = cm.equipes.some(function (q) { return q.joueurs.some(estEnLigne) })
         enJeuCM = true
         musique(false)
         if (window.garderEcranAllume) window.garderEcranAllume(true)
-        preparerEcriture()
+        if (cm.parallele) afficherStatut()
+        else preparerEcriture()
     })
 
     // ---------- Écriture des phrases (en secret) ----------
@@ -178,7 +182,7 @@
             label.appendChild(l1); label.appendChild(l2)
             const champ = document.createElement("textarea")
             champ.id = "cm-phrase-" + i
-            champ.dataset.champ = prefixeEcriture() + "-" + i
+            champ.dataset.champ = prefixeDe(auteur) + "-" + i
             champ.addEventListener("input", function () { if (!champ.dataset.distant && window.Salle && Salle.actif()) Salle.ecrirePartage(champ.dataset.champ, champ.value) })
             champ.rows = 2
             champ.maxLength = 160
@@ -202,7 +206,9 @@
         barre.hidden = !enLigne
         zone.classList.toggle("masque", enLigne)
         $("cm-montrer").textContent = "Afficher"
+        $("cm-ecr-retour").hidden = !cm.parallele
         afficher("ecran-cm-ecriture")
+        if (cm.parallele && window.Salle) JEUX_SOIREE["crea-mime"].surPartage(Salle.partage())
     }
 
     $("cm-valider-phrases").addEventListener("click", function () {
@@ -226,6 +232,7 @@
         }
         // Les phrases écrites par l'auteur sont celles que l'équipe adverse mimera
         cm.phrases[autre(cm.ecrit)] = champs.map(function (c) { return c.value.trim().replace(/\s+/g, " ") })
+        if (cm.parallele) { cm.pret[cm.ecrit] = true; afficherStatut(); return }
         preparerPassage()
     })
 
@@ -286,7 +293,8 @@
         $("cm-revoir-phrase").textContent = t.phrase
         $("cm-carte").classList.remove("visible", "vu")
         $("cm-go").disabled = true
-        carteEnLigne($("cm-carte"), t.joueur, t.joueur + " voit sa phrase sur son téléphone", $("cm-go"))
+        const enLigneCM = carteEnLigne($("cm-carte"), t.joueur, t.joueur + " voit sa phrase sur son téléphone", $("cm-go"))
+        $("cm-tour-consigne").textContent = enLigneCM ? "La phrase s'affiche sur son téléphone." : "Toi seul regardes la phrase !"
         afficher("ecran-cm-tour")
     }
 
@@ -502,7 +510,55 @@
 
     $("cm-rejouer").addEventListener("click", function () { afficher("ecran-cm-config") })
 
-    function prefixeEcriture() { return "cm" + (cm.partie || 0) + "-" + cm.ecrit }
+    function prefixeDe(e) { return "cm" + (cm.partie || 0) + "-" + e }
+    function prefixeEcriture() { return prefixeDe(cm.ecrit) }
+    $("cm-ecr-retour").addEventListener("click", function () { afficherStatut() })
+
+    // ---------- En ligne : suivi des deux équipes qui écrivent ----------
+    function valeursDe(e) {
+        const p = window.Salle ? Salle.partage() : {}
+        const l = []
+        for (let i = 0; i < nbPhrases(); i++) l.push(((p[prefixeDe(e) + "-" + i] || {}).valeur || "").trim().replace(/\s+/g, " "))
+        return l
+    }
+    function pretesDe(e) { return valeursDe(e).filter(function (v) { return nbMots(v) >= MOTS_MIN_PHRASE }).length }
+    function afficherStatut() {
+        const box = $("cm-statut")
+        box.textContent = ""
+        ;[0, 1].forEach(function (e) {
+            const c = document.createElement("div")
+            c.className = "cm-st-equipe" + (cm.pret[e] ? " pret" : "")
+            const t = document.createElement("p"); t.className = "cm-st-nom"
+            remplirEquipeCM(t, e)
+            c.appendChild(t)
+            const d = document.createElement("p"); d.className = "cm-st-etat"
+            const n = pretesDe(e)
+            d.textContent = cm.pret[e] ? "Phrases validées ✓" : n + " / " + nbPhrases() + " phrases prêtes · écrit pour " + cm.equipes[autre(e)].nom
+            c.appendChild(d)
+            if (!cm.pret[e]) {
+                const b = document.createElement("button")
+                b.type = "button"; b.className = "so-bandeau-btn"
+                b.textContent = "Écrire sur ce téléphone"
+                b.addEventListener("click", function () { cm.ecrit = e; preparerEcriture() })
+                c.appendChild(b)
+            }
+            box.appendChild(c)
+        })
+        const go = $("cm-st-go")
+        const tout = cm.pret[0] && cm.pret[1]
+        go.disabled = !tout
+        go.textContent = tout ? "Que le mime commence" : "En attente des phrases"
+        $("cm-st-titre").textContent = tout ? "Toutes les phrases sont créées !" : "Les deux équipes écrivent"
+        $("cm-st-consigne").textContent = tout ? "Chaque équipe a écrit les phrases de l'autre. Place au spectacle." : "Chaque équipe écrit les phrases de l'autre sur ses téléphones, puis valide. Une équipe sans téléphone peut écrire ici."
+        if (!document.getElementById("ecran-cm-statut").classList.contains("actif")) afficher("ecran-cm-statut")
+        else if (window.diffuserJeu) diffuserJeu()
+        if (tout) son("lancer")
+    }
+    $("cm-st-go").addEventListener("click", function () {
+        if (!(cm.pret[0] && cm.pret[1])) return
+        cm.ecrit = 1
+        preparerPassage()
+    })
     $("cm-montrer").addEventListener("click", function () {
         const z = $("cm-phrases")
         z.classList.toggle("masque")
@@ -513,11 +569,18 @@
     }
     JEUX_SOIREE["crea-mime"] = {
         enLigne: function (ecran) {
-            const phase = { "ecran-cm-ecriture": "ecriture", "ecran-cm-passage": "passage", "ecran-cm-tour": "tour", "ecran-cm-mime": "mime", "ecran-cm-resultat": "resultat", "ecran-cm-fin": "fin" }[ecran] || "preparation"
-            if (phase === "preparation" || !cm.equipes.length) return { public: { phase: "preparation" } }
-            const pub = { phase: phase, etape: cm.ecrit + "-" + cm.index }
+            const phase = { "ecran-cm-ecriture": "ecriture", "ecran-cm-statut": "ecriture", "ecran-cm-passage": "passage", "ecran-cm-tour": "tour", "ecran-cm-mime": "mime", "ecran-cm-resultat": "resultat", "ecran-cm-fin": "fin" }[ecran] || "preparation"
+            if (phase === "preparation" || !cm.equipes.length || !enJeuCM && phase !== "fin") {
+                return { public: { phase: "preparation", equipes: [0, 1].map(function (e) { return { nom: $("cm-nom-" + e).value.trim() || "Équipe " + (e + 1), noms: joueursDe(e), signe: SYMBOLES[e].signe, couleur: SYMBOLES[e].couleur } }) } }
+            }
+            const pub = { phase: phase, etape: cm.ecrit + "-" + cm.index, equipes: cm.equipes.map(function (q, e) { return { nom: q.nom, noms: q.joueurs, signe: SYMBOLES[e].signe, couleur: SYMBOLES[e].couleur } }) }
             const prives = {}
-            if (phase === "ecriture") {
+            if (phase === "ecriture" && cm.parallele) {
+                pub.parallele = true
+                pub.etape = "par-" + cm.pret.join("-")
+                pub.nb = nbPhrases()
+                pub.ecritures = [0, 1].map(function (e) { return { equipe: e, nom: cm.equipes[e].nom, auteurs: cm.equipes[e].joueurs, prefixe: prefixeDe(e), pret: cm.pret[e], cible: cm.equipes[autre(e)].nom } })
+            } else if (phase === "ecriture") {
                 const a = cm.ecrit
                 Object.assign(pub, { nb: nbPhrases(), prefixe: prefixeEcriture(), auteurs: cm.equipes[a].joueurs, equipeAuteur: cm.equipes[a].nom, equipeCible: cm.equipes[autre(a)].nom })
             }
@@ -529,11 +592,23 @@
             }
             if (phase === "resultat") pub.resultat = { titre: $("cm-res-surtitre").textContent, phrase: $("cm-res-phrase").textContent, detail: $("cm-res-temps").textContent }
             if (phase === "fin") pub.fin = { titre: $("cm-fin-titre").textContent, detail: $("cm-fin-sous-titre").textContent }
-            if (cm.tours.length) pub.scores = [0, 1].map(function (e) { return { equipe: cm.equipes[e].nom, signe: SYMBOLES[e].signe, couleur: SYMBOLES[e].couleur, points: formatTemps(tempsEquipe(e)), noms: cm.equipes[e].joueurs, ms: tempsEquipe(e) } })
+            if (cm.tours.some(function (t) { return t.temps !== null })) pub.scores = [0, 1].map(function (e) { return { equipe: cm.equipes[e].nom, signe: SYMBOLES[e].signe, couleur: SYMBOLES[e].couleur, points: formatTemps(tempsEquipe(e)), noms: cm.equipes[e].joueurs, ms: tempsEquipe(e) } })
             return { public: pub, prives: prives }
+        },
+        surMessage: function (type, de, donnees) {
+            if (type !== "cm-valider" || !cm.parallele || !donnees) return
+            const e = donnees.equipe
+            if (e !== 0 && e !== 1 || cm.pret[e]) return
+            if (!cm.equipes[e].joueurs.some(function (n) { return n.toLowerCase() === String(de).toLowerCase() })) return
+            const v = valeursDe(e)
+            if (v.some(function (x) { return nbMots(x) < MOTS_MIN_PHRASE })) return
+            cm.phrases[autre(e)] = v
+            cm.pret[e] = true
+            afficherStatut()
         },
         // Les phrases tapées sur les téléphones arrivent dans les champs de l'hôte
         surPartage: function (partage) {
+            if (document.getElementById("ecran-cm-statut").classList.contains("actif")) afficherStatut()
             document.querySelectorAll("#cm-phrases textarea[data-champ]").forEach(function (t) {
                 const v = (partage[t.dataset.champ] || {}).valeur
                 if (typeof v !== "string" || v === t.value || document.activeElement === t) return

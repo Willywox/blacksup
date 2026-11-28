@@ -78,7 +78,8 @@
         c.appendChild(t); c.appendChild(e)
         $("my-carte").classList.remove("visible", "vu")
         $("my-vu").disabled = true
-        carteEnLigne($("my-carte"), conteur().nom, conteur().nom + " voit sa consigne sur son téléphone", $("my-vu"))
+        const enLigneMY = carteEnLigne($("my-carte"), conteur().nom, conteur().nom + " voit sa consigne sur son téléphone", $("my-vu"))
+        $("my-sec-etiquette").textContent = enLigneMY ? "Au tour de" : "Passe le téléphone à"
         afficher("ecran-my-secret")
     }
     carteAMaintenir($("my-carte"), function () { $("my-vu").disabled = false })
@@ -181,8 +182,10 @@
         // Le plus grand menteur : celui qui a piégé le plus de monde
         let menteur = null
         my.joueurs.forEach(function (j) { if (j.pieges > 0 && (!menteur || j.pieges > menteur.pieges)) menteur = j })
+        const rois = menteur ? my.joueurs.filter(function (j) { return j.pieges === menteur.pieges }).map(function (j) { return j.nom }) : []
+        const nomsRois = rois.length > 1 ? rois.slice(0, -1).join(", ") + " et " + rois[rois.length - 1] : rois[0]
         $("my-fin-sous-titre").textContent = menteur
-            ? "Roi du mytho : " + menteur.nom + ", avec " + menteur.pieges + (menteur.pieges > 1 ? " personnes piégées." : " personne piégée.")
+            ? (rois.length > 1 ? "Rois du mytho : " : "Roi du mytho : ") + nomsRois + ", avec " + menteur.pieges + (menteur.pieges > 1 ? " personnes piégées." : " personne piégée.")
             : "Personne n'a réussi à piéger qui que ce soit. Des saints."
         let devin = 0
         my.joueurs.forEach(function (j) { devin = Math.max(devin, j.devines) })

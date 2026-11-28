@@ -197,6 +197,8 @@
         inf.tour = 1
         inf.whiteGagne = false
         inf.dernierOrdre = null
+        inf.partie = Date.now()
+        inf.decompte = null
         enJeuINF = true
         musique(false)
         if (window.garderEcranAllume) window.garderEcranAllume(true)
@@ -208,7 +210,7 @@
     function preparerDistribution() {
         // Les joueurs connectés voient leur mot sur leur téléphone : on passe directement aux autres
         while (inf.distribue < inf.joueurs.length && estEnLigne(inf.joueurs[inf.distribue].nom)) inf.distribue++
-        if (inf.distribue >= inf.joueurs.length) { preparerTour(); return }
+        if (inf.distribue >= inf.joueurs.length) { finDistribution(); return }
         const j = inf.joueurs[inf.distribue]
         $("inf-dist-progres").textContent = "Joueur " + (inf.distribue + 1) + " sur " + inf.joueurs.length
         $("inf-dist-nom").textContent = j.nom
@@ -258,8 +260,34 @@
     $("inf-vu").addEventListener("click", function () {
         inf.distribue++
         if (inf.distribue < inf.joueurs.length) preparerDistribution()
-        else preparerTour()
+        else finDistribution()
     })
+
+    // En ligne : écran commun « qui a vu son mot », puis on lance le tour
+    const vusINF = suiviVus({ prefixe: "inf", quoi: "son mot", suite: function () { preparerTour() } })
+    function finDistribution() {
+        const enLigne = inf.joueurs.filter(function (j) { return estEnLigne(j.nom) }).map(function (j) { return j.nom })
+        if (!enLigne.length) { preparerTour(); return }
+        vusINF.ouvrir(inf.joueurs.map(function (j) { return j.nom }), inf.joueurs.map(function (j) { return j.nom }).filter(function (n) { return enLigne.indexOf(n) === -1 }))
+    }
+
+    // En ligne : chacun vote sur son téléphone, l'appli élimine le plus voté
+    const voteINF = voteEnLigne({
+        conteneur: $("inf-vote-ligne"), bouton: $("inf-reveler"), forcer: $("inf-reveler-forcer"),
+        vivants: function () { return vivants().map(function (i) { return inf.joueurs[i].nom }) },
+        surChangement: function () { majVotesTour() },
+        surResultat: function (nom, d) {
+            inf.choix = inf.joueurs.findIndex(function (j) { return j.nom === nom })
+            inf.decompte = voteINF.texteDecompte(d)
+            $("inf-eliminer").disabled = false
+            $("inf-eliminer").click()
+        }
+    })
+    function majVotesTour() {
+        const p = $("inf-tour-votes")
+        p.hidden = !voteINF.actif()
+        p.textContent = "Votes reçus : " + voteINF.compte() + " · chacun peut voter sur son téléphone"
+    }
 
     // ---------- Un tour de parole ----------
     function vivants() { return inf.joueurs.map(function (j, i) { return i }).filter(function (i) { return !inf.joueurs[i].elimine }) }
@@ -272,6 +300,8 @@
         for (let essai = 0; essai < 10 && inf.dernierOrdre && v.length > 2 && ordre.join() === inf.dernierOrdre; essai++) ordre = melanger(v.slice())
         inf.dernierOrdre = ordre.join()
         inf.ordreNoms = ordre.map(function (i) { return inf.joueurs[i].nom })
+        voteINF.nouveauTour(inf.partie + "-" + inf.tour)
+        majVotesTour()
         const ol = $("inf-ordre")
         ol.textContent = ""
         ordre.forEach(function (i, k) {
@@ -287,6 +317,13 @@
     // ---------- Le vote ----------
     function preparerVote() {
         inf.choix = null
+        const enLigne = voteINF.actif()
+        $("inf-vote").hidden = enLigne
+        $("inf-eliminer").hidden = enLigne
+        $("inf-vote-ligne").hidden = !enLigne
+        $("inf-reveler").hidden = !enLigne
+        $("inf-reveler-forcer").hidden = true
+        if (enLigne) { voteINF.rendre(); afficher("ecran-inf-vote"); return }
         const grille = $("inf-vote")
         grille.textContent = ""
         vivants().forEach(function (i, k) {
@@ -317,6 +354,8 @@
         j.elimine = true
         derniereElimination = inf.choix
         afficherRevelation(j)
+        if (inf.decompte) { $("inf-rev-detail").textContent += " Votes : " + inf.decompte + "."; inf.derniersVotes = inf.decompte; inf.decompte = null }
+        else inf.derniersVotes = null
     })
 
     // ---------- Révélation du rôle ----------
@@ -344,6 +383,9 @@
             detail.textContent = "Démasqué… mais il a encore une chance."
             son("trouve")
             $("inf-white-devine").hidden = false
+            $("inf-white-consigne").innerHTML = estEnLigne(j.nom)
+                ? j.nom + " tape sa réponse <b>sur son téléphone</b>… (ou ici, s'il préfère)"
+                : "Mister White, prends le téléphone et tape <b>en secret</b> le mot des civils. Une seule chance&#160;!"
             $("inf-white-mot").value = ""
             $("inf-white-valider").disabled = true
             $("inf-continuer").hidden = true
@@ -460,7 +502,7 @@
 
     JEUX_SOIREE.infiltre = {
         enLigne: function (ecran) {
-            let phase = { "ecran-inf-distribution": "distribution", "ecran-inf-tour": "tour", "ecran-inf-vote": "vote", "ecran-inf-revelation": "revelation", "ecran-inf-fin": "fin" }[ecran] || "preparation"
+            let phase = { "ecran-inf-vus": "vus", "ecran-inf-distribution": "distribution", "ecran-inf-tour": "tour", "ecran-inf-vote": "vote", "ecran-inf-revelation": "revelation", "ecran-inf-fin": "fin" }[ecran] || "preparation"
             if (phase !== "fin" && !enJeuINF) phase = "preparation"
             if (phase === "preparation") return { public: { phase: phase } }
             const whiteAttend = phase === "revelation" && !$("inf-white-devine").hidden
@@ -479,6 +521,8 @@
                     vivants: inf.joueurs.filter(function (j) { return !j.elimine }).map(function (j) { return j.nom }),
                     elimines: inf.joueurs.filter(function (j) { return j.elimine }).map(function (j) { return { nom: j.nom, role: NOMS_ROLES[j.role], or: j.role !== "civil" } }),
                     revelation: der ? { nom: der.nom, role: NOMS_ROLES[der.role], detail: $("inf-rev-detail").textContent } : null,
+                    vus: phase === "vus" ? vusINF.public() : null,
+                    vote: (phase === "tour" || phase === "vote") && voteINF.actif() ? voteINF.public() : null,
                     fin: phase === "fin" ? {
                         titre: $("inf-fin-titre").textContent,
                         mots: $("inf-fin-mots").textContent,
@@ -489,6 +533,8 @@
             }
         },
         surMessage: function (type, de, donnees) {
+            if (type === "vu") { vusINF.recevoir(de, donnees); return }
+            if (type === "vote") { voteINF.recevoir(de, donnees); return }
             // Mister White a tapé sa réponse sur son téléphone
             if (type !== "white" || $("inf-white-devine").hidden || derniereElimination === null) return
             const w = inf.joueurs[derniereElimination]
