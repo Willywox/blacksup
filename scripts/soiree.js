@@ -98,6 +98,7 @@
     function avatar(j, classe) {
         const a = document.createElement("span")
         a.className = "avatar" + (classe ? " " + classe : "")
+        if (j && j.nom) a.dataset.nom = j.nom
         if (j && j.photo) {
             const img = document.createElement("img")
             img.src = j.photo
@@ -176,6 +177,12 @@
             li.appendChild(r)
             ul.appendChild(li)
         })
+        if (window.Salle && Salle.actif()) {
+            const carte = {}
+            brouillon.forEach(function (b) { carte[b.nom] = b.photo || null })
+            Salle.annuaire(carte)
+            Salle.diffuser()
+        }
         const n = brouillon.length
         if (n < JOUEURS_MIN) aideJ("Il faut au moins " + JOUEURS_MIN + " joueurs (encore " + (JOUEURS_MIN - n) + ").")
         else aideJ(n + " joueurs. Que le meilleur gagne.")
@@ -270,6 +277,9 @@
             const rang = document.createElement("span"); rang.className = "so-rang"; rang.textContent = personne ? "–" : j._rang
             const mil = document.createElement("div"); mil.className = "so-milieu"
             const nom = document.createElement("p"); nom.className = "so-nom"; nom.textContent = j.nom
+            // Point de connexion : vert = téléphone connecté, gris = téléphone en veille
+            const st = window.Salle && Salle.statut ? Salle.statut(j.nom) : null
+            if (st) { const d = document.createElement("span"); d.className = "so-connexion " + st; d.title = st === "enligne" ? "Téléphone connecté" : "Téléphone hors ligne"; nom.appendChild(d) }
             mil.appendChild(nom)
             const t = resumeTitres(j.titres)
             if (j.mentions) t.unshift.apply(t, j.mentions)
@@ -319,6 +329,9 @@
             const nm = document.createElement("span"); nm.className = "so-jeu-nom"; nm.textContent = j.nom
             const sous = document.createElement("span"); sous.className = "so-jeu-sous"
             const fois = S.jeux.filter(function (x) { return x.jeu === j.id }).length
+            // Les envies des joueurs (depuis leur téléphone)
+            const fans = Object.keys(S.envies || {}).filter(function (n) { return S.envies[n] === j.id })
+            if (fans.length) { const e = document.createElement("span"); e.className = "so-envie"; e.textContent = "♥ " + fans.length; e.title = fans.join(", "); b.appendChild(e) }
             sous.textContent = !ok ? (S.joueurs.length < j.min ? "dès " + j.min + " joueurs" : j.max + " joueurs max")
                 : j.entracte ? "Entracte · sans points" : (fois ? "joué " + fois + (fois > 1 ? " fois" : " fois") : "jamais joué")
             b.appendChild(ic); b.appendChild(nm); b.appendChild(sous)
@@ -449,6 +462,7 @@
         son("lancer")
         S.jeuEnCours = id
         S.arbitresDuJeu = []
+        S.envies = {}
         if (!j.entracte && JEUX_SOIREE[id]) JEUX_SOIREE[id].remplir(donnees(id))
         sauver()
         location.hash = j.route
@@ -764,6 +778,11 @@
         if (S.joueurs.length >= 4 && groupes.length >= 2 && groupes[groupes.length - 1][0]._rang > 3) etapes.push({ titre: "Le Nullard", etiquette: "Le titre que personne ne veut", gens: groupes[groupes.length - 1], detail: "Avec " + groupes[groupes.length - 1][0].points + " points. Il fallait bien quelqu'un.", son: "erreur" })
         let maxCoeur = 0
         S.joueurs.forEach(function (j) { maxCoeur = Math.max(maxCoeur, j.coeur || 0) })
+        // Le plus désigné dans « Qui de nous ? »
+        const qdn = S.qdn || {}
+        let maxQ = 0
+        Object.keys(qdn).forEach(function (n) { if (joueur(n)) maxQ = Math.max(maxQ, qdn[n]) })
+        if (maxQ > 0) etapes.push({ titre: "Le Suspect n°1", etiquette: "Le plus désigné dans Qui de nous ?", gens: S.joueurs.filter(function (j) { return qdn[j.nom] === maxQ }), detail: maxQ + (maxQ > 1 ? " fois montré du doigt" : " fois montré du doigt"), son: "trouve", suspect: true })
         if (maxCoeur > 0) etapes.push({ titre: "Le Chouchou des nanas", etiquette: "GOAT du cœur", gens: S.joueurs.filter(function (j) { return j.coeur === maxCoeur }), detail: maxCoeur + (maxCoeur > 1 ? " votes du cœur" : " vote du cœur"), son: "trouve", coeur: true })
         // Titres selon le rang réel (deux GOAT ex æquo : le suivant est 3e, donc Le Bronze)
         const deRang = function (r) { return groupes.filter(function (g) { return g[0]._rang === r })[0] }
@@ -774,7 +793,7 @@
         // Les mentions spéciales restent dans le bilan
         S.joueurs.forEach(function (j) { j.mentions = [] })
         etapes.forEach(function (e) {
-            if (e.goat || e.titre === "Le Nullard" || e.coeur) e.gens.forEach(function (j) { j.mentions.push(e.titre.replace("Les GOAT", "Le GOAT")) })
+            if (e.goat || e.titre === "Le Nullard" || e.coeur || e.suspect) e.gens.forEach(function (j) { j.mentions.push(e.titre.replace("Les GOAT", "Le GOAT")) })
         })
         sauver()
         afficher("ecran-soiree-ceremonie")
@@ -918,6 +937,14 @@
     })
 
     // ---------- En ligne : ce que voient les téléphones des joueurs ----------
+    Soiree.qdnDesigne = function (nom, voix) {
+        if (!S) return
+        const j = joueur(nom)
+        if (!j) return
+        S.qdn = S.qdn || {}
+        S.qdn[j.nom] = (S.qdn[j.nom] || 0) + voix
+        sauver()
+    }
     Soiree.etatPublic = function () {
         const src = S || bilanCourant
         if (!src) return null
@@ -944,7 +971,20 @@
             const b = Object.assign({}, bilanCourant, { joueurs: bilanCourant.joueurs.map(function (j) { return Object.assign({}, j, { photo: null }) }) })
             return { vue: "bilan", bilan: { goats: classement(bilanCourant.joueurs).filter(function (j) { return j._rang === 1 }).map(function (j) { return j.nom }), entree: b } }
         }
-        return { vue: S ? "hub" : "attente" }
+        if (ecran === "ecran-soiree-joueurs") return { vue: "attente", arrives: brouillon.map(function (b) { return b.nom }) }
+        if (S) return { vue: "hub", jeux: JEUX.map(function (j) { return { id: j.id, nom: j.nom, jouable: jouable(j), entracte: !!j.entracte } }), envies: S.envies || {} }
+        return { vue: "attente" }
+    }
+    // Un joueur propose le prochain jeu depuis son téléphone
+    Soiree.envie = function (de, jeu) {
+        if (!S || !joueur(de) || !infoJeu(jeu)) return
+        S.envies = S.envies || {}
+        S.envies[joueur(de).nom] = jeu
+        sauver()
+        if (location.hash === "#soiree") rendreJeux()
+    }
+    Soiree.rafraichirConnexions = function () {
+        if (S && location.hash === "#soiree") rendreClassement($("so-classement"), S.joueurs)
     }
     // Un joueur a rejoint la salle depuis son téléphone
     Soiree.joueurEnLigne = function (j) {

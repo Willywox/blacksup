@@ -212,7 +212,7 @@ function suiviVus(o) {
 // les joueurs sans téléphone votent sur celui de l'hôte, l'appli élimine le plus voté
 function voteEnLigne(o) {
     // o : { conteneur, bouton, forcer, vivants: fn -> [noms], surResultat: fn(nom, decompte) }
-    const st = { votes: {}, candidats: null, etape: 1, cle: null, message: "", votantLocal: null, choixLocal: null }
+    const st = { votes: {}, candidats: null, etape: 1, cle: null, message: "", votantLocal: null, choixLocal: null, historique: [], tour: 0 }
     function vivants() { return o.vivants() }
     function candidats() { return st.candidats || vivants() }
     function trouver(liste, nom) { return liste.filter(function (n) { return n.toLowerCase() === String(nom).toLowerCase() })[0] }
@@ -243,6 +243,7 @@ function voteEnLigne(o) {
         const max = d[0].voix
         const ex = d.filter(function (x) { return x.voix === max }).map(function (x) { return x.nom })
         if (ex.length > 1) {
+            st.historique.push({ tour: st.cle, votes: Object.assign({}, st.votes), elimine: null, egalite: ex.slice() })
             st.message = "Égalité entre " + ex.join(" et ") + " : nouveau vote, seulement entre eux !"
             st.candidats = ex; st.votes = {}; st.etape++; st.votantLocal = null
             son("erreur")
@@ -251,6 +252,7 @@ function voteEnLigne(o) {
             return
         }
         st.dernierDecompte = d
+        st.historique.push({ tour: st.cle, votes: Object.assign({}, st.votes), elimine: ex[0], egalite: null })
         o.surResultat(ex[0], d)
     }
     function texteDecompte(d) { return (d || []).map(function (x) { return x.nom + " " + x.voix }).join(" · ") }
@@ -287,6 +289,12 @@ function voteEnLigne(o) {
                 li.appendChild(k); li.appendChild(document.createTextNode(n))
                 if (st.votes[n]) { const s = document.createElement("small"); s.textContent = "a voté"; li.appendChild(s) }
                 else if (estEnLigne(n)) { const s = document.createElement("small"); s.textContent = "vote sur son téléphone…"; li.appendChild(s) }
+                else if (window.Salle && Salle.statut && Salle.statut(n) === "horsligne") {
+                    const s = document.createElement("small"); s.className = "hors-ligne"; s.textContent = "téléphone en veille · "
+                    const b = document.createElement("button"); b.type = "button"; b.className = "so-bandeau-btn"; b.textContent = "Voter ici"
+                    b.addEventListener("click", function () { st.votantLocal = n; st.choixLocal = null; rendre() })
+                    li.appendChild(s); li.appendChild(b)
+                }
                 else {
                     const b = document.createElement("button"); b.type = "button"; b.className = "so-bandeau-btn"; b.textContent = "Voter ici"
                     b.addEventListener("click", function () { st.votantLocal = n; st.choixLocal = null; rendre() })
@@ -318,6 +326,66 @@ function voteEnLigne(o) {
         public: function () {
             return { etape: st.etape, candidats: candidats(), votants: Object.keys(st.votes), message: st.message, decompte: st.dernierDecompte ? texteDecompte(st.dernierDecompte) : null }
         },
-        oublierDecompte: function () { st.dernierDecompte = null }
+        oublierDecompte: function () { st.dernierDecompte = null },
+        nouvellePartie: function () { st.historique = []; st.cle = null },
+        // Les coulisses : qui a voté contre qui, et qui a bien voté (camp : fn(nom) -> "A" | "B", libelle : fn(nom) -> rôle)
+        coulisses: function (camp, libelle) {
+            if (!st.historique.length) return null
+            const tours = [], stats = {}
+            let numero = 0, derniereCle = null
+            st.historique.forEach(function (h) {
+                if (h.tour !== derniereCle) { numero++; derniereCle = h.tour }
+                const votes = Object.keys(h.votes).map(function (de) {
+                    const pour = h.votes[de]
+                    const bon = camp(de) !== camp(pour)
+                    stats[de] = stats[de] || { nom: de, bons: 0, total: 0, contreCamp: 0 }
+                    stats[de].total++
+                    if (bon) stats[de].bons++; else stats[de].contreCamp++
+                    return { de: de, pour: pour, bon: bon }
+                })
+                tours.push({ titre: "Tour " + numero + (h.egalite ? " · égalité" : ""), elimine: h.elimine ? h.elimine + " (" + libelle(h.elimine) + ")" : "Égalité entre " + h.egalite.join(" et "), votes: votes })
+            })
+            const bilan = Object.keys(stats).map(function (n) { return stats[n] }).sort(function (a, b) { return (b.bons / b.total) - (a.bons / a.total) || b.bons - a.bons })
+            bilan.forEach(function (b) {
+                const cache = camp(b.nom) === "B"   // infiltrés, Mister White, dieux
+                if (b.contreCamp === 0) b.verdict = cache ? "Stratège" : "Flair de détective"
+                else if (b.bons === 0) b.verdict = cache ? "A vendu les siens" : "Traître malgré lui"
+                else b.verdict = b.contreCamp > b.bons ? "Complètement perdu" : "Pas mal"
+            })
+            return { tours: tours, bilan: bilan }
+        }
     }
+}
+
+// Affiche « les coulisses du vote » (fin de L'Infiltré / des Dieux)
+function rendreCoulisses(boite, c) {
+    boite.textContent = ""
+    boite.hidden = !c
+    if (!c) return
+    const t = document.createElement("p"); t.className = "etiquette"; t.textContent = "Les coulisses du vote"
+    boite.appendChild(t)
+    c.tours.forEach(function (tour) {
+        const d = document.createElement("div"); d.className = "coulisses-tour"
+        const h = document.createElement("p"); h.className = "coulisses-titre"; h.innerHTML = "<b></b> · <span></span>"
+        h.querySelector("b").textContent = tour.titre; h.querySelector("span").textContent = tour.elimine
+        d.appendChild(h)
+        const ul = document.createElement("ul"); ul.className = "coulisses-votes"
+        tour.votes.forEach(function (v) {
+            const li = document.createElement("li"); li.className = v.bon ? "bon" : "rate"
+            li.textContent = v.de + " → " + v.pour
+            ul.appendChild(li)
+        })
+        d.appendChild(ul)
+        boite.appendChild(d)
+    })
+    const ul = document.createElement("ul"); ul.className = "coulisses-bilan"
+    c.bilan.forEach(function (b) {
+        const li = document.createElement("li")
+        const n = document.createElement("span"); n.className = "coulisses-nom"; n.textContent = b.nom
+        const v = document.createElement("span"); v.className = "coulisses-verdict"; v.textContent = b.verdict
+        const s = document.createElement("span"); s.className = "coulisses-score"; s.textContent = b.bons + " / " + b.total + " bons votes" + (b.contreCamp ? " · " + b.contreCamp + " contre son camp" : "")
+        li.appendChild(n); li.appendChild(v); li.appendChild(s)
+        ul.appendChild(li)
+    })
+    boite.appendChild(ul)
 }

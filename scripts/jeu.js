@@ -268,11 +268,20 @@ function ecrireMot(mot) {
     carte.addEventListener("pointercancel", cacher)
 })()
 
+// Combo : plus le joueur fait deviner de mots dans son tour, plus c'est beau
+function nomCombo(n) {
+    if (n <= 0) return ""
+    return ["", "Ok", "Nice", "Wow", "Incroyable", "Génie !!!", "Légendaire", "Légendaire", "GOAT"][Math.min(n, 8)]
+}
 function majCompteur(anime) {
     const n = partie.trouves.length
     const b = $("nb-trouves")
     b.textContent = n
     $("nb-trouves-texte").textContent = n > 1 ? "mots trouvés" : "mot trouvé"
+    const c = $("combo")
+    c.textContent = nomCombo(n)
+    c.className = "combo niveau-" + Math.min(n, 8)
+    if (anime && n && !reduit) { void c.offsetWidth; c.classList.add("eclate") }
     if (anime && !reduit) {
         b.classList.remove("saute"); void b.offsetWidth; b.classList.add("saute")
     }
@@ -320,7 +329,8 @@ let verrou = false   // évite les doubles clics pendant une animation
 $("btn-trouve").addEventListener("click", function (e) {
     if (!chrono.enCours || verrou) return
     partie.trouves.push(partie.chapeau.shift())
-    son("trouve")
+    if (typeof Sons !== "undefined" && Sons.combo && !Sons.estMuet()) Sons.combo(partie.trouves.length)
+    else son("trouve")
     majCompteur(true)
     etincelles(e.currentTarget)
 
@@ -662,6 +672,8 @@ JEUX_SOIREE.blacksup = {
             numeroManche: partie.manche + 1,
             equipe: partie.equipes[partie.equipe],
             joueur: joueurDe(partie.equipe) || null,
+            prochain: joueurDe((partie.equipe + 1) % partie.equipes.length) || null,
+            trouvesTour: phase === "tour" ? partie.trouves.length : 0,
             restants: partie.chapeau.length,
             finServeur: phase === "tour" && chrono.enCours ? chrono.finServeur : null,
             scores: partie.equipes.map(function (nom, e) { return { equipe: nom, signe: SYMBOLES[e].signe, couleur: SYMBOLES[e].couleur, points: totaux[e], noms: partie.joueurs[e] || [] } })
@@ -1244,3 +1256,26 @@ function fermerBientot() {
 $("bientot-fermer").addEventListener("click", fermerBientot)
 $("bientot").addEventListener("click", function (e) { if (e.target === $("bientot")) fermerBientot() })
 document.addEventListener("keydown", function (e) { if (e.key === "Escape") fermerBientot() })
+
+
+// ---------- Toucher une photo de profil pour la voir en grand ----------
+;(function () {
+    const fond = document.createElement("div")
+    fond.className = "zoom-photo"
+    fond.hidden = true
+    fond.innerHTML = '<button type="button" class="zoom-fermer" aria-label="Fermer"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button><img alt=""><p class="zoom-nom"></p>'
+    document.body.appendChild(fond)
+    function fermer() { fond.hidden = true }
+    fond.addEventListener("click", function (e) { if (e.target === fond || e.target.closest(".zoom-fermer")) fermer() })
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") fermer() })
+    document.addEventListener("click", function (e) {
+        const a = e.target.closest && e.target.closest(".avatar")
+        if (!a || a.closest("button, label, a, .zoom-photo")) return
+        const img = a.querySelector("img")
+        if (!img) return
+        fond.querySelector("img").src = img.src
+        fond.querySelector(".zoom-nom").textContent = a.dataset.nom || ""
+        fond.hidden = false
+        son("clic")
+    })
+})()

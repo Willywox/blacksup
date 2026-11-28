@@ -99,6 +99,8 @@
 
     function tirerSon() {
         su.index++
+        su.buzz = null
+        su.refuses = []
         const s = sonActuel()
         const el = $("su-son")
         el.textContent = ""
@@ -128,6 +130,7 @@
         $("su-tour-nom").textContent = su.joueurs[su.fredonneur].nom
         $("su-revoir-son").textContent = s[0] + " · " + s[1]
         $("su-revoir").classList.remove("visible", "vu")
+        cacherBuzz()
         afficher("ecran-su-tour")
         lancerJauge()
     })
@@ -174,6 +177,42 @@
             jauge.active = true
             jauge.image = requestAnimationFrame(boucle)
         }
+    })
+
+    // ---------- Buzzer : les joueurs connectés buzzent depuis leur téléphone ----------
+    function montrerBuzz(nom) {
+        su.buzz = nom
+        su.resteBuzz = Math.max(0, jauge.fin - performance.now())
+        arreterJauge()
+        $("su-buzz-nom").textContent = nom
+        $("su-buzz").hidden = false
+        $("su-actions").hidden = true
+        if (typeof Sons !== "undefined" && Sons.buzzer) Sons.buzzer()
+        animer($("su-buzz"), [{ opacity: 0, transform: "scale(.85)" }, { opacity: 1, transform: "none" }], { duration: 350, easing: "cubic-bezier(.34,1.56,.64,1)" })
+        if (window.diffuserJeu) diffuserJeu()
+    }
+    function cacherBuzz() {
+        $("su-buzz").hidden = true
+        $("su-actions").hidden = false
+    }
+    $("su-buzz-oui").addEventListener("click", function () {
+        const i = su.joueurs.findIndex(function (j) { return j.nom === su.buzz })
+        cacherBuzz()
+        su.buzz = null
+        son("trouve")
+        resultat(i)
+    })
+    $("su-buzz-non").addEventListener("click", function () {
+        su.refuses.push(su.buzz)
+        su.buzz = null
+        cacherBuzz()
+        son("erreur")
+        // le chrono repart
+        jauge.fin = performance.now() + (su.resteBuzz || 0)
+        jauge.finServeur = (window.Salle ? Salle.versServeur(Date.now() + (su.resteBuzz || 0)) : 0)
+        jauge.active = true
+        jauge.image = requestAnimationFrame(boucle)
+        if (window.diffuserJeu) diffuserJeu()
     })
 
     $("su-personne").addEventListener("click", function () {
@@ -279,8 +318,11 @@
                     etape: su.tour,
                     numero: su.tour,
                     fredonneur: f.nom,
+                    prochain: su.joueurs[(su.fredonneur + 1) % su.joueurs.length].nom,
                     objectif: su.objectif,
                     finServeur: phase === "tour" && jauge.active ? jauge.finServeur : null,
+                    buzz: phase === "tour" ? (su.buzz || null) : null,
+                    refuses: phase === "tour" ? (su.refuses || []) : [],
                     resultat: phase === "resultat" ? { titre: s[0], artiste: s[1], gain: $("su-res-gain").textContent } : null,
                     fin: phase === "fin" ? { titre: $("su-fin-titre").textContent, detail: $("su-fin-sous-titre").textContent } : null,
                     scores: scoresIndividuels(su.joueurs)
@@ -288,7 +330,14 @@
                 prives: prives
             }
         },
-        surMessage: function (type, de) {
+        surMessage: function (type, de, donnees) {
+            if (type === "buzz") {
+                const nom = (su.joueurs.filter(function (j) { return j.nom.toLowerCase() === String(de).toLowerCase() })[0] || {}).nom
+                if (!nom || !jauge.active || su.buzz || !donnees || donnees.numero !== su.tour) return
+                if (nom === su.joueurs[su.fredonneur].nom || su.refuses.indexOf(nom) !== -1) return
+                montrerBuzz(nom)
+                return
+            }
             if (type === "autre-son" && document.getElementById("ecran-su-revelation").classList.contains("actif") && su.joueurs[su.fredonneur].nom.toLowerCase() === String(de).toLowerCase()) $("su-autre").click()
         }, remplir: function (joueurs) { liste.remplacer(joueurs) }, presents: liste.noms, ajouter: liste.ajouter }
 

@@ -588,7 +588,7 @@
             }
             const t = cm.tours[cm.index]
             if (t && (phase === "tour" || phase === "mime" || phase === "resultat")) {
-                Object.assign(pub, { tour: (cm.index + 1) + " / " + cm.tours.length, mime: t.joueur, equipe: cm.equipes[t.equipe].nom,
+                Object.assign(pub, { tour: (cm.index + 1) + " / " + cm.tours.length, mime: t.joueur, equipe: cm.equipes[t.equipe].nom, prochain: cm.tours[cm.index + 1] ? cm.tours[cm.index + 1].joueur : null,
                     debutServeur: chronoCM.debutServeur || 0, cumul: chronoCM.cumul, chronoActif: chronoCM.actif })
                 if (phase !== "resultat") prives[t.joueur] = { phrase: t.phrase }
             }

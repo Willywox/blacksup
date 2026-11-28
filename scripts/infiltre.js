@@ -199,6 +199,7 @@
         inf.dernierOrdre = null
         inf.partie = Date.now()
         inf.decompte = null
+        voteINF.nouvellePartie()
         enJeuINF = true
         musique(false)
         if (window.garderEcranAllume) window.garderEcranAllume(true)
@@ -484,6 +485,9 @@
             li.appendChild(nom); li.appendChild(role)
             bilan.appendChild(li)
         })
+        inf.coulisses = voteINF.coulisses(function (n) { const j = inf.joueurs.filter(function (x) { return x.nom === n })[0]; return j && j.role === "civil" ? "A" : "B" },
+            function (n) { const j = inf.joueurs.filter(function (x) { return x.nom === n })[0]; return j ? NOMS_ROLES[j.role] : "" })
+        rendreCoulisses($("inf-coulisses"), inf.coulisses)
         const imposteurs = inf.joueurs.filter(function (j) { return j.role !== "civil" }).map(function (j) { return j.nom })
         const civils = inf.joueurs.filter(function (j) { return j.role === "civil" }).map(function (j) { return j.nom })
         const blancs = inf.joueurs.filter(function (j) { return j.role === "white" }).map(function (j) { return j.nom })
@@ -526,7 +530,8 @@
                     fin: phase === "fin" ? {
                         titre: $("inf-fin-titre").textContent,
                         mots: $("inf-fin-mots").textContent,
-                        roles: inf.joueurs.map(function (j) { return { nom: j.nom, role: NOMS_ROLES[j.role] + (j.mot ? " · " + j.mot : "") } })
+                        roles: inf.joueurs.map(function (j) { return { nom: j.nom, role: NOMS_ROLES[j.role] + (j.mot ? " · " + j.mot : "") } }),
+                        coulisses: inf.coulisses || null
                     } : null
                 },
                 prives: phase === "fin" ? {} : prives

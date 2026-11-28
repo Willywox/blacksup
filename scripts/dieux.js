@@ -127,6 +127,8 @@
         dx.distribue = 0
         dx.partie = Date.now()
         dx.dernier = null
+        dx.numerique = !!(window.Salle && Salle.actif() && $("dx-nuit-numerique").checked)
+        voteDX.nouvellePartie()
         enJeuDX = true
         musique(false)
         if (window.garderEcranAllume) window.garderEcranAllume(true)
@@ -462,6 +464,9 @@
             li.appendChild(nom); li.appendChild(role)
             bilan.appendChild(li)
         })
+        dx.coulisses = voteDX.coulisses(function (n) { const j = dx.joueurs.filter(function (x) { return x.nom === n })[0]; return j && j.dieu ? "B" : "A" },
+            function (n) { const j = dx.joueurs.filter(function (x) { return x.nom === n })[0]; return j && j.dieu ? "Dieu" : "Humain" })
+        rendreCoulisses($("dx-coulisses"), dx.coulisses)
         const dieuxN = dx.joueurs.filter(function (j) { return j.dieu }).map(function (j) { return j.nom })
         const humainsN = dx.joueurs.filter(function (j) { return !j.dieu }).map(function (j) { return j.nom })
         finSoiree("dieux", gagnant === "humains"
@@ -477,6 +482,11 @@
 
     $("dx-rejouer").addEventListener("click", function () { son("lancer"); lancer() })
 
+    // L'option « nuit numérique » n'apparaît que si des téléphones sont connectés
+    new MutationObserver(function () {
+        if ($("ecran-dx-config").classList.contains("actif")) $("dx-option-numerique").hidden = !(window.Salle && Salle.actif())
+    }).observe($("ecran-dx-config"), { attributes: true, attributeFilter: ["class"] })
+
     JEUX_SOIREE.dieux = {
         surMessage: function (type, de, donnees) {
             if (type === "vu") vusDX.recevoir(de, donnees)
@@ -488,7 +498,12 @@
             if (phase === "preparation") return { public: { phase: phase } }
             const der = dx.dernier !== undefined && dx.dernier !== null ? dx.joueurs[dx.dernier] : null
             const prives = {}
-            dx.joueurs.forEach(function (j) { prives[j.nom] = { role: j.dieu ? "dieu" : "humain" } })
+            const tousDieux = dx.joueurs.filter(function (j) { return j.dieu }).map(function (j) { return j.nom })
+            dx.joueurs.forEach(function (j) {
+                prives[j.nom] = { role: j.dieu ? "dieu" : "humain" }
+                // Nuit numérique : un dieu voit les autres dieux sur son téléphone
+                if (j.dieu && dx.numerique) prives[j.nom].autres = tousDieux.filter(function (n) { return n !== j.nom })
+            })
             return {
                 public: {
                     phase: phase,
@@ -501,7 +516,7 @@
                     vus: phase === "vus" ? vusDX.public() : null,
                     vote: (phase === "jour" || phase === "vote") && voteDX.actif() ? voteDX.public() : null,
                     nuit: phase === "nuit" ? { texte: $("dx-nuit-texte").textContent, surtitre: $("dx-nuit-surtitre").textContent } : null,
-                    fin: phase === "fin" ? { titre: $("dx-fin-titre").textContent, detail: $("dx-fin-sous-titre").textContent } : null
+                    fin: phase === "fin" ? { titre: $("dx-fin-titre").textContent, detail: $("dx-fin-sous-titre").textContent, coulisses: dx.coulisses || null } : null
                 },
                 prives: phase === "fin" ? {} : prives
             }

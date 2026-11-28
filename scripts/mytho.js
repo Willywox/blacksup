@@ -100,6 +100,8 @@
     // ---------- Le vote ----------
     $("my-vers-vote").addEventListener("click", function () {
         my.votes = {}
+        my.votesTel = {}
+        my.boutons = {}
         const grille = $("my-grille")
         grille.textContent = ""
         my.joueurs.forEach(function (j, i) {
@@ -110,7 +112,11 @@
             b.textContent = j.nom
             b.setAttribute("aria-pressed", "false")
             b.style.animationDelay = (0.1 + grille.children.length * 0.04) + "s"
+            my.boutons[i] = b
+            // Un joueur connecté vote en secret sur son téléphone
+            if (estEnLigne(j.nom)) { b.disabled = true; b.classList.add("vote-tel"); b.textContent = j.nom + " · vote sur son téléphone…" }
             b.addEventListener("click", function () {
+                if (my.votesTel[i]) return
                 my.votes[i] = !my.votes[i]
                 b.setAttribute("aria-pressed", my.votes[i] ? "true" : "false")
                 majBouton()
@@ -122,7 +128,21 @@
     })
     function majBouton() {
         const n = Object.keys(my.votes).filter(function (k) { return my.votes[k] }).length
-        $("my-reveler").textContent = n === 0 ? "Tout le monde a dit vrai" : "Révéler la vérité"
+        const attente = Object.keys(my.boutons || {}).filter(function (i) { return my.boutons[i].classList.contains("vote-tel") && !my.votesTel[i] }).length
+        $("my-reveler").textContent = attente ? "En attente de " + attente + (attente > 1 ? " votes" : " vote") + " (révéler quand même)" : (n === 0 ? "Tout le monde a dit vrai" : "Révéler la vérité")
+    }
+    function voteTelephone(de, d) {
+        if (!document.getElementById("ecran-my-vote").classList.contains("actif") || !d || d.position !== my.position) return
+        const i = my.joueurs.findIndex(function (j) { return j.nom.toLowerCase() === String(de).toLowerCase() })
+        if (i < 0 || i === my.ordre[my.position] || my.votesTel[i] || !my.boutons[i]) return
+        my.votesTel[i] = true
+        my.votes[i] = !!d.mytho
+        const b = my.boutons[i]
+        b.textContent = my.joueurs[i].nom + " · a voté ✓"
+        b.classList.add("a-vote")
+        son("clic")
+        majBouton()
+        if (window.diffuserJeu) diffuserJeu()
     }
 
     // ---------- Résultat ----------
@@ -160,6 +180,7 @@
             g.append("Personne ne s'est fait avoir. " + conteurJ.nom + " ne marque rien.")
         }
         son(pieges.length > justes.length ? "trouve" : "clic")
+        $("my-res-pieges").textContent = (pieges.length ? "Piégés : " + pieges.join(", ") + ". " : "") + (justes.length ? "Pas dupes : " + justes.join(", ") + "." : "")
 
         rendreClassementJoueurs($("my-res-classement"), joueursPourClassement(), false)
         $("my-suivant").textContent = my.position === my.ordre.length - 1 ? "Voir le classement final" : "Histoire suivante"
@@ -217,15 +238,19 @@
                     etape: my.position,
                     histoire: (Math.min(my.position, my.ordre.length - 1) + 1) + " / " + my.ordre.length,
                     conteur: c ? c.nom : "",
+                    prochain: my.ordre[my.position + 1] !== undefined ? my.joueurs[my.ordre[my.position + 1]].nom : null,
                     theme: my.theme,
-                    resultat: phase === "resultat" ? { verdict: $("my-res-verdict").textContent, gain: $("my-res-gain").textContent } : null,
+                    resultat: phase === "resultat" ? { verdict: $("my-res-verdict").textContent, gain: $("my-res-gain").textContent, detail: $("my-res-pieges").textContent } : null,
+                    votants: phase === "vote" ? Object.keys(my.votesTel || {}).map(function (i) { return my.joueurs[i].nom }) : [],
+                    position: my.position,
                     fin: phase === "fin" ? { titre: $("my-fin-titre").textContent, detail: $("my-fin-sous-titre").textContent } : null,
                     scores: scoresIndividuels(my.joueurs)
                 },
                 prives: prives
             }
         },
-        surMessage: function (type, de) {
+        surMessage: function (type, de, donnees) {
+            if (type === "mytho-vote") { voteTelephone(de, donnees); return }
             if (type === "theme" && document.getElementById("ecran-my-secret").classList.contains("actif") && conteur().nom.toLowerCase() === String(de).toLowerCase()) $("my-autre").click()
         }, remplir: function (joueurs) { liste.remplacer(joueurs) }, presents: liste.noms, ajouter: liste.ajouter }
 

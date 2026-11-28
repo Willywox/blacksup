@@ -31,7 +31,7 @@ const Sons = (function () {
     const Contexte = window.AudioContext || window.webkitAudioContext
     if (!Contexte) {
         // Navigateur très ancien : le jeu marche, simplement sans son
-        return { jouer: function () {}, ambiance: function () {}, estMuet: function () { return true }, basculerMuet: function () { return true }, invite: function () { return false }, surChangement: function () {} }
+        return { jouer: function () {}, combo: function () {}, buzzer: function () {}, aToi: function () {}, ambiance: function () {}, estMuet: function () { return true }, basculerMuet: function () { return true }, invite: function () { return false }, surChangement: function () {} }
     }
 
     const ctx = new Contexte()
@@ -240,8 +240,49 @@ const Sons = (function () {
         if (nom !== "aucun") jouer(nom)
     }, true)
 
+    // Petits sons synthétisés (pas de fichier) : combos, buzzer, « c'est à toi »
+    function note(freq, debut, duree, type, volume) {
+        if (muet || ctx.state !== "running") return
+        const o = ctx.createOscillator(), g = ctx.createGain()
+        o.type = type || "triangle"
+        o.frequency.setValueAtTime(freq, debut)
+        g.gain.setValueAtTime(0.0001, debut)
+        g.gain.exponentialRampToValueAtTime(volume || 0.25, debut + 0.012)
+        g.gain.exponentialRampToValueAtTime(0.0001, debut + duree)
+        o.connect(g); g.connect(general)
+        o.start(debut); o.stop(debut + duree + 0.05)
+    }
+    const GAMME = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51, 1567.98]
+    // Combo : plus il y a de mots dans le tour, plus l'arpège monte, s'allonge et brille
+    function combo(n) {
+        const t = ctx.currentTime + 0.01
+        const k = Math.min(Math.max(n, 1), 8)
+        for (let i = 0; i < k; i++) {
+            const f = GAMME[Math.min(i + Math.floor(k / 2), GAMME.length - 1)]
+            note(f, t + i * 0.055, 0.22, k >= 5 ? "square" : "triangle", k >= 5 ? 0.09 : 0.2)
+            if (k >= 3) note(f * 2, t + i * 0.055, 0.16, "sine", 0.06)
+        }
+        if (k >= 5) {
+            // accord final qui scintille
+            const fin = t + k * 0.055
+            ;[1046.5, 1318.51, 1567.98, 2093].forEach(function (f, i) { note(f, fin + i * 0.02, 0.6, "sine", 0.08) })
+        }
+    }
+    function buzzer() {
+        const t = ctx.currentTime + 0.01
+        note(196, t, 0.18, "square", 0.12); note(146.83, t + 0.12, 0.28, "square", 0.12)
+    }
+    function aToi(bientot) {
+        const t = ctx.currentTime + 0.01
+        if (bientot) { note(880, t, 0.25, "sine", 0.15); return }
+        note(880, t, 0.18, "triangle", 0.22); note(1318.51, t + 0.14, 0.35, "triangle", 0.22)
+    }
+
     return {
         jouer: jouer,
+        combo: combo,
+        buzzer: buzzer,
+        aToi: aToi,
         ambiance: ambiance,
         estMuet: function () { return muet },
         basculerMuet: basculerMuet,
